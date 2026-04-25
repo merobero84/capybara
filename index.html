@@ -999,8 +999,8 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
 
   let suppS=0, totalS=0;
 
-  // 천간 (일간 제외, 각 10점)
-  [yGan, mGan, ...(hGan?[hGan]:[])].forEach(g=>{
+  // 천간 전체 포함 (일간도 비겁으로 포함)
+  [yGan, mGan, dGan, ...(hGan?[hGan]:[])].forEach(g=>{
     totalS+=10; if(isSup(g)) suppS+=10;
   });
 
