@@ -975,43 +975,21 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
   /* 6. 12운성 */
   const un={year:_un(dGan,yJi),month:_un(dGan,mJi),day:_un(dGan,dJi),hour:hJi?_un(dGan,hJi):''};
 
-  /* 7. 신강/신약 — 지장간 전체 가중치 정밀 계산 */
+  /* 7. 신강/신약 — 지장간 정기(주기)만, 월지 3배 가중 */
   const _OH2={甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'};
   const _GEN2={목:'수',화:'목',토:'화',금:'토',수:'금'};
+  const _JJG2={子:'癸',丑:'己',寅:'甲',卯:'乙',辰:'戊',巳:'丙',午:'丁',未:'己',申:'庚',酉:'辛',戌:'戊',亥:'壬'};
   const ilOh=_OH2[dGan], inOh=_GEN2[ilOh];
   const isSup=g=>g&&(_OH2[g]===ilOh||_OH2[g]===inOh);
 
-  // 지장간 전체 (여기/중기/정기) 가중치 포함
-  const _JJG_FULL={
-    子:[{g:'壬',w:10},{g:'癸',w:20}],
-    丑:[{g:'癸',w:9},{g:'辛',w:3},{g:'己',w:18}],
-    寅:[{g:'戊',w:7},{g:'丙',w:7},{g:'甲',w:16}],
-    卯:[{g:'甲',w:10},{g:'乙',w:20}],
-    辰:[{g:'乙',w:9},{g:'癸',w:3},{g:'戊',w:18}],
-    巳:[{g:'戊',w:7},{g:'庚',w:7},{g:'丙',w:16}],
-    午:[{g:'丙',w:10},{g:'己',w:9},{g:'丁',w:11}],
-    未:[{g:'丁',w:9},{g:'乙',w:3},{g:'己',w:18}],
-    申:[{g:'戊',w:7},{g:'壬',w:7},{g:'庚',w:16}],
-    酉:[{g:'庚',w:10},{g:'辛',w:20}],
-    戌:[{g:'辛',w:9},{g:'丁',w:3},{g:'戊',w:18}],
-    亥:[{g:'甲',w:7},{g:'壬',w:23}],
-  };
-
   let suppS=0, totalS=0;
-
-  // 천간 전체 포함 (일간도 비겁으로 포함)
-  [yGan, mGan, dGan, ...(hGan?[hGan]:[])].forEach(g=>{
-    totalS+=10; if(isSup(g)) suppS+=10;
-  });
-
-  // 지지 지장간 전체 (월지 3배 가중)
+  // 천간 전체 (일간 포함, 각 1점)
+  [yGan,mGan,dGan,...(hGan?[hGan]:[])].forEach(g=>{totalS+=1;if(isSup(g))suppS+=1;});
+  // 지지 정기만 (월지 3배)
   [{j:yJi,w:1},{j:mJi,w:3},{j:dJi,w:1},...(hJi?[{j:hJi,w:1}]:[])].forEach(({j,w})=>{
-    if(!j) return;
-    (_JJG_FULL[j]||[]).forEach(({g,w:jw})=>{
-      const rw=jw*w; totalS+=rw; if(isSup(g)) suppS+=rw;
-    });
+    if(!j)return;
+    totalS+=w; if(isSup(_JJG2[j]))suppS+=w;
   });
-
   const ratio=totalS>0?suppS/totalS:0.5;
   const sangScore=Math.round(ratio*100/10)*10;
   const singang=sangScore>=50?'신강':'신약';
@@ -2649,27 +2627,22 @@ function buildPages(data, year) {
       <h1 class="pg-title">${esc(data.singang || '신강/신약')}</h1>
       <div class="pg-body">
         ${(() => {
-          // sangScore 없으면 일간 기준으로 간이 계산
-          let sc = data.sangScore;
-          if (sc == null) {
-            sc = 0;
-            const ss = (g) => {
-              if (!g || !data.ilgan) return '';
-              const GAN10=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-              return ['비견','겁재','식신','상관','편재','정재','편관','정관','편인','정인'][(GAN10.indexOf(g)-GAN10.indexOf(data.ilgan)+10)%10];
-            };
-            const p = data.pillars;
-            [p?.year?.gan, p?.month?.gan, p?.day?.gan, p?.hour?.gan].filter(Boolean).forEach(g=>{const s=ss(g);if(s==='비견'||s==='겁재')sc+=2;if(s==='편인'||s==='정인')sc+=1;});
-            const strongU=['건록','제왕','관대','장생'];
-            if(strongU.includes(data.unseong?.month))sc+=2;
-          }
-          // sangScore 없으면 간이 계산
-          let score100;
-          if (data.sangScore != null) {
-            score100 = data.sangScore;
-          } else {
-            const maxSc = 14;
-            score100 = Math.min(Math.round(sc / maxSc * 100), 100);
+          let score100 = data.sangScore;
+          if (score100 == null) {
+            // 지장간 정기만 방식 (engine_00과 동일)
+            const _OH3={甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'};
+            const _GEN3={목:'수',화:'목',토:'화',금:'토',수:'금'};
+            const _JJG3={子:'癸',丑:'己',寅:'甲',卯:'乙',辰:'戊',巳:'丙',午:'丁',未:'己',申:'庚',酉:'辛',戌:'戊',亥:'壬'};
+            const ilOh3=_OH3[data.ilgan], inOh3=_GEN3[ilOh3];
+            const isSup3=g=>g&&(_OH3[g]===ilOh3||_OH3[g]===inOh3);
+            let supp=0,total=0;
+            const p=data.pillars;
+            [p?.year?.gan,p?.month?.gan,p?.day?.gan,p?.hour?.gan].filter(Boolean).forEach(g=>{total+=1;if(isSup3(g))supp+=1;});
+            [[p?.year?.ji,1],[p?.month?.ji,3],[p?.day?.ji,1],[p?.hour?.ji,1]].forEach(([j,w])=>{
+              if(!j)return;
+              total+=w; if(isSup3(_JJG3[j]))supp+=w;
+            });
+            score100=total>0?Math.round(supp/total*100/10)*10:50;
           }
           // 10점 단위로 반올림
           const scoreRounded = Math.round(score100 / 10) * 10;
