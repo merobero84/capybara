@@ -5846,7 +5846,7 @@ function saveProfiles(arr) {
 }
 
 window.saveProfileMulti = function() {
-  const name = document.getElementById('auto-save-name')?.value.trim() || '프로필';
+  const name = document.getElementById('auto-name')?.value.trim() || document.getElementById('auto-save-name')?.value.trim() || '프로필';
   const profile = {
     name,
     gender: document.getElementById('auto-gender')?.value,
@@ -5877,7 +5877,9 @@ window.loadProfileMulti = function(id) {
   set('auto-month', p.month);   set('auto-day', p.day);
   set('auto-ampm', p.ampm);     set('auto-hour-sel', p.hour);
   set('auto-min-sel', p.min);   set('auto-lovestatus', p.love);
-  set('auto-viewyear', p.viewyear); set('auto-save-name', p.name);
+  set('auto-viewyear', p.viewyear);
+  set('auto-save-name', p.name);
+  set('auto-name', p.name); // 이름 칸도 함께 세팅
   const unk = document.getElementById('auto-time-unknown');
   if (unk) {
     unk.checked = !!p.unknown;
