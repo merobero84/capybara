@@ -720,45 +720,26 @@
       </div>
       <div class="field" style="margin-bottom:10px;">
         <label>태어난 시간 <span style="font-size:12px;color:var(--ink-soft);">(모르면 체크)</span></label>
-        <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;align-items:center;">
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:8px;align-items:center;">
           <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;white-space:nowrap;">
             <input type="checkbox" id="auto-time-unknown"
-              onchange="
-                const u=this.checked;
-                document.getElementById('auto-ampm').disabled=u;
-                document.getElementById('auto-hour-sel').disabled=u;
-                document.getElementById('auto-min-sel').disabled=u;
-              "
+              onchange="['auto-ampm','auto-hour-sel','auto-min-sel'].forEach(id=>document.getElementById(id).disabled=this.checked)"
               style="width:16px;height:16px;cursor:pointer;" />
             모름
           </label>
-          <select id="auto-ampm" style="padding:10px 8px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;">
+          <select id="auto-ampm" style="padding:10px 6px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;">
             <option value="am">오전</option>
             <option value="pm">오후</option>
           </select>
-          <div style="display:flex;gap:6px;">
-            <select id="auto-hour-sel" style="flex:1;padding:10px 4px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;text-align:center;">
-              <option value="12">12시</option>
-              <option value="1">1시</option>
-              <option value="2">2시</option>
-              <option value="3">3시</option>
-              <option value="4">4시</option>
-              <option value="5">5시</option>
-              <option value="6">6시</option>
-              <option value="7">7시</option>
-              <option value="8">8시</option>
-              <option value="9">9시</option>
-              <option value="10">10시</option>
-              <option value="11">11시</option>
-            </select>
-            <select id="auto-min-sel" style="flex:1;padding:10px 4px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;text-align:center;">
-              <option value="0">00분</option>
-              <option value="10">10분</option>
-              <option value="20">20분</option>
-              <option value="30">30분</option>
-              <option value="40">40분</option>
-              <option value="50">50분</option>
-            </select>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <input id="auto-hour-sel" type="number" value="12" min="1" max="12"
+              style="width:100%;padding:10px 6px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;text-align:center;" />
+            <span style="font-size:13px;color:var(--ink-soft);white-space:nowrap;">시</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <input id="auto-min-sel" type="number" value="0" min="0" max="59"
+              style="width:100%;padding:10px 6px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;text-align:center;" />
+            <span style="font-size:13px;color:var(--ink-soft);white-space:nowrap;">분</span>
           </div>
         </div>
         <p style="margin:6px 0 0;font-size:11px;color:var(--ink-soft);">💡 진태양시 보정(-32분) 자동 적용</p>
