@@ -719,22 +719,32 @@
         </div>
       </div>
       <div class="field" style="margin-bottom:10px;">
-        <label for="auto-hour">태어난 시주 <span style="font-size:12px;color:var(--ink-soft);">(선택 — 모르면 비워두세요)</span></label>
-        <select id="auto-hour">
-          <option value="">모름 / 미입력</option>
-          <option value="子">子시 (밤 23:00~01:00)</option>
-          <option value="丑">丑시 (새벽 01:00~03:00)</option>
-          <option value="寅">寅시 (새벽 03:00~05:00)</option>
-          <option value="卯">卯시 (아침 05:00~07:00)</option>
-          <option value="辰">辰시 (오전 07:00~09:00)</option>
-          <option value="巳">巳시 (오전 09:00~11:00)</option>
-          <option value="午">午시 (낮 11:00~13:00)</option>
-          <option value="未">未시 (오후 13:00~15:00)</option>
-          <option value="申">申시 (오후 15:00~17:00)</option>
-          <option value="酉">酉시 (저녁 17:00~19:00)</option>
-          <option value="戌">戌시 (저녁 19:00~21:00)</option>
-          <option value="亥">亥시 (밤 21:00~23:00)</option>
-        </select>
+        <label for="auto-hour">태어난 시간 <span style="font-size:12px;color:var(--ink-soft);">(선택)</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <div style="font-size:11px;color:var(--ink-soft);margin-bottom:4px;">⏰ 시간 직접 입력</div>
+            <input id="auto-time" type="time" style="width:100%;padding:10px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;" placeholder="HH:MM" />
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--ink-soft);margin-bottom:4px;">또는 시지 직접 선택</div>
+            <select id="auto-hour" style="width:100%;padding:10px;border:1.5px solid var(--petal);border-radius:12px;font-size:13px;font-family:inherit;background:#fff;">
+              <option value="">모름</option>
+              <option value="子">子시 (23~01시)</option>
+              <option value="丑">丑시 (01~03시)</option>
+              <option value="寅">寅시 (03~05시)</option>
+              <option value="卯">卯시 (05~07시)</option>
+              <option value="辰">辰시 (07~09시)</option>
+              <option value="巳">巳시 (09~11시)</option>
+              <option value="午">午시 (11~13시)</option>
+              <option value="未">未시 (13~15시)</option>
+              <option value="申">申시 (15~17시)</option>
+              <option value="酉">酉시 (17~19시)</option>
+              <option value="戌">戌시 (19~21시)</option>
+              <option value="亥">亥시 (21~23시)</option>
+            </select>
+          </div>
+        </div>
+        <p style="margin:6px 0 0;font-size:11px;color:var(--ink-soft);">💡 시간 입력 시 진태양시 보정(-32분) 자동 적용 · 시지 선택 시 그대로 사용</p>
       </div>
       <div class="field" style="margin-bottom:10px;">
         <label for="auto-lovestatus">연애 상황</label>
@@ -5422,7 +5432,25 @@ function init() {
     const year  = parseInt(document.getElementById('auto-year').value, 10);
     const month = parseInt(document.getElementById('auto-month').value, 10);
     const day   = parseInt(document.getElementById('auto-day').value, 10);
-    const hourJi  = document.getElementById('auto-hour').value; // '子','丑',... or ''
+    const timeInput = document.getElementById('auto-time').value; // "HH:MM"
+    let hourJi = document.getElementById('auto-hour').value; // 시지 직접 선택
+
+    // 시간 입력이 있으면 진태양시 보정 후 시지 계산
+    if (timeInput) {
+      const [hh, mm] = timeInput.split(':').map(Number);
+      // 진태양시 = 표준시 - 32분 (한국 기준, 동경 127° vs 표준 135°)
+      let totalMin = hh * 60 + mm - 32;
+      if (totalMin < 0) totalMin += 24 * 60;
+      const corrH = Math.floor(totalMin / 60) % 24;
+      const corrM = totalMin % 60;
+      // 시지 계산 (2시간 단위)
+      // 자시: 23:00~01:00, 축시: 01:00~03:00, ...
+      const JI12 = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+      let jiIdx;
+      if (corrH === 23) jiIdx = 0;
+      else jiIdx = Math.floor((corrH + 1) / 2) % 12;
+      hourJi = JI12[jiIdx];
+    }
     const gender = document.getElementById('auto-gender').value;
     const loveStatus = document.getElementById('auto-lovestatus').value;
     const viewYear = parseInt(document.getElementById('auto-viewyear').value, 10) || 2026;
