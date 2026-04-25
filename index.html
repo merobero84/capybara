@@ -968,6 +968,21 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
   if(strongU.includes(un.month))sScore+=2;
   if(weakU.includes(un.month))sScore-=1;
   const singang=sScore>=5?'신강':'신약';
+  const sangScore=Math.min(Math.round(sScore/14*100),100);
+
+  /* 간이 용신 계산 (신강→기운 빼는 식신·재성·관성이 용신 / 신약→기운 채우는 인성·비겁이 용신) */
+  let yongsin='',heesin='',kisin='';
+  if(singang==='신강'){
+    // 신강: 식상·재성·관성 중 오행 약한 것이 용신
+    const orderStrong=['식신','상관','편재','정재','편관','정관'];
+    // 오행 분포에서 가장 약한 오행
+    const sorted=Object.entries(oh).sort((a,b)=>a[1]-b[1]);
+    yongsin=sorted[0][0]; heesin=sorted[1][0]; kisin=sorted[4][0];
+  } else {
+    // 신약: 인성·비겁 중 오행 많은 것이 용신
+    const sorted=Object.entries(oh).sort((a,b)=>b[1]-a[1]);
+    yongsin=sorted[0][0]; heesin=sorted[1][0]; kisin=sorted[4][0];
+  }
 
   /* 8. 대운 — 월주 60갑자 순번 기준 역행/순행 */
   const yGanYang=_GAN.indexOf(yGan)%2===0;
@@ -1023,8 +1038,8 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
     birth:`${year}년 ${month}월 ${day}일`,
     birthYear:year,birthMonth:month,birthDay:day,
     pillars:{year:{gan:yGan,ji:yJi},month:{gan:mGan,ji:mJi},day:{gan:dGan,ji:dJi},hour:hGan?{gan:hGan,ji:hJi}:{gan:'',ji:''}},
-    ilgan:dGan,oheng:oh,singang,
-    yongsin:'',heesin:'',kisin:'',sinsal:[],
+    ilgan:dGan,oheng:oh,singang,sangScore,
+    yongsin,heesin,kisin,sinsal:[],
     unseong:un,
     jijanggan:{year:_JIJANG[yJi]?.slice(-1)[0]||'',month:_JIJANG[mJi]?.slice(-1)[0]||'',day:_JIJANG[dJi]?.slice(-1)[0]||'',hour:hJi?_JIJANG[hJi]?.slice(-1)[0]||'':''},
     sipsin_gan:{year:_ss(dGan,yGan),month:_ss(dGan,mGan),day:'일간',hour:hGan?_ss(dGan,hGan):''},
@@ -2603,17 +2618,18 @@ function buildPages(data, year) {
             if(strongU.includes(data.unseong?.month))sc+=2;
           }
           const maxSc = 14;
-          const pct = Math.min(Math.round(sc / maxSc * 100), 100);
+          const score100 = Math.min(Math.round(sc / maxSc * 100), 100);
+          const pct = score100;
           const isStrong = data.singang?.includes('강');
           const barColor = isStrong ? 'var(--leaf-3)' : '#e8917e';
           return `
             <div class="mood-card cream" style="margin-bottom:12px;text-align:center;">
               <p style="margin:0 0 4px;font-size:12px;color:var(--ink-soft);">신강/신약 점수</p>
-              <p style="margin:0 0 8px;font-family:'Nanum Pen Script',cursive;font-size:40px;color:${isStrong?'var(--moss-deep)':'#c4705e'};">${sc}점</p>
+              <p style="margin:0 0 8px;font-family:'Nanum Pen Script',cursive;font-size:40px;color:${isStrong?'var(--moss-deep)':'#c4705e'};">${score100}점</p>
               <div style="background:rgba(0,0,0,0.08);border-radius:99px;height:12px;overflow:hidden;margin:0 10px 6px;">
                 <div style="width:${pct}%;height:100%;background:${barColor};border-radius:99px;transition:width .5s;"></div>
               </div>
-              <p style="margin:0;font-size:11px;color:var(--ink-soft);">0(극신약) ←→ 14(극신강) · 기준선: 5점</p>
+              <p style="margin:0;font-size:11px;color:var(--ink-soft);">신약(0) ←→ 신강(100) · 기준선: 35점</p>
             </div>`;
         })()}
         <div class="mood-card ${data.singang?.includes('강') ? 'leaf' : 'peach'}">
@@ -3693,8 +3709,8 @@ function buildClosingPages(data, year, pages) {
           <input id="gemini-key" type="password" placeholder="AIzaSy... (Gemini API 키 입력)"
             style="width:100%;padding:10px 14px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;margin-bottom:8px;"/>
           <select id="gemini-model" style="width:100%;padding:10px 14px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;margin-bottom:8px;">
-            <option value="gemini-2.5-flash-preview-04-17">⚡ Gemini 2.5 Flash (권장 · 무료 500회/일)</option>
-            <option value="gemini-2.5-pro-preview-05-06">🧠 Gemini 2.5 Pro (고품질 · 무료 25회/일)</option>
+            <option value="gemini-2.5-flash">⚡ Gemini 2.5 Flash (권장 · 무료 500회/일)</option>
+            <option value="gemini-2.5-pro">🧠 Gemini 2.5 Pro (고품질 · 무료 25회/일)</option>
           </select>
           <textarea id="gemini-ask" placeholder="예: 올해 결혼 가능성은요? 이직 타이밍은? 건강 주의사항은?"
             style="width:100%;padding:10px 14px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;min-height:72px;margin-bottom:8px;resize:vertical;"></textarea>
@@ -5737,7 +5753,7 @@ if (document.readyState === 'loading') {
 // ── Gemini AI 전역 함수 ──
 window.handleGeminiAsk = async function() {
   const key    = document.getElementById('gemini-key')?.value.trim();
-  const model  = document.getElementById('gemini-model')?.value || 'gemini-2.5-flash-preview-04-17';
+  const model  = document.getElementById('gemini-model')?.value || 'gemini-2.5-flash';
   const ask    = document.getElementById('gemini-ask')?.value.trim();
   const resEl  = document.getElementById('gemini-result');
   const btn    = document.querySelector('[onclick="handleGeminiAsk()"]');
