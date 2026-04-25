@@ -676,6 +676,14 @@
     <h2 style="margin:0;font-family:'Gowun Batang',serif;font-size:18px;">🦫 개인 사주</h2>
   </div>
 
+  <!-- 저장된 프로필 목록 -->
+  <div id="profile-list-wrap" style="margin-bottom:14px;display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <p style="margin:0;font-size:13px;color:var(--ink-soft);">📁 저장된 정보</p>
+    </div>
+    <div id="profile-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+  </div>
+
   <!-- 탭 전환 -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
     <button id="tab-btn-auto" class="input-tab-btn active" onclick="switchInputTab('auto')">
@@ -766,9 +774,13 @@
         <input id="auto-viewyear" type="number" value="2026" min="2020" max="2040" />
       </div>
       <button class="btn btn-primary btn-full" id="btn-auto-analyze">사주 카드 열기 🔮</button>
-      <button onclick="saveProfile()" style="width:100%;margin-top:8px;padding:10px;border:1.5px solid var(--petal);border-radius:12px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;color:var(--ink-soft);">
-        💾 이 정보 저장하기
-      </button>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <input id="auto-save-name" type="text" placeholder="이름 (저장 시 사용)" maxlength="10"
+          style="flex:1;padding:10px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;" />
+        <button onclick="saveProfileMulti()" style="padding:10px 14px;border:1.5px solid var(--petal);border-radius:12px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;color:var(--ink-soft);white-space:nowrap;">
+          💾 저장
+        </button>
+      </div>
       <div id="save-msg" style="display:none;text-align:center;font-size:12px;color:var(--moss);margin-top:6px;"></div>
       <div id="auto-error" style="display:none;margin-top:8px;"></div>
       <div class="mood-card cream" style="margin-top:12px;font-size:12px;color:var(--ink-soft);">
@@ -5451,6 +5463,7 @@ function showScreen(id) {
   ['screen-main','screen-input','screen-multi'].forEach(s => {
     document.getElementById(s).style.display = s === id ? 'block' : 'none';
   });
+  if (id === 'screen-input') renderProfileList();
   window.scrollTo(0, 0);
 }
 
@@ -5824,10 +5837,18 @@ if (document.readyState === 'loading') {
   init();
 }
 
-// ── 프로필 저장/불러오기 ──
-window.saveProfile = function() {
+// ── 다중 프로필 저장/불러오기 ──
+function getProfiles() {
+  try { return JSON.parse(localStorage.getItem('saju_profiles')||'[]'); } catch{ return []; }
+}
+function saveProfiles(arr) {
+  localStorage.setItem('saju_profiles', JSON.stringify(arr));
+}
+
+window.saveProfileMulti = function() {
+  const name = document.getElementById('auto-save-name')?.value.trim() || '프로필';
   const profile = {
-    name:   document.getElementById('auto-name')?.value.trim() || '',
+    name,
     gender: document.getElementById('auto-gender')?.value,
     year:   document.getElementById('auto-year')?.value,
     month:  document.getElementById('auto-month')?.value,
@@ -5837,36 +5858,59 @@ window.saveProfile = function() {
     min:    document.getElementById('auto-min-sel')?.value,
     unknown: document.getElementById('auto-time-unknown')?.checked,
     love:   document.getElementById('auto-lovestatus')?.value,
+    viewyear: document.getElementById('auto-viewyear')?.value,
+    id: Date.now()
   };
-  localStorage.setItem('saju_profile', JSON.stringify(profile));
+  const arr = getProfiles();
+  arr.push(profile);
+  saveProfiles(arr);
+  renderProfileList();
   const msg = document.getElementById('save-msg');
   if (msg) { msg.style.display='block'; msg.textContent='✓ 저장됐어요!'; setTimeout(()=>msg.style.display='none', 2000); }
 };
 
-window.loadSavedProfile = function() {
-  const raw = localStorage.getItem('saju_profile');
-  if (!raw) { alert('저장된 정보가 없어요 🦫'); return; }
-  const p = JSON.parse(raw);
-  const set = (id, val) => { const el=document.getElementById(id); if(el&&val!=null) el.value=val; };
-  set('auto-name', p.name);
-  set('auto-gender', p.gender);
-  set('auto-year', p.year);
-  set('auto-month', p.month);
-  set('auto-day', p.day);
-  set('auto-ampm', p.ampm);
-  set('auto-hour-sel', p.hour);
-  set('auto-min-sel', p.min);
-  set('auto-lovestatus', p.love);
+window.loadProfileMulti = function(id) {
+  const arr = getProfiles();
+  const p = arr.find(x=>x.id===id); if (!p) return;
+  const set = (elId, val) => { const el=document.getElementById(elId); if(el&&val!=null) el.value=val; };
+  set('auto-gender', p.gender); set('auto-year', p.year);
+  set('auto-month', p.month);   set('auto-day', p.day);
+  set('auto-ampm', p.ampm);     set('auto-hour-sel', p.hour);
+  set('auto-min-sel', p.min);   set('auto-lovestatus', p.love);
+  set('auto-viewyear', p.viewyear); set('auto-save-name', p.name);
   const unk = document.getElementById('auto-time-unknown');
   if (unk) {
     unk.checked = !!p.unknown;
-    ['auto-ampm','auto-hour-sel','auto-min-sel'].forEach(id=>{
-      const el=document.getElementById(id); if(el) el.disabled=!!p.unknown;
-    });
+    ['auto-ampm','auto-hour-sel','auto-min-sel'].forEach(id=>{ const el=document.getElementById(id); if(el) el.disabled=!!p.unknown; });
   }
-  const msg = document.getElementById('save-msg');
-  if (msg) { msg.style.display='block'; msg.textContent='✓ 불러왔어요!'; setTimeout(()=>msg.style.display='none', 2000); }
 };
+
+window.deleteProfileMulti = function(id, e) {
+  e.stopPropagation();
+  const arr = getProfiles().filter(x=>x.id!==id);
+  saveProfiles(arr);
+  renderProfileList();
+};
+
+function renderProfileList() {
+  const arr = getProfiles();
+  const wrap = document.getElementById('profile-list-wrap');
+  const list = document.getElementById('profile-list');
+  if (!wrap || !list) return;
+  if (arr.length === 0) { wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = arr.map(p => `
+    <div onclick="loadProfileMulti(${p.id})"
+      style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:#fff;border:1.5px solid var(--petal);border-radius:12px;cursor:pointer;font-size:13px;font-family:inherit;">
+      <span>${p.gender==='male'?'👦':'👧'} ${p.name||'이름없음'}</span>
+      <span style="color:var(--ink-soft);font-size:11px;">${p.year}.${String(p.month).padStart(2,'0')}.${String(p.day).padStart(2,'0')}</span>
+      <button onclick="deleteProfileMulti(${p.id},event)"
+        style="background:none;border:none;color:#c4a0a0;cursor:pointer;font-size:14px;padding:0 0 0 4px;line-height:1;">✕</button>
+    </div>
+  `).join('');
+}
+
+// 화면 열릴 때 프로필 목록 렌더링
 
 // 페이지 로드 시 자동 복원
 (function(){
