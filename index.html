@@ -719,32 +719,15 @@
         </div>
       </div>
       <div class="field" style="margin-bottom:10px;">
-        <label for="auto-hour">태어난 시간 <span style="font-size:12px;color:var(--ink-soft);">(선택)</span></label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div>
-            <div style="font-size:11px;color:var(--ink-soft);margin-bottom:4px;">⏰ 시간 직접 입력</div>
-            <input id="auto-time" type="time" style="width:100%;padding:10px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;" placeholder="HH:MM" />
-          </div>
-          <div>
-            <div style="font-size:11px;color:var(--ink-soft);margin-bottom:4px;">또는 시지 직접 선택</div>
-            <select id="auto-hour" style="width:100%;padding:10px;border:1.5px solid var(--petal);border-radius:12px;font-size:13px;font-family:inherit;background:#fff;">
-              <option value="">모름</option>
-              <option value="子">子시 (23~01시)</option>
-              <option value="丑">丑시 (01~03시)</option>
-              <option value="寅">寅시 (03~05시)</option>
-              <option value="卯">卯시 (05~07시)</option>
-              <option value="辰">辰시 (07~09시)</option>
-              <option value="巳">巳시 (09~11시)</option>
-              <option value="午">午시 (11~13시)</option>
-              <option value="未">未시 (13~15시)</option>
-              <option value="申">申시 (15~17시)</option>
-              <option value="酉">酉시 (17~19시)</option>
-              <option value="戌">戌시 (19~21시)</option>
-              <option value="亥">亥시 (21~23시)</option>
-            </select>
-          </div>
+        <label>태어난 시간 <span style="font-size:12px;color:var(--ink-soft);">(모르면 체크)</span></label>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input id="auto-time" type="time" style="flex:1;padding:10px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;" />
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;white-space:nowrap;cursor:pointer;">
+            <input type="checkbox" id="auto-time-unknown" onchange="document.getElementById('auto-time').disabled=this.checked;document.getElementById('auto-time').value='';" style="width:18px;height:18px;cursor:pointer;" />
+            모름
+          </label>
         </div>
-        <p style="margin:6px 0 0;font-size:11px;color:var(--ink-soft);">💡 시간 입력 시 진태양시 보정(-32분) 자동 적용 · 시지 선택 시 그대로 사용</p>
+        <p style="margin:6px 0 0;font-size:11px;color:var(--ink-soft);">💡 진태양시 보정(-32분) 자동 적용</p>
       </div>
       <div class="field" style="margin-bottom:10px;">
         <label for="auto-lovestatus">연애 상황</label>
@@ -2604,9 +2587,38 @@ function buildPages(data, year) {
       <div class="pg-eyebrow">기운의 세기</div>
       <h1 class="pg-title">${esc(data.singang || '신강/신약')}</h1>
       <div class="pg-body">
-        <div class="mood-card cream">
-          <p>신강(身强)·신약(身弱)은 일간이 주변의 도움을 많이 받는지, 아니면 혼자서 기운을 내는지를 나타내요.</p>
-          <p style="margin-top:8px;"><strong>${esc(data.singang || '')}</strong> 사주예요. ${data.singang?.includes('강') ? '기운이 강해 주도적이고 추진력 있지만, 과하면 고집·독선으로 흘러요. 기운을 뽑아내는 식상·재성이 약이에요.' : data.singang?.includes('약') ? '기운이 약해 섬세하고 배려심 깊지만, 과하면 기운 저하·자신감 부족. 인성·비겁이 보약이에요.' : '기운의 균형을 살펴보세요.'}</p>
+        ${(() => {
+          // sangScore 없으면 일간 기준으로 간이 계산
+          let sc = data.sangScore;
+          if (sc == null) {
+            sc = 0;
+            const ss = (g) => {
+              if (!g || !data.ilgan) return '';
+              const GAN10=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+              return ['비견','겁재','식신','상관','편재','정재','편관','정관','편인','정인'][(GAN10.indexOf(g)-GAN10.indexOf(data.ilgan)+10)%10];
+            };
+            const p = data.pillars;
+            [p?.year?.gan, p?.month?.gan, p?.day?.gan, p?.hour?.gan].filter(Boolean).forEach(g=>{const s=ss(g);if(s==='비견'||s==='겁재')sc+=2;if(s==='편인'||s==='정인')sc+=1;});
+            const strongU=['건록','제왕','관대','장생'];
+            if(strongU.includes(data.unseong?.month))sc+=2;
+          }
+          const maxSc = 14;
+          const pct = Math.min(Math.round(sc / maxSc * 100), 100);
+          const isStrong = data.singang?.includes('강');
+          const barColor = isStrong ? 'var(--leaf-3)' : '#e8917e';
+          return `
+            <div class="mood-card cream" style="margin-bottom:12px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:12px;color:var(--ink-soft);">신강/신약 점수</p>
+              <p style="margin:0 0 8px;font-family:'Nanum Pen Script',cursive;font-size:40px;color:${isStrong?'var(--moss-deep)':'#c4705e'};">${sc}점</p>
+              <div style="background:rgba(0,0,0,0.08);border-radius:99px;height:12px;overflow:hidden;margin:0 10px 6px;">
+                <div style="width:${pct}%;height:100%;background:${barColor};border-radius:99px;transition:width .5s;"></div>
+              </div>
+              <p style="margin:0;font-size:11px;color:var(--ink-soft);">0(극신약) ←→ 14(극신강) · 기준선: 5점</p>
+            </div>`;
+        })()}
+        <div class="mood-card ${data.singang?.includes('강') ? 'leaf' : 'peach'}">
+          <p><strong>${esc(data.singang || '')} 사주예요.</strong></p>
+          <p style="margin-top:6px;">${data.singang?.includes('강') ? '기운이 강해 주도적이고 추진력 있어요. 과하면 고집·독선이 될 수 있으니, 기운을 발산하는 식상·재성이 약이에요.' : data.singang?.includes('약') ? '기운이 약해 섬세하고 배려심 깊어요. 기운이 떨어지기 쉬우니, 인성·비겁으로 기운을 채우는 해·달이 좋아요.' : '기운의 균형을 살펴보세요.'}</p>
         </div>
       </div>
     `
@@ -3686,7 +3698,7 @@ function buildClosingPages(data, year, pages) {
           </select>
           <textarea id="gemini-ask" placeholder="예: 올해 결혼 가능성은요? 이직 타이밍은? 건강 주의사항은?"
             style="width:100%;padding:10px 14px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;min-height:72px;margin-bottom:8px;resize:vertical;"></textarea>
-          <button id="btn-gemini-ask" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--leaf-3),var(--moss));color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;">
+          <button onclick="handleGeminiAsk()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--leaf-3),var(--moss));color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;">
             🔮 Gemini에게 해석 받기
           </button>
         </div>
@@ -4519,6 +4531,8 @@ function chapterOrderIdx(chapter) {
 }
 
 function renderStory(data, year) {
+  window._lastStoryData = data;
+  window._lastStoryYear = year;
   // 전체 페이지 조립
   let pages = buildPages(data, year);
 
@@ -5348,60 +5362,7 @@ function renderStoryPages(pages, data, year) {
   setTimeout(() => {
     const keyEl = document.getElementById('gemini-key');
     if (keyEl && savedKey) keyEl.value = savedKey;
-
-    const btn = document.getElementById('btn-gemini-ask');
-    if (!btn) return;
-    btn.addEventListener('click', async () => {
-      const key = document.getElementById('gemini-key')?.value.trim();
-      const model = document.getElementById('gemini-model')?.value || 'gemini-2.5-flash-preview-04-17';
-      const ask = document.getElementById('gemini-ask')?.value.trim();
-      const resultEl = document.getElementById('gemini-result');
-      if (!key || !key.startsWith('AIza')) {
-        alert('Gemini API 키(AIzaSy...)를 입력해주세요.\naistudio.google.com에서 무료로 발급받을 수 있어요 🦫'); return;
-      }
-      localStorage.setItem('gemini_api_key', key);
-      const gender = data?.gender === 'male' ? '남성' : '여성';
-      const age = data?.birthYear ? (year - data.birthYear) : '';
-      const honoric = data?.name ? `${data.name}님` : '그대';
-      const cw = data?.yeonwoon?.find(y => y.year === year) || data?.yeonwoon?.[0];
-      const prompt = `당신은 20년 경력의 한국 명리학 전문가입니다. 따뜻하고 친근한 말투로, 명리학적 근거를 바탕으로 답해주세요. 오락·참고용이므로 균형 잡힌 시각을 유지하고, 중요한 결정은 본인이 한다는 말로 마무리해주세요.
-
-[사주 정보]
-- 이름: ${honoric} (${gender}, ${age}세)
-- 일간: ${data?.ilgan||'?'}
-- 사주팔자: ${data?.pillars?.year?.gan||''}${data?.pillars?.year?.ji||''} / ${data?.pillars?.month?.gan||''}${data?.pillars?.month?.ji||''} / ${data?.pillars?.day?.gan||''}${data?.pillars?.day?.ji||''} / ${data?.pillars?.hour?.gan||''}${data?.pillars?.hour?.ji||''}
-- 오행: 목${data?.oheng?.목||0} 화${data?.oheng?.화||0} 토${data?.oheng?.토||0} 금${data?.oheng?.금||0} 수${data?.oheng?.수||0}
-- 신강/신약: ${data?.singang||'?'}
-- 용신/희신/기신: ${data?.yongsin||'?'}/${data?.heesin||'?'}/${data?.kisin||'?'}
-- 신살: ${(data?.sinsal||[]).join(', ')||'없음'}
-- ${year}년 세운: ${cw?.gan||''}${cw?.ji||''} (${cw?.sipsin||''} · ${cw?.unseong||''})
-
-[질문]
-${ask||`${year}년 한 해 운세를 종합적으로 풀어주세요. 애정·재물·건강·커리어 각 영역을 다뤄주세요.`}`;
-
-      resultEl.style.display = 'block';
-      resultEl.textContent = '🔮 Gemini가 풀이하는 중... (10~20초 걸려요)';
-      try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-          { method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:2048,temperature:0.8} }) }
-        );
-        const json = await res.json();
-        if (json.error) {
-          const c = json.error.code;
-          resultEl.textContent = c===400 ? '❌ API 키가 올바르지 않아요. 키를 다시 확인해주세요.' :
-            c===429 ? '❌ 오늘 사용 한도를 초과했어요. 내일 다시 시도해주세요.' :
-            '❌ 오류: ' + (json.error.message||'알 수 없는 오류');
-          return;
-        }
-        const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-        resultEl.textContent = text || '응답을 받았지만 내용이 비어있어요. 다시 시도해주세요.';
-      } catch(e) {
-        resultEl.textContent = '❌ 네트워크 오류: ' + e.message;
-      }
-    });
-  }, 300);
+  }, 200);
 }
 
 
@@ -5432,24 +5393,17 @@ function init() {
     const year  = parseInt(document.getElementById('auto-year').value, 10);
     const month = parseInt(document.getElementById('auto-month').value, 10);
     const day   = parseInt(document.getElementById('auto-day').value, 10);
-    const timeInput = document.getElementById('auto-time').value; // "HH:MM"
-    let hourJi = document.getElementById('auto-hour').value; // 시지 직접 선택
+    const timeUnknown = document.getElementById('auto-time-unknown').checked;
+    const timeInput = timeUnknown ? '' : document.getElementById('auto-time').value;
+    let hourJi = '';
 
-    // 시간 입력이 있으면 진태양시 보정 후 시지 계산
     if (timeInput) {
       const [hh, mm] = timeInput.split(':').map(Number);
-      // 진태양시 = 표준시 - 32분 (한국 기준, 동경 127° vs 표준 135°)
       let totalMin = hh * 60 + mm - 32;
       if (totalMin < 0) totalMin += 24 * 60;
       const corrH = Math.floor(totalMin / 60) % 24;
-      const corrM = totalMin % 60;
-      // 시지 계산 (2시간 단위)
-      // 자시: 23:00~01:00, 축시: 01:00~03:00, ...
       const JI12 = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-      let jiIdx;
-      if (corrH === 23) jiIdx = 0;
-      else jiIdx = Math.floor((corrH + 1) / 2) % 12;
-      hourJi = JI12[jiIdx];
+      hourJi = corrH === 23 ? '子' : JI12[Math.floor((corrH + 1) / 2) % 12];
     }
     const gender = document.getElementById('auto-gender').value;
     const loveStatus = document.getElementById('auto-lovestatus').value;
@@ -5779,6 +5733,61 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
+
+// ── Gemini AI 전역 함수 ──
+window.handleGeminiAsk = async function() {
+  const key    = document.getElementById('gemini-key')?.value.trim();
+  const model  = document.getElementById('gemini-model')?.value || 'gemini-2.5-flash-preview-04-17';
+  const ask    = document.getElementById('gemini-ask')?.value.trim();
+  const resEl  = document.getElementById('gemini-result');
+  const btn    = document.querySelector('[onclick="handleGeminiAsk()"]');
+
+  if (!key || !key.startsWith('AIza')) {
+    alert('Gemini API 키(AIzaSy...)를 입력해주세요.\naistudio.google.com에서 무료로 발급받을 수 있어요 🦫'); return;
+  }
+  localStorage.setItem('gemini_api_key', key);
+
+  const d = window._lastStoryData || {}, yr = window._lastStoryYear || 2026;
+  const gK = d?.gender==='male'?'남성':'여성';
+  const age = d?.birthYear ? yr - d.birthYear : '';
+  const hon = d?.name ? `${d.name}님` : '그대';
+  const cw  = d?.yeonwoon?.find(y=>y.year===yr) || d?.yeonwoon?.[0];
+
+  const prompt = `당신은 20년 경력의 한국 명리학 전문가입니다. 따뜻하고 친근한 말투로 답해주세요. 오락·참고용이고, 중요한 결정은 본인이 한다는 말로 마무리해주세요.
+
+[사주]
+- ${hon} (${gK}${age?`, ${age}세`:''}) · 일간 ${d?.ilgan||'?'}
+- 사주팔자: ${d?.pillars?.year?.gan||''}${d?.pillars?.year?.ji||''} / ${d?.pillars?.month?.gan||''}${d?.pillars?.month?.ji||''} / ${d?.pillars?.day?.gan||''}${d?.pillars?.day?.ji||''} / ${d?.pillars?.hour?.gan||''}${d?.pillars?.hour?.ji||''}
+- 오행: 목${d?.oheng?.목||0} 화${d?.oheng?.화||0} 토${d?.oheng?.토||0} 금${d?.oheng?.금||0} 수${d?.oheng?.수||0}
+- 신강/신약: ${d?.singang||'?'} · 용신: ${d?.yongsin||'?'}
+- 신살: ${(d?.sinsal||[]).join(', ')||'없음'}
+- ${yr}년 세운: ${cw?.gan||''}${cw?.ji||''} (${cw?.sipsin||''} · ${cw?.unseong||''})
+
+[질문]
+${ask||`${yr}년 운세를 애정·재물·건강·커리어 영역별로 풀어주세요.`}`;
+
+  if (btn) btn.textContent = '⏳ 풀이 중...';
+  if (resEl) { resEl.style.display='block'; resEl.textContent='🔮 Gemini가 풀이하는 중...'; }
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+      { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{maxOutputTokens:2048,temperature:0.8} }) }
+    );
+    const json = await res.json();
+    const c = json.error?.code;
+    if (c) {
+      if(resEl) resEl.textContent = c===400?'❌ API 키가 올바르지 않아요.':c===429?'❌ 오늘 한도 초과했어요. 내일 다시 시도해주세요.':'❌ 오류: '+(json.error.message||'');
+    } else {
+      const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+      if(resEl) resEl.textContent = text || '응답이 비어있어요. 다시 시도해주세요.';
+    }
+  } catch(e) {
+    if(resEl) resEl.textContent = '❌ 네트워크 오류: '+e.message;
+  }
+  if (btn) btn.textContent = '🔮 Gemini에게 해석 받기';
+};
 
 </script>
 </body>
