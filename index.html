@@ -2617,8 +2617,15 @@ function buildPages(data, year) {
             const strongU=['건록','제왕','관대','장생'];
             if(strongU.includes(data.unseong?.month))sc+=2;
           }
-          const maxSc = 14;
-          const score100 = Math.min(Math.round(sc / maxSc * 100), 100);
+          // sangScore가 있으면 이미 100점 만점, 없으면 간이 계산 후 환산
+          let score100;
+          if (data.sangScore != null) {
+            score100 = data.sangScore; // engine_00에서 이미 100점 환산됨
+          } else {
+            // 만세력 텍스트 입력 방식: 천간 기준 간이 계산
+            const maxSc = 14;
+            score100 = Math.min(Math.round(sc / maxSc * 100), 100);
+          }
           const pct = score100;
           const isStrong = data.singang?.includes('강');
           const barColor = isStrong ? 'var(--leaf-3)' : '#e8917e';
@@ -3718,7 +3725,7 @@ function buildClosingPages(data, year, pages) {
             🔮 Gemini에게 해석 받기
           </button>
         </div>
-        <div id="gemini-result" style="display:none;margin-top:12px;padding:14px;background:#fff;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;line-height:1.75;white-space:pre-wrap;max-height:320px;overflow-y:auto;"></div>
+        <div id="gemini-result" style="display:none;margin-top:12px;padding:14px;background:#fff;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;line-height:1.75;white-space:pre-wrap;max-height:60vh;overflow-y:auto;"></div>
       </div>
     `
   });
