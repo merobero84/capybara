@@ -719,21 +719,21 @@
         </div>
       </div>
       <div class="field" style="margin-bottom:10px;">
-        <label for="auto-hour">태어난 시간 <span style="font-size:12px;color:var(--ink-soft);">(선택 — 모르면 비워두세요)</span></label>
+        <label for="auto-hour">태어난 시주 <span style="font-size:12px;color:var(--ink-soft);">(선택 — 모르면 비워두세요)</span></label>
         <select id="auto-hour">
-          <option value="-1">모름 / 미입력</option>
-          <option value="23">자시 (밤 11시~)</option>
-          <option value="1">축시 (새벽 1~3시)</option>
-          <option value="3">인시 (새벽 3~5시)</option>
-          <option value="5">묘시 (새벽 5~7시)</option>
-          <option value="7">진시 (오전 7~9시)</option>
-          <option value="9">사시 (오전 9~11시)</option>
-          <option value="11">오시 (오전 11시~오후 1시)</option>
-          <option value="13">미시 (오후 1~3시)</option>
-          <option value="15">신시 (오후 3~5시)</option>
-          <option value="17">유시 (오후 5~7시)</option>
-          <option value="19">술시 (저녁 7~9시)</option>
-          <option value="21">해시 (밤 9~11시)</option>
+          <option value="">모름 / 미입력</option>
+          <option value="子">子시 (밤 23:00~01:00)</option>
+          <option value="丑">丑시 (새벽 01:00~03:00)</option>
+          <option value="寅">寅시 (새벽 03:00~05:00)</option>
+          <option value="卯">卯시 (아침 05:00~07:00)</option>
+          <option value="辰">辰시 (오전 07:00~09:00)</option>
+          <option value="巳">巳시 (오전 09:00~11:00)</option>
+          <option value="午">午시 (낮 11:00~13:00)</option>
+          <option value="未">未시 (오후 13:00~15:00)</option>
+          <option value="申">申시 (오후 15:00~17:00)</option>
+          <option value="酉">酉시 (저녁 17:00~19:00)</option>
+          <option value="戌">戌시 (저녁 19:00~21:00)</option>
+          <option value="亥">亥시 (밤 21:00~23:00)</option>
         </select>
       </div>
       <div class="field" style="margin-bottom:10px;">
@@ -931,7 +931,8 @@ function _buildTerms(year){
 }
 
 // ── 메인 ──
-function calcSaju(year,month,day,hour,gender,name){
+function calcSaju(year,month,day,hourJiInput,gender,name){
+  // hourJiInput: '子','丑',...,'亥' 또는 '' (미입력)
   const bJDN=_jdn(year,month,day);
 
   /* 1. 년주 */
@@ -950,11 +951,11 @@ function calcSaju(year,month,day,hour,gender,name){
   const dIdx=((bJDN-2415011)%60+60)%60;
   const dGan=_GAN[dIdx%10],dJi=_JI[dIdx%12];
 
-  /* 4. 시주 */
+  /* 4. 시주 — 시지 직접 입력 */
   let hGan='',hJi='';
-  if(hour>=0){
-    const hJiIdx=hour===23?0:Math.floor((hour+1)/2)%12;
-    hJi=_JI[hJiIdx];
+  if(hourJiInput && _JI.includes(hourJiInput)){
+    hJi=hourJiInput;
+    const hJiIdx=_JI.indexOf(hJi);
     hGan=_GAN[(_HGANBASE[dGan]+hJiIdx)%10];
   }
 
@@ -5421,7 +5422,7 @@ function init() {
     const year  = parseInt(document.getElementById('auto-year').value, 10);
     const month = parseInt(document.getElementById('auto-month').value, 10);
     const day   = parseInt(document.getElementById('auto-day').value, 10);
-    const hour  = parseInt(document.getElementById('auto-hour').value, 10);
+    const hourJi  = document.getElementById('auto-hour').value; // '子','丑',... or ''
     const gender = document.getElementById('auto-gender').value;
     const loveStatus = document.getElementById('auto-lovestatus').value;
     const viewYear = parseInt(document.getElementById('auto-viewyear').value, 10) || 2026;
@@ -5429,7 +5430,7 @@ function init() {
       errEl.className='error'; errEl.textContent='생년월일을 올바르게 입력해주세요.'; errEl.style.display='block'; return;
     }
     try {
-      const data = calcSaju(year, month, day, hour, gender, '');
+      const data = calcSaju(year, month, day, hourJi, gender, '');
       data.loveStatus = loveStatus;
       renderStory(data, viewYear);
       ['screen-main','screen-input','screen-multi'].forEach(s => document.getElementById(s).style.display='none');
