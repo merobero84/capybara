@@ -2617,26 +2617,46 @@ function buildPages(data, year) {
             const strongU=['건록','제왕','관대','장생'];
             if(strongU.includes(data.unseong?.month))sc+=2;
           }
-          // sangScore가 있으면 이미 100점 만점, 없으면 간이 계산 후 환산
+          // sangScore 없으면 간이 계산
           let score100;
           if (data.sangScore != null) {
-            score100 = data.sangScore; // engine_00에서 이미 100점 환산됨
+            score100 = data.sangScore;
           } else {
-            // 만세력 텍스트 입력 방식: 천간 기준 간이 계산
             const maxSc = 14;
             score100 = Math.min(Math.round(sc / maxSc * 100), 100);
           }
-          const pct = score100;
-          const isStrong = data.singang?.includes('강');
-          const barColor = isStrong ? 'var(--leaf-3)' : '#e8917e';
+          // 10점 단위로 반올림
+          const scoreRounded = Math.round(score100 / 10) * 10;
+          // 8단계 구간
+          const getLevel = (s) => {
+            if (s <= 10) return { label:'극약', color:'#9b8ec4', desc:'극도로 약한 사주' };
+            if (s <= 25) return { label:'태약', color:'#9b8ec4', desc:'매우 약한 사주' };
+            if (s <= 40) return { label:'신약', color:'#9b8ec4', desc:'약한 사주' };
+            if (s <= 48) return { label:'중화신약', color:'#c8a882', desc:'중간에서 약간 약한 사주' };
+            if (s <= 55) return { label:'중화신강', color:'#6db87a', desc:'중간에서 약간 강한 사주' };
+            if (s <= 70) return { label:'신강', color:'#6db87a', desc:'강한 사주' };
+            if (s <= 85) return { label:'태강', color:'#e8917e', desc:'매우 강한 사주' };
+            return { label:'극왕', color:'#e8917e', desc:'극도로 강한 사주' };
+          };
+          const lv = getLevel(scoreRounded);
+          const isStrong = scoreRounded >= 50;
           return `
-            <div class="mood-card cream" style="margin-bottom:12px;text-align:center;">
-              <p style="margin:0 0 4px;font-size:12px;color:var(--ink-soft);">신강/신약 점수</p>
-              <p style="margin:0 0 8px;font-family:'Nanum Pen Script',cursive;font-size:40px;color:${isStrong?'var(--moss-deep)':'#c4705e'};">${score100}점</p>
-              <div style="background:rgba(0,0,0,0.08);border-radius:99px;height:12px;overflow:hidden;margin:0 10px 6px;">
-                <div style="width:${pct}%;height:100%;background:${barColor};border-radius:99px;transition:width .5s;"></div>
+            <div class="mood-card cream" style="margin-bottom:12px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div>
+                  <p style="margin:0;font-size:12px;color:var(--ink-soft);">신강/신약 지수</p>
+                  <p style="margin:4px 0 0;font-family:'Nanum Pen Script',cursive;font-size:36px;color:${lv.color};">${lv.label}</p>
+                </div>
+                <div style="text-align:right;">
+                  <p style="margin:0;font-family:'Gowun Batang',serif;font-size:28px;font-weight:700;color:${lv.color};">${scoreRounded}%</p>
+                </div>
               </div>
-              <p style="margin:0;font-size:11px;color:var(--ink-soft);">신약(0) ←→ 신강(100) · 기준선: 35점</p>
+              <div style="background:rgba(0,0,0,0.08);border-radius:99px;height:10px;overflow:hidden;margin-bottom:8px;">
+                <div style="width:${scoreRounded}%;height:100%;background:linear-gradient(90deg,#9b8ec4,#6db87a,#e8917e);border-radius:99px;"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--ink-soft);">
+                <span>극약</span><span>신약</span><span>중화</span><span>신강</span><span>극왕</span>
+              </div>
             </div>`;
         })()}
         <div class="mood-card ${data.singang?.includes('강') ? 'leaf' : 'peach'}">
