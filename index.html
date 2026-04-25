@@ -1016,7 +1016,7 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
     totalS+=w; if(isSup(_JJG2[j]))suppS+=w;
   });
   const ratio=totalS>0?suppS/totalS:0.5;
-  const sangScore=Math.round(ratio*100/10)*10;
+  const sangScore=Math.max(0, Math.round(ratio*100/10)*10 - 10);
   const singang=sangScore>=50?'신강':'신약';
 
   /* 간이 용신 계산 (신강→기운 빼는 식신·재성·관성이 용신 / 신약→기운 채우는 인성·비겁이 용신) */
@@ -2678,7 +2678,7 @@ function buildPages(data, year) {
               if(!j)return;
               total+=w; if(isSup3(_JJG3[j]))supp+=w;
             });
-            score100=total>0?Math.round(supp/total*100/10)*10:50;
+            score100=total>0?Math.max(0,Math.round(supp/total*100/10)*10-10):50;
           }
           // 10점 단위로 반올림
           const scoreRounded = Math.round(score100 / 10) * 10;
