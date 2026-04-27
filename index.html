@@ -52,7 +52,7 @@ body{background:
 /* ── 홈 ── */
 #screen-home{padding-bottom:calc(80px + var(--safe-bottom));}
 .home-header{background:linear-gradient(135deg,var(--leaf-1),var(--cream));
-  padding:20px 16px;position:relative;min-height:110px;overflow:visible;}
+  padding:20px 16px 12px;position:relative;min-height:130px;overflow:visible;}
 .home-greeting{font-family:'Nanum Pen Script',cursive;font-size:28px;color:var(--moss-deep);margin:0 0 4px;}
 .home-date{font-size:12px;color:var(--ink-soft);margin:0;}
 
@@ -264,40 +264,37 @@ body{background:
 <!-- ══════════════ 홈 ══════════════ -->
 <div id="screen-home" class="screen">
   <div class="home-header">
-    <div>
+    <!-- 왼쪽: 인사말 -->
+    <div style="padding-right:115px;">
       <p class="home-greeting" id="home-greeting">안녕하세요 🦫</p>
       <p class="home-date" id="home-date"></p>
     </div>
-    <!-- 카피바라 + 말풍선 묶음 -->
-    <div style="position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;">
-      <!-- 말풍선 (이미지 왼쪽) -->
+    <!-- 오른쪽: 카피바라 + 말풍선 -->
+    <div style="position:absolute;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-end;">
+      <!-- 말풍선 -->
       <div id="capi-bubble" style="
         background:#fff;
         border:1.5px solid var(--petal);
-        border-radius:12px 12px 4px 12px;
-        padding:8px 12px;
+        border-radius:12px 12px 12px 4px;
+        padding:7px 10px;
         font-size:11px;
         color:var(--ink-soft);
-        max-width:130px;
+        max-width:120px;
         line-height:1.5;
         box-shadow:0 2px 8px rgba(200,112,94,.12);
+        margin-right:8px;
+        margin-bottom:4px;
         position:relative;
-        margin-right:6px;
-        flex-shrink:0;
       ">
         <span style="font-size:10px;font-weight:700;color:var(--moss-deep);display:block;margin-bottom:2px;">🦫 카피바라 도령</span>
         <span id="capi-bubble-text">느긋하게, 그러나 깊이 🌿</span>
-        <!-- 말풍선 꼬리 (오른쪽) -->
-        <div style="position:absolute;right:-8px;top:50%;transform:translateY(-50%);
-          width:0;height:0;
-          border-top:6px solid transparent;
-          border-bottom:6px solid transparent;
-          border-left:8px solid var(--petal);"></div>
-        <div style="position:absolute;right:-6px;top:50%;transform:translateY(-50%);
-          width:0;height:0;
-          border-top:5px solid transparent;
-          border-bottom:5px solid transparent;
-          border-left:7px solid #fff;"></div>
+        <!-- 말풍선 꼬리 아래쪽 -->
+        <div style="position:absolute;right:14px;bottom:-7px;width:0;height:0;
+          border-left:6px solid transparent;border-right:6px solid transparent;
+          border-top:7px solid var(--petal);"></div>
+        <div style="position:absolute;right:15px;bottom:-5px;width:0;height:0;
+          border-left:5px solid transparent;border-right:5px solid transparent;
+          border-top:6px solid #fff;"></div>
       </div>
       <!-- 카피바라 이미지 -->
       <img src="./assets/capi.png" alt="카피바라 도령" class="capi-char" />
