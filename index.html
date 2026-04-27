@@ -6841,50 +6841,128 @@ const MENU_CONFIG = {
   },
 
   mbti_saju: {
-    title: '🧬 사주 MBTI',
+    title: '🧬 사주로 보는 MBTI',
     render(data) {
       const oh=data.oheng||{};
       const isStrong=data.sangScore>=50;
-      const isWood=(oh.목||0)>=(oh.금||0);
-      const isFire=(oh.화||0)>=(oh.수||0);
-      const isEarth=(oh.토||0)>=2;
-      const T1=isStrong?{k:'신강',n:'주도형(신강)'}:{k:'신약',n:'섬세형(신약)'};
-      const T2=isWood?{k:'목기',n:'창의형(목)'}:{k:'금기',n:'실행형(금)'};
-      const T3=isFire?{k:'화기',n:'열정형(화)'}:{k:'수기',n:'직관형(수)'};
-      const T4=isEarth?{k:'토기',n:'안정형(토)'}:{k:'균형',n:'균형형'};
-      const type=`${T1.k}-${T2.k}-${T3.k}-${T4.k}`;
-      const COMBO_DESC = {
-        '신강-목기-화기': '에너지 넘치는 리더! 추진력과 열정이 강해요.',
-        '신강-목기-수기': '지혜로운 리더! 결단력과 직관이 동시에 있어요.',
-        '신강-금기-화기': '카리스마 넘치는 승부사! 강하고 뜨거워요.',
-        '신강-금기-수기': '냉철한 리더! 결단력과 계획성이 뛰어나요.',
-        '신약-목기-화기': '감성적인 크리에이터! 예술적 재능이 있어요.',
-        '신약-목기-수기': '신비로운 감성가! 섬세하고 직관이 강해요.',
-        '신약-금기-화기': '따뜻한 완벽주의자! 열정적이지만 꼼꼼해요.',
-        '신약-금기-수기': '깊이 있는 사색가! 조용하지만 지혜로워요.',
+      // E/I: 신강=외향(E), 신약=내향(I)
+      const isE = isStrong;
+      // N/S: 화+목 > 토+금 이면 직관(N), 아니면 감각(S)
+      const isN = ((oh.화||0)+(oh.목||0)) > ((oh.토||0)+(oh.금||0));
+      // F/T: 수+목 > 금+화 이면 감성(F), 아니면 이성(T)
+      const isF2 = ((oh.수||0)+(oh.목||0)) >= ((oh.금||0)+(oh.화||0));
+      // J/P: 일간 기준 정(正)계열 십신 많으면 J, 편(偏)계열 많으면 P
+      const sipsinGan = [data.sipsin_gan?.year, data.sipsin_gan?.month, data.sipsin_gan?.hour].filter(Boolean);
+      const jCount = sipsinGan.filter(s=>s&&(s.startsWith('정')||s==='비견')).length;
+      const pCount = sipsinGan.filter(s=>s&&s.startsWith('편')).length;
+      const isJ = jCount >= pCount;
+
+      const type = (isE?'E':'I')+(isN?'N':'S')+(isF2?'F':'T')+(isJ?'J':'P');
+
+      const MBTI_DESC = {
+        ENFJ:{name:'선도자',emoji:'🌟',desc:'카리스마 있고 따뜻한 리더예요. 사람들을 이끌고 영감을 주는 것을 좋아해요.',strength:'공감력, 리더십, 따뜻함',weakness:'자기 돌봄 부족, 타인 의존',love:'파트너를 깊이 사랑하고 헌신해요. 상대가 성장하도록 도와주는 스타일이에요.'},
+        ENFP:{name:'활동가',emoji:'🌈',desc:'열정적이고 창의적인 자유로운 영혼이에요. 새로운 것에 쉽게 흥분하고 가능성을 봐요.',strength:'창의력, 열정, 공감력',weakness:'집중력 부족, 계획 안 지킴',love:'설레는 감정을 중요시해요. 권태기를 힘들어하지만 감정 표현만큼은 최고예요.'},
+        ENTJ:{name:'통솔자',emoji:'👑',desc:'대담하고 전략적인 리더예요. 목표를 향해 강하게 밀고 나가요.',strength:'결단력, 전략적 사고, 리더십',weakness:'독단적, 감정 표현 부족',love:'관계에서도 리더십을 발휘해요. 상대에게 높은 기준을 요구하기도 해요.'},
+        ENTP:{name:'변론가',emoji:'⚡',desc:'지적 호기심이 넘치고 토론을 즐기는 혁신가예요.',strength:'창의력, 논리력, 유머',weakness:'논쟁적, 마무리 약함',love:'지적 자극을 주는 상대에게 끌려요. 심심한 연애는 금방 지루해해요.'},
+        ESFJ:{name:'집정관',emoji:'🤝',desc:'배려심 깊고 사교적인 조력자예요. 주변 사람들을 항상 챙겨요.',strength:'배려, 사교성, 책임감',weakness:'갈등 회피, 타인 눈치',love:'안정적이고 따뜻한 연애를 원해요. 기념일과 이벤트를 정말 소중히 여겨요.'},
+        ESFP:{name:'연예인',emoji:'🎭',desc:'활기차고 즉흥적인 자유로운 영혼이에요. 파티에서 항상 주인공이에요.',strength:'활발함, 유머, 즉흥성',weakness:'계획 없음, 갈등 회피',love:'재미있고 활기찬 연애를 원해요. 심각한 분위기를 힘들어해요.'},
+        ESTJ:{name:'경영자',emoji:'📋',desc:'체계적이고 책임감 강한 관리자예요. 규칙과 질서를 중요시해요.',strength:'조직력, 책임감, 결단력',weakness:'융통성 없음, 감정 표현 부족',love:'안정적이고 체계적인 관계를 원해요. 약속은 반드시 지켜야 해요.'},
+        ESTP:{name:'사업가',emoji:'🏎️',desc:'대담하고 현실적인 행동파예요. 위기 상황에서 빛을 발해요.',strength:'현실감각, 행동력, 유머',weakness:'계획성 부족, 충동적',love:'짜릿하고 열정적인 연애를 좋아해요. 권태기를 제일 못 참아요.'},
+        INFJ:{name:'옹호자',emoji:'🔮',desc:'깊이 있고 통찰력 있는 신비로운 이상주의자예요.',strength:'공감력, 통찰력, 이상주의',weakness:'완벽주의, 번아웃',love:'드물지만 깊고 의미 있는 연애를 원해요. 상대의 영혼까지 이해하려 해요.'},
+        INFP:{name:'중재자',emoji:'🌙',desc:'이상주의적이고 감성 깊은 시인 같은 존재예요.',strength:'공감력, 창의력, 충성심',weakness:'현실 외면, 자기비판',love:'동화 같은 순수한 사랑을 원해요. 쉽게 마음을 열지 않지만 한번 열면 깊어요.'},
+        INTJ:{name:'건축가',emoji:'🏛️',desc:'전략적이고 독립적인 혁신적 사고를 가진 존재예요.',strength:'전략적 사고, 독립심, 결단력',weakness:'거만함, 감정 표현 극도로 어려움',love:'연애에도 전략이 있어요 ㅋㅋ 상대를 철저히 분석한 뒤 접근해요.'},
+        INTP:{name:'논리술사',emoji:'🔬',desc:'독창적이고 논리적인 사색가예요. 머릿속에 세계가 있어요.',strength:'논리력, 창의력, 독립심',weakness:'감정 표현 어려움, 완벽주의',love:'지적 교감이 없으면 연애가 안 돼요. 생각이 통하는 상대를 찾아요.'},
+        ISFJ:{name:'수호자',emoji:'🛡️',desc:'헌신적이고 따뜻한 보호자예요. 조용히 모든 것을 챙겨요.',strength:'헌신, 배려, 인내',weakness:'자기희생 과다, 변화 거부',love:'안정적이고 오래가는 사랑을 원해요. 상대를 위해 모든 것을 희생해요.'},
+        ISFP:{name:'모험가',emoji:'🎨',desc:'자유롭고 감성적인 예술가예요. 겉으로는 조용하지만 내면은 풍부해요.',strength:'감수성, 유연함, 친절',weakness:'갈등 극도로 회피, 자기표현 어려움',love:'말보다 행동으로 사랑을 표현해요. 상대가 먼저 다가와주길 기다려요.'},
+        ISTJ:{name:'현실주의자',emoji:'📚',desc:'신뢰할 수 있고 실용적인 의무의 사람이에요.',strength:'성실함, 신뢰, 책임감',weakness:'변화 거부, 감정 표현 서툼',love:'안정적이고 꾸준한 사랑이에요. 말로 표현은 못해도 행동으로 증명해요.'},
+        ISTP:{name:'장인',emoji:'🔧',desc:'독립적이고 현실적인 실용주의자예요. 손으로 하는 모든 걸 잘해요.',strength:'문제해결, 독립심, 현실감각',weakness:'감정 표현 어려움, 헌신 약함',love:'자유로운 연애를 선호해요. 구속이나 감정 강요를 가장 싫어해요.'}
       };
-      const shortKey=`${T1.k}-${T2.k}-${T3.k}`;
-      const desc=COMBO_DESC[shortKey]||'독특한 사주 유형이에요!';
+
+      // 궁합 좋은/나쁜 MBTI
+      const COMPAT = {
+        ENFJ:{good:['INFP','ISFP'],bad:['ISTP','ESTP']},
+        ENFP:{good:['INTJ','INFJ'],bad:['ISTJ','ESTJ']},
+        ENTJ:{good:['INTP','INFP'],bad:['ISFP','ESFP']},
+        ENTP:{good:['INFJ','INTJ'],bad:['ISFJ','ESFJ']},
+        ESFJ:{good:['ISFP','INFP'],bad:['INTP','ENTP']},
+        ESFP:{good:['ISFJ','ISTJ'],bad:['INTJ','ENTJ']},
+        ESTJ:{good:['ISTP','INTP'],bad:['INFP','ENFP']},
+        ESTP:{good:['ISFJ','ESFJ'],bad:['INFJ','ENFJ']},
+        INFJ:{good:['ENFP','ENTP'],bad:['ESTP','ESFP']},
+        INFP:{good:['ENFJ','ENTJ'],bad:['ESTJ','ESTP']},
+        INTJ:{good:['ENFP','ENTP'],bad:['ESFP','ESTP']},
+        INTP:{good:['ENTJ','ESTJ'],bad:['ESFJ','ISFJ']},
+        ISFJ:{good:['ESFP','ESTP'],bad:['ENTP','INTP']},
+        ISFP:{good:['ENFJ','ESFJ'],bad:['ENTJ','ESTJ']},
+        ISTJ:{good:['ESFP','ESTP'],bad:['ENFP','INFP']},
+        ISTP:{good:['ESTJ','ENTJ'],bad:['ENFJ','ESFJ']}
+      };
+
+      const desc = MBTI_DESC[type]||MBTI_DESC['INFP'];
+      const compat = COMPAT[type]||{good:['ENFJ','INFJ'],bad:['ESTP','ISTP']};
+
       return `
-        <div class="result-card" style="text-align:center;background:linear-gradient(135deg,#f5f0ff,#fff5f8);">
-          <div class="result-card-title" style="justify-content:center;">🧬 나의 사주 유형</div>
-          <p style="font-family:'Nanum Pen Script',cursive;font-size:28px;color:var(--moss-deep);margin:12px 0 4px;">${type}</p>
-          <p style="font-size:14px;font-weight:700;color:var(--leaf-3);margin:0 0 8px;">${desc}</p>
-          <p style="font-size:11px;color:var(--ink-soft);">⚠️ 재미용이에요 🦫</p>
-        </div>
-        <div class="result-card">
-          <div class="result-card-title">📊 4가지 유형 해석</div>
-          <div class="tag-row">
-            <span class="tag tag-good">${T1.n}</span>
-            <span class="tag tag-neutral">${T2.n}</span>
-            <span class="tag" style="background:#ffe0d0;color:#c45030;">${T3.n}</span>
-            <span class="tag tag-neutral">${T4.n}</span>
+        <div class="result-card" style="background:linear-gradient(135deg,#f5f0ff,#fff5f8);">
+          <div style="text-align:center;padding:8px 0 16px;">
+            <div style="font-size:40px;margin-bottom:8px;">${desc.emoji}</div>
+            <div style="font-size:42px;font-weight:900;color:var(--moss-deep);letter-spacing:6px;">${type}</div>
+            <div style="font-size:16px;font-weight:700;color:var(--leaf-3);margin:6px 0;">${desc.name}</div>
+            <p style="font-size:13px;color:var(--ink-soft);margin:0;">사주 기반 추정 (재미용 🦫)</p>
           </div>
-          <div style="margin-top:12px;font-size:13px;line-height:1.9;color:var(--ink-soft);">
-            <div>• <strong>${T1.k}</strong>: ${isStrong?'기운이 강해 주도적이에요':'기운이 섬세해 배려심 깊어요'}</div>
-            <div>• <strong>${T2.k}</strong>: ${isWood?'목 기운 — 창의·성장 지향':'금 기운 — 결단·실행 지향'}</div>
-            <div>• <strong>${T3.k}</strong>: ${isFire?'화 기운 — 열정·표현이 풍부':'수 기운 — 지혜·직관이 강해'}</div>
-            <div>• <strong>${T4.k}</strong>: ${isEarth?'토 기운 — 안정을 중시해':'균형 — 두루두루 고른 편'}</div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-card-title">📖 ${type} 유형 설명</div>
+          <p style="font-size:14px;line-height:1.8;">${desc.desc}</p>
+          <div style="margin-top:12px;">
+            <div style="font-size:12px;color:var(--ink-soft);margin-bottom:4px;">✨ 강점</div>
+            <div class="tag-row">${desc.strength.split(',').map(s=>`<span class="tag tag-good">${s.trim()}</span>`).join('')}</div>
+          </div>
+          <div style="margin-top:10px;">
+            <div style="font-size:12px;color:var(--ink-soft);margin-bottom:4px;">💧 약점</div>
+            <div class="tag-row">${desc.weakness.split(',').map(s=>`<span class="tag tag-neutral">${s.trim()}</span>`).join('')}</div>
+          </div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-card-title">💕 연애 스타일</div>
+          <p style="font-size:14px;line-height:1.8;">${desc.love}</p>
+        </div>
+
+        <div class="result-card">
+          <div class="result-card-title">💕 나랑 잘 맞는 유형</div>
+          ${compat.good.map(t => MBTI_DESC[t] ? `
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);">
+              <span style="font-size:24px;">${MBTI_DESC[t].emoji}</span>
+              <div>
+                <div style="font-weight:700;">${t} · ${MBTI_DESC[t].name}</div>
+                <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">${MBTI_DESC[t].desc.slice(0,30)}...</div>
+              </div>
+              <span class="tag tag-good" style="margin-left:auto;">궁합 ↑</span>
+            </div>` : '').join('')}
+        </div>
+
+        <div class="result-card">
+          <div class="result-card-title">🚨 조심해야 할 유형</div>
+          ${compat.bad.map(t => MBTI_DESC[t] ? `
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);">
+              <span style="font-size:24px;">${MBTI_DESC[t].emoji}</span>
+              <div>
+                <div style="font-weight:700;">${t} · ${MBTI_DESC[t].name}</div>
+                <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">${MBTI_DESC[t].desc.slice(0,30)}...</div>
+              </div>
+              <span class="tag tag-bad" style="margin-left:auto;">주의</span>
+            </div>` : '').join('')}
+          <p style="font-size:11px;color:var(--ink-soft);margin-top:8px;">⚠️ 사주+MBTI 조합 추정이에요. 실제와 다를 수 있어요!</p>
+        </div>
+
+        <div class="result-card" style="background:var(--ivory-2);">
+          <div class="result-card-title">📊 ${type} 추정 근거</div>
+          <div style="font-size:12px;line-height:2;color:var(--ink-soft);">
+            <div>• ${isE?'E(외향)':'I(내향)'}: 신강신약 ${data.sangScore}점 → ${isStrong?'기운이 강해 외향적(E)':'기운이 섬세해 내향적(I)'}</div>
+            <div>• ${isN?'N(직관)':'S(감각)'}: 화목 ${(oh.화||0)+(oh.목||0)} vs 토금 ${(oh.토||0)+(oh.금||0)} → ${isN?'직관형(N)':'감각형(S)'}</div>
+            <div>• ${isF2?'F(감성)':'T(이성)'}: 수목 ${(oh.수||0)+(oh.목||0)} vs 금화 ${(oh.금||0)+(oh.화||0)} → ${isF2?'감성형(F)':'이성형(T)'}</div>
+            <div>• ${isJ?'J(계획)':'P(즉흥)'}: 정(正)계열 ${jCount}개 vs 편(偏)계열 ${pCount}개 → ${isJ?'계획형(J)':'즉흥형(P)'}</div>
           </div>
         </div>`;
     }
