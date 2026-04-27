@@ -807,13 +807,99 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
     wolun[m2]={gan:mg,ji:mj,sipsin:_ss(dGan,mg),unseong:_un(dGan,mj)};
   }
 
+  /* 12신살 계산 (년지 기준 + 일지 기준) */
+  const _SAMHAP = {
+    寅:'인오술',午:'인오술',戌:'인오술',
+    巳:'사유축',酉:'사유축',丑:'사유축',
+    申:'신자진',子:'신자진',辰:'신자진',
+    亥:'해묘미',卯:'해묘미',未:'해묘미'
+  };
+  const _SINSAL_TABLE = {
+    인오술:['亥','子','丑','寅','卯','辰','巳','午','未','申','酉','戌'],
+    사유축:['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'],
+    신자진:['巳','午','未','申','酉','戌','亥','子','丑','寅','卯','辰'],
+    해묘미:['申','酉','戌','亥','子','丑','寅','卯','辰','巳','午','未'],
+  };
+  const _SINSAL_NAMES=['겁살','재살','천살','지살','도화살','월살','망신살','장성살','반안살','역마살','육해살','화개살'];
+
+  const sinsal=[];
+  const allJi=[yJi,mJi,dJi,...(hJi?[hJi]:[])];
+
+  // 년지 기준 신살
+  const yGroup=_SAMHAP[yJi];
+  const yTable=yGroup?_SINSAL_TABLE[yGroup]:null;
+  if(yTable) {
+    // 년지 제외 나머지 지지들 체크
+    [mJi,dJi,...(hJi?[hJi]:[])].forEach(ji=>{
+      const idx=yTable.indexOf(ji);
+      if(idx>=0) sinsal.push(_SINSAL_NAMES[idx]);
+    });
+  }
+
+  // 일지 기준 신살 (년지·월지·시지 체크)
+  const dGroup=_SAMHAP[dJi];
+  const dTable=dGroup?_SINSAL_TABLE[dGroup]:null;
+  if(dTable) {
+    [yJi,mJi,...(hJi?[hJi]:[])].forEach(ji=>{
+      const idx=dTable.indexOf(ji);
+      if(idx>=0){
+        const name=_SINSAL_NAMES[idx];
+        if(!sinsal.includes(name)) sinsal.push(name);
+      }
+    });
+  }
+
+  // 양인살 (일간 기준 - 일지 체크)
+  const _YANGIN={甲:'卯',乙:'寅',丙:'午',丁:'巳',戊:'午',己:'巳',庚:'酉',辛:'申',壬:'子',癸:'亥'};
+  if(allJi.includes(_YANGIN[dGan])) sinsal.push('양인살');
+
+  // 천을귀인 (일간 기준)
+  const _CHEONUL={甲:['丑','未'],乙:['子','申'],丙:['亥','酉'],丁:['亥','酉'],戊:['丑','未'],己:['子','申'],庚:['丑','未'],辛:['寅','午'],壬:['巳','卯'],癸:['巳','卯']};
+  if(allJi.some(j=>(_CHEONUL[dGan]||[]).includes(j))) sinsal.push('천을귀인');
+
+  // 문창귀인 (일간 기준)
+  const _MUNCHANG={甲:'巳',乙:'午',丙:'申',丁:'酉',戊:'申',己:'酉',庚:'亥',辛:'子',壬:'寅',癸:'卯'};
+  if(allJi.includes(_MUNCHANG[dGan])) sinsal.push('문창귀인');
+
+  // 건록 (일간 기준)
+  const _GUNROK={甲:'寅',乙:'卯',丙:'巳',丁:'午',戊:'巳',己:'午',庚:'申',辛:'酉',壬:'亥',癸:'子'};
+  if(allJi.includes(_GUNROK[dGan])) sinsal.push('건록');
+
+  // 홍염살 (일간 기준)
+  const _HONGYEOM={甲:'午',乙:'午',丙:'寅',丁:'未',戊:'辰',己:'辰',庚:'戌',辛:'酉',壬:'子',癸:'申'};
+  if(allJi.includes(_HONGYEOM[dGan])) sinsal.push('홍염살');
+
+  // 고신살/과숙살 (남자=고신, 여자=과숙, 년지 기준)
+  const _GOSHIN={寅:'巳',卯:'巳',辰:'巳',巳:'申',午:'申',未:'申',申:'亥',酉:'亥',戌:'亥',亥:'寅',子:'寅',丑:'寅'};
+  const _GWASUK={寅:'丑',卯:'丑',辰:'丑',巳:'辰',午:'辰',未:'辰',申:'未',酉:'未',戌:'未',亥:'戌',子:'戌',丑:'戌'};
+  const goshinJi=gender==='male'?_GOSHIN[yJi]:_GWASUK[yJi];
+  if(goshinJi&&allJi.includes(goshinJi)) sinsal.push(gender==='male'?'고신살':'과숙살');
+
+  // 원진살 (서로 상극 지지쌍)
+  const _WONJIN={子:'未',丑:'午',寅:'酉',卯:'申',辰:'亥',巳:'戌',午:'丑',未:'子',申:'卯',酉:'寅',戌:'巳',亥:'辰'};
+  for(let a=0;a<allJi.length;a++){
+    for(let b=a+1;b<allJi.length;b++){
+      if(_WONJIN[allJi[a]]===allJi[b]&&!sinsal.includes('원진살')) sinsal.push('원진살');
+    }
+  }
+
+  // 귀문관살
+  const _GWIMUN={子:'酉',丑:'午',寅:'未',卯:'申',辰:'亥',巳:'戌',午:'丑',未:'寅',申:'卯',酉:'子',戌:'巳',亥:'辰'};
+  for(let a=0;a<allJi.length;a++){
+    for(let b=a+1;b<allJi.length;b++){
+      if(_GWIMUN[allJi[a]]===allJi[b]&&!sinsal.includes('귀문관살')) sinsal.push('귀문관살');
+    }
+  }
+
+  const sinsalUniq=[...new Set(sinsal)];
+
   return {
     name:name||'',gender,
     birth:`${year}년 ${month}월 ${day}일`,
     birthYear:year,birthMonth:month,birthDay:day,
     pillars:{year:{gan:yGan,ji:yJi},month:{gan:mGan,ji:mJi},day:{gan:dGan,ji:dJi},hour:hGan?{gan:hGan,ji:hJi}:{gan:'',ji:''}},
     ilgan:dGan,oheng:oh,singang,sangScore,
-    yongsin,heesin,kisin,sinsal:[],
+    yongsin,heesin,kisin,sinsal:sinsalUniq,
     unseong:un,
     jijanggan:{year:_JIJANG[yJi]?.slice(-1)[0]||'',month:_JIJANG[mJi]?.slice(-1)[0]||'',day:_JIJANG[dJi]?.slice(-1)[0]||'',hour:hJi?_JIJANG[hJi]?.slice(-1)[0]||'':''},
     sipsin_gan:{year:_ss(dGan,yGan),month:_ss(dGan,mGan),day:'일간',hour:hGan?_ss(dGan,hGan):''},
@@ -6138,10 +6224,13 @@ const MENU_CONFIG = {
         </div>
 
         <div class="result-card">
-          <div class="result-card-title">📊 월별 운세 흐름</div>
+          <div class="result-card-title">📊 월별 운세 흐름 <span style="font-size:11px;color:var(--ink-soft);">· 클릭하면 상세보기 👆</span></div>
           <div class="month-score-grid">
             ${monthScores.map(({m,s})=>`
-              <div class="month-score-cell ${m===NOW_MONTH?'msc-top':''}">
+              <div class="month-score-cell ${m===NOW_MONTH?'msc-top':''}"
+                onclick="openMonthDetail(${m})"
+                style="cursor:pointer;transition:transform .1s;"
+                onmousedown="this.style.transform='scale(.95)'" onmouseup="this.style.transform=''">
                 <div class="msc-month">${m}월</div>
                 <div class="msc-score" style="color:${scoreColor(s)};">${s}</div>
                 <div class="msc-label">${scoreEmoji(s)}</div>
@@ -6397,29 +6486,93 @@ const MENU_CONFIG = {
 
   bad_match: {
     title: '🚫 절대 만나면 안 되는 상대',
-    render(data) {
-      const dJi = data.pillars?.day?.ji||'?';
+    render(data, p) {
+      const dJi=data.pillars?.day?.ji||'?';
+      const dGan=data.pillars?.day?.gan||'?';
       const CHUNG={子:'午',午:'子',卯:'酉',酉:'卯',寅:'申',申:'寅',巳:'亥',亥:'巳',辰:'戌',戌:'辰',丑:'未',未:'丑'};
       const HYUNG={子:'卯',卯:'子',寅:'巳',巳:'申',申:'寅',丑:'戌',戌:'未',未:'丑'};
-      const chungJi=CHUNG[dJi]||'?', hyungJi=HYUNG[dJi]||'없음';
+      const HAEM={子:'未',丑:'午',寅:'巳',卯:'辰',辰:'卯',巳:'寅',午:'丑',未:'子',申:'亥',酉:'戌',戌:'酉',亥:'申'};
+      const chungJi=CHUNG[dJi]||'?';
+      const hyungJi=HYUNG[dJi]||'없음';
+      const haemJi=HAEM[dJi]||'?';
+      const CHUNG_DESC={
+        '子午':'물과 불의 충돌. 처음엔 강렬하게 끌리지만 가치관이 너무 달라요. 한쪽이 맞추다 결국 지쳐요.',
+        '卯酉':'감성과 이성의 충돌. 대화는 잘 되는 것 같지만 결정적 순간마다 생각이 달라 갈등이 생겨요.',
+        '寅申':'추진력 vs 추진력. 서로 자기 방식이 맞다고 양보 안 해요. 연애보다 경쟁 관계가 돼요.',
+        '巳亥':'열정과 지혜의 충돌. 서로 페이스를 못 맞추고 답답해해요.',
+        '辰戌':'안정 vs 변화. 한쪽은 정착하고 싶고 한쪽은 변화를 추구해서 미래 방향이 달라요.',
+        '丑未':'현실 vs 이상. 돈 쓰는 방식, 미래 계획이 달라 갈등이 잦아요.'
+      };
+      const ck=[dJi,chungJi].sort().join('');
+      const cd=CHUNG_DESC[ck]||CHUNG_DESC[[chungJi,dJi].sort().join('')]||'서로의 에너지가 충돌해 갈등이 잦아요.';
+      const OH={甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'};
+      const GEK={목:'금',화:'수',토:'목',금:'화',수:'토'};
+      const worstOh=GEK[OH[dGan]||'목']||'?';
+      const WORST_DESC={
+        목:'나를 자르는 금 기운의 상대. 내 감성과 계획을 무시하고 현실만 따지는 타입이라 상처받기 쉬워요.',
+        화:'내 열정을 끄는 수 기운의 상대. 내 표현력을 차갑게 대하거나 무관심해서 외로워져요.',
+        토:'내 안정을 뚫는 목 기운의 상대. 안정감을 무너뜨리고 계속 변화를 요구해서 힘들어요.',
+        금:'나를 녹이는 화 기운의 상대. 내 원칙을 흔들고 감정적으로 압박을 줘요.',
+        수:'나를 막는 토 기운의 상대. 내 자유로움을 막고 틀에 가두려 해요.',
+      };
       return `
-        <div class="result-card">
+        <div class="result-card" style="background:linear-gradient(135deg,#fff5f5,#fff8f5);">
           <div class="result-card-title">⚡ 충(冲) — 가장 위험한 관계</div>
-          <div style="text-align:center;padding:16px 0;">
-            <div style="font-size:50px;">⚡</div>
-            <p style="font-size:20px;font-weight:700;margin:8px 0;">일지 <strong>${dJi}</strong>와 충: <span style="color:#c4393a;">${chungJi}일</span> 생</p>
-            <p style="font-size:13px;color:var(--ink-soft);">처음엔 강하게 끌리지만 갈등이 깊어져요</p>
+          <div style="display:flex;align-items:center;gap:14px;padding:10px 0;">
+            <div style="text-align:center;background:rgba(196,57,58,.08);border-radius:12px;padding:12px 16px;min-width:70px;">
+              <div style="font-size:26px;">⚡</div>
+              <div style="font-size:22px;font-weight:700;color:#c4393a;">${chungJi}일</div>
+              <div style="font-size:10px;color:var(--ink-soft);">생 조심</div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:700;margin-bottom:6px;">일지 <span style="color:#c4393a;">${dJi}</span>와 충 → <span style="color:#c4393a;">${chungJi}일</span>생</div>
+              <p style="font-size:13px;line-height:1.75;color:var(--ink-soft);margin:0;">${cd}</p>
+            </div>
+          </div>
+          <div style="background:#fff0f0;border-radius:10px;padding:10px 14px;margin-top:6px;">
+            <p style="font-size:13px;margin:0;color:#c4393a;">💔 처음에 강하게 끌릴수록 더 조심! 충 관계는 설렘이 클수록 위험해요.</p>
           </div>
         </div>
         <div class="result-card">
-          <div class="result-card-title">⚠️ 형(刑) — 주의 필요한 관계</div>
-          <div style="text-align:center;padding:12px 0;">
-            <div style="font-size:40px;">⚠️</div>
-            <p style="font-size:18px;font-weight:700;margin:8px 0;">${hyungJi!='없음'?`${hyungJi}일 생 주의`:'형 관계 없음'}</p>
+          <div class="result-card-title">😤 오행으로 보는 최악의 상대</div>
+          <div style="background:#fff0f0;border-radius:12px;padding:14px;margin-bottom:8px;">
+            <div style="font-size:14px;font-weight:700;color:#c4393a;margin-bottom:6px;">🔴 ${worstOh} 기운이 강한 상대</div>
+            <p style="font-size:13px;line-height:1.75;margin:0;">${WORST_DESC[worstOh]||'서로 맞지 않는 에너지예요.'}</p>
+          </div>
+          <p style="font-size:12px;color:var(--ink-soft);">일간 ${dGan}(${OH[dGan]}) 기운을 극하는 상대를 특히 주의하세요.</p>
+        </div>
+        ${hyungJi!=='없음'?`
+        <div class="result-card">
+          <div class="result-card-title">⚠️ 형(刑) — 은근히 피곤한 관계</div>
+          <div style="display:flex;align-items:center;gap:14px;padding:8px 0;">
+            <div style="text-align:center;background:rgba(200,162,0,.1);border-radius:12px;padding:10px 14px;min-width:70px;">
+              <div style="font-size:22px;">⚠️</div>
+              <div style="font-size:18px;font-weight:700;color:#c8a200;">${hyungJi}일</div>
+            </div>
+            <p style="font-size:13px;line-height:1.75;color:var(--ink-soft);margin:0;flex:1;">충처럼 격렬하진 않지만 은근히 피곤한 관계예요. 무심코 상처 주는 말을 하게 되어 감정이 쌓여요. 오랜 연애에서 특히 드러나요.</p>
+          </div>
+        </div>`:''}
+        <div class="result-card">
+          <div class="result-card-title">💫 해(害) — 함께여도 성장이 없는 관계</div>
+          <div style="display:flex;align-items:center;gap:14px;padding:8px 0;">
+            <div style="text-align:center;background:var(--ivory-2);border-radius:12px;padding:10px 14px;min-width:70px;">
+              <div style="font-size:20px;">💫</div>
+              <div style="font-size:18px;font-weight:700;">${haemJi}일</div>
+            </div>
+            <p style="font-size:13px;line-height:1.75;color:var(--ink-soft);margin:0;flex:1;">크게 싸우진 않지만 함께 있어도 발전이 없어요. 서로의 성장을 방해하는 관계라 시간이 지날수록 후회해요.</p>
+          </div>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">🤝 이미 사귀고 있다면?</div>
+          <div style="font-size:14px;line-height:2;">
+            <div>✅ 서로의 다름을 인정하고 존중하기</div>
+            <div>✅ 사소한 것에 양보하는 연습 먼저</div>
+            <div>✅ 갈등 시 바로 해결 말고 하루 쉬고 대화</div>
+            <div>✅ 공통 취미나 미래 목표 함께 만들기</div>
           </div>
         </div>
         <div class="result-card" style="background:var(--ivory-2);">
-          <p style="font-size:12px;color:var(--ink-soft);margin:0;">💡 충·형이라도 전체 사주를 봐야 정확해요. 참고용으로만 봐주세요 🦫</p>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0;">💡 충·형·해라도 다른 기둥이 잘 맞으면 극복 가능해요. 전체 사주 궁합을 봐야 정확해요 🦫</p>
         </div>`;
     }
   },
@@ -7089,7 +7242,89 @@ function renderMonthResult(data, field, emoji, label, overrideScore) {
     </div>`;
 }
 
-// ── 초기화 ──
+// 월별 상세 보기
+function openMonthDetail(month) {
+  const p = getCurrentProfile();
+  if (!p) return;
+  const data = profileToData(p);
+  const cw = data.wolun?.[month];
+  const sub = cw ? capiScoreMonth(data, cw) : {love:50,money:50,work:50,health:50,overall:50};
+  const MONTH_NAMES2=['','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const SEASON={1:'겨울',2:'겨울',3:'봄',4:'봄',5:'봄',6:'여름',7:'여름',8:'여름',9:'가을',10:'가을',11:'가을',12:'겨울'};
+  const SEASON_EMOJI={봄:'🌸',여름:'☀️',가을:'🍂',겨울:'❄️'};
+  const ss=SEASON[month], se=SEASON_EMOJI[ss]||'📅';
+
+  const SIPSIN_MONTH_DESC = {
+    비견:`독립심이 강해지는 달이에요. 혼자서 해내고 싶은 욕구가 강해지고, 새로운 시작에 좋아요.`,
+    겁재:`경쟁적 에너지가 강한 달이에요. 승부욕이 올라오고 대담한 시도가 가능해요. 지출 주의!`,
+    식신:`즐거움과 창의가 넘치는 달이에요. 먹고 마시고 즐기기 좋고, 연애 감성도 올라가요.`,
+    상관:`표현력과 끼가 폭발하는 달! 하고 싶은 말을 시원하게 할 수 있어요. 윗사람과 마찰 주의.`,
+    편재:`활발한 재물 활동의 달이에요. 사람을 만날수록 기회가 생겨요. 투자보다 영업·마케팅에 좋아요.`,
+    정재:`차분하게 모아가는 달이에요. 저축·관리에 최고, 꾸준한 노력이 결실을 맺어요.`,
+    편관:`긴장감 있는 달이에요. 외부 압력이 있지만 이걸 이겨내면 성장해요. 과로 주의!`,
+    정관:`공식적인 성취의 달이에요. 승진·합격·취업 기회가 있고, 원칙대로 하면 인정받아요.`,
+    편인:`내면을 돌아보는 달이에요. 배움·공부·창작에 집중하면 좋아요. 식사 불규칙 주의.`,
+    정인:`귀인의 도움이 있는 달이에요. 배움이 성과로 이어지고, 자격증·시험에 좋아요.`
+  };
+  const monthDesc = cw ? (SIPSIN_MONTH_DESC[cw.sipsin]||'운세의 흐름을 잘 타보세요.') : '';
+
+  document.getElementById('detail-title').textContent = `${se} ${MONTH_NAMES2[month]} 상세 운세`;
+  document.getElementById('detail-body').innerHTML = `
+    <div class="result-card" style="background:linear-gradient(135deg,#fff5ee,#fff0f8);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div style="text-align:center;background:rgba(232,145,126,.12);border-radius:12px;padding:10px 16px;">
+          <div style="font-size:22px;">${se}</div>
+          <div style="font-size:20px;font-weight:700;">${cw?.gan||''}${cw?.ji||''}</div>
+          <div style="font-size:10px;color:var(--ink-soft);">${MONTH_NAMES2[month]}</div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:700;">${cw?.sipsin||''} · ${cw?.unseong||''}</div>
+          <div style="font-size:13px;color:var(--moss-deep);margin-top:4px;">${monthDesc}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-card">
+      <div class="result-card-title">📊 영역별 운세</div>
+      ${[['💕 애정운',sub.love],['💰 재물운',sub.money],['💼 업무운',sub.work],['🏥 건강운',sub.health]].map(([l,s])=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ivory-2);">
+          <span style="min-width:70px;font-size:13px;">${l}</span>
+          <div style="flex:1;"><div class="result-bar-wrap" style="margin:0;"><div class="result-bar" style="width:${s}%;background:${scoreColor(s)};"></div></div></div>
+          <span style="font-weight:700;color:${scoreColor(s)};min-width:30px;">${s}</span>
+        </div>`).join('')}
+    </div>
+
+    <div class="result-card">
+      <div class="result-card-title">💕 ${MONTH_NAMES2[month]} 연애 포인트</div>
+      <p style="font-size:14px;line-height:1.8;">${
+        sub.love>=70?`🌟 연애운이 아주 좋은 달이에요! ${cw?.sipsin==='정관'||cw?.sipsin==='편관'?'운명적인 인연이 나타날 수 있어요. 소개팅·모임에 적극 나가세요!':cw?.sipsin==='식신'||cw?.sipsin==='상관'?'자연스러운 매력이 발산되는 달! 먼저 다가가는 용기를 내봐요.':'적극적으로 마음을 표현하기 좋은 달이에요. 고백 타이밍 BEST!'}`:
+        sub.love>=50?`✨ 평온한 연애 흐름이에요. 기존 관계를 돈독히 하기 좋아요. 무리한 새 시작보다 현재에 집중하세요.`:
+        `🌧️ 연애운이 좀 약한 달이에요. 새로운 만남보다 자신을 돌보는 시간을 가져요. 억지로 밀어붙이면 역효과예요.`
+      }</p>
+    </div>
+
+    <div class="result-card">
+      <div class="result-card-title">💰 ${MONTH_NAMES2[month]} 재물 포인트</div>
+      <p style="font-size:14px;line-height:1.8;">${
+        sub.money>=70?`🌟 재물운이 좋은 달이에요! 새로운 수입 기회를 적극 잡으세요. 투자·부업 시작하기 좋아요.`:
+        sub.money>=50?`✨ 안정적인 재물 흐름이에요. 꾸준히 저축하고 큰 지출은 자제하세요.`:
+        `⚠️ 예상치 못한 지출이 생길 수 있어요. 충동구매 자제하고 지갑을 꼭 잠가요!`
+      }</p>
+    </div>
+
+    <div class="result-card" style="background:var(--ivory-2);">
+      <div class="result-card-title">🦫 ${MONTH_NAMES2[month]} 한마디</div>
+      <p style="font-size:14px;line-height:1.8;font-style:italic;">"${
+        sub.overall>=70?`${MONTH_NAMES2[month]}은 올해 가장 빛나는 달 중 하나예요! 하고 싶었던 것을 지금 시작해봐요 🌟`:
+        sub.overall>=50?`${MONTH_NAMES2[month]}은 차분하게 준비하는 달이에요. 꾸준함이 결실을 맺어요 🌿`:
+        `${MONTH_NAMES2[month]}은 쉬어가는 달이에요. 무리하지 말고 체력을 아껴요 🦫`
+      }"</p>
+    </div>
+  `;
+  showScreen('detail');
+}
+
+
 function init() {
   const profiles=getProfiles();
   if(profiles.length===0) { showScreen('onboard'); }
