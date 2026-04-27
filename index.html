@@ -82,7 +82,8 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(
 .badge-new{background:#e8f5e9;color:#2d9a6b;}
 
 /* ── 이달 운세 가로스크롤 ── */
-.month-scroll{overflow-x:auto;scrollbar-width:none;padding:0 16px;}
+.month-scroll{overflow-x:auto;scrollbar-width:none;padding:0 16px;cursor:grab;}
+.month-scroll:active{cursor:grabbing;}
 .month-scroll::-webkit-scrollbar{display:none;}
 .month-row{display:flex;gap:8px;}
 .month-item{flex-shrink:0;background:#fff;border-radius:14px;padding:10px 14px;text-align:center;cursor:pointer;border:1.5px solid #f0e0d8;min-width:60px;}
@@ -3198,7 +3199,20 @@ MENU_CONFIG.gaeun_health = {
 
 
 
-document.addEventListener('DOMContentLoaded', init);
+// ── 가로스크롤 PC 지원 (드래그 + 휠) ──
+function initScrollDrag(){
+  document.querySelectorAll('.month-scroll').forEach(el=>{
+    let isDown=false, startX, scrollLeft;
+    el.addEventListener('mousedown',e=>{isDown=true;startX=e.pageX-el.offsetLeft;scrollLeft=el.scrollLeft;});
+    el.addEventListener('mouseleave',()=>isDown=false);
+    el.addEventListener('mouseup',()=>isDown=false);
+    el.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-el.offsetLeft;el.scrollLeft=scrollLeft-(x-startX)*1.5;});
+    el.addEventListener('wheel',e=>{e.preventDefault();el.scrollLeft+=e.deltaY;},{passive:false});
+  });
+}
+document.addEventListener('DOMContentLoaded',()=>{init();setTimeout(initScrollDrag,500);});
+
+
 
 function saveAndAnalyzeGroup(){
   const profiles=getProfiles();
