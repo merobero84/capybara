@@ -268,9 +268,9 @@ details summary::-webkit-details-marker{display:none;}
         <div class="menu-card purple" onclick="openMenu('iljuro')"><span class="menu-card-emoji">🌟</span><div class="menu-card-title">일주 완전 분석</div><div class="menu-card-desc">60갑자 성격·운명·패턴</div></div>
         <div class="menu-card purple" onclick="openMenu('love_pattern')"><span class="menu-card-emoji">🔄</span><div class="menu-card-title">연애 반복 패턴</div><div class="menu-card-desc">왜 매번 같은 사람을?</div></div>
         <div class="menu-card purple" onclick="openMenu('geokguk')"><span class="menu-card-emoji">🏛️</span><div class="menu-card-title">나의 사주 그릇</div><div class="menu-card-desc">격국으로 보는 내 규모</div></div>
-        <div class="menu-card mint" onclick="openMenu('gaeun_total')"><span class="menu-card-emoji">🍀</span><div class="menu-card-title">개운법 처방전</div><div class="menu-card-desc">색깔·방향·음식·향수</div></div>
-        <div class="menu-card mint" onclick="openMenu('gaeun_job')"><span class="menu-card-emoji">💼</span><div class="menu-card-title">행운의 직업군</div><div class="menu-card-desc">용신으로 보는 적성</div></div>
-        <div class="menu-card mint" onclick="openMenu('gaeun_health')"><span class="menu-card-emoji">🏥</span><div class="menu-card-title">건강 취약점 분석</div><div class="menu-card-desc">오행으로 보는 내 몸</div></div>
+        <div class="menu-card purple" onclick="openMenu('gaeun_total')"><span class="menu-card-emoji">🍀</span><div class="menu-card-title">개운법 처방전</div><div class="menu-card-desc">색깔·방향·음식·향수</div></div>
+        <div class="menu-card purple" onclick="openMenu('gaeun_job')"><span class="menu-card-emoji">💼</span><div class="menu-card-title">행운의 직업군</div><div class="menu-card-desc">용신으로 보는 적성</div></div>
+        <div class="menu-card purple" onclick="openMenu('gaeun_health')"><span class="menu-card-emoji">🏥</span><div class="menu-card-title">건강 취약점 분석</div><div class="menu-card-desc">오행으로 보는 내 몸</div></div>
       </div>
     </div>
 
@@ -2402,77 +2402,235 @@ const MENU_CONFIG = {
   multi_compare: {
     title: '👥 다인 비교',
     render(data) {
-      const profiles=getProfiles();
-      if(profiles.length<2) return `
+      const profiles = getProfiles();
+      if(profiles.length < 2) return `
         <div class="result-card" style="text-align:center;">
           <p style="font-size:40px;">🦫🦫</p>
-          <p style="font-size:15px;">비교할 사람이 없어요!</p>
-          <button onclick="switchTab('profile')" class="btn-primary" style="margin-top:12px;">프로필 추가하기</button>
+          <p style="font-size:15px;margin-top:8px;">비교할 사람이 없어요!</p>
+          <button onclick="switchTab('profile')" style="margin-top:12px;background:var(--petal);color:#fff;border:none;border-radius:12px;padding:10px 24px;font-size:14px;cursor:pointer;font-family:inherit;">프로필 추가하기</button>
         </div>`;
-      const allData=profiles.map(p=>({p,d:profileToData(p)}));
-      const curIdx=getCurrentIdx();
-      const HAP={子:'丑',丑:'子',寅:'亥',亥:'寅',卯:'戌',戌:'卯',辰:'酉',酉:'辰',巳:'申',申:'巳',午:'未',未:'午'};
-      const avgScore=d=>{
-        const arr=Array.from({length:12},(_,i)=>{const m=i+1,cw=d.wolun?.[m];return cw?capiScoreMonth(d,cw).overall:50;});
+
+      const OH = {甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'};
+      const SAENG = {목:'화',화:'토',토:'금',금:'수',수:'목'};
+      const GEK  = {목:'토',화:'금',토:'수',금:'목',수:'화'};
+      const OH_COLOR = {목:'#4CAF50',화:'#FF5722',토:'#8D6E63',금:'#9E9E9E',수:'#2196F3'};
+      const OH_EMOJI = {목:'🌳',화:'🔥',토:'🌏',금:'⚙️',수:'💧'};
+
+      const allData = profiles.map(p=>({p, d:profileToData(p)}));
+      const curIdx = getCurrentIdx();
+
+      // 저장된 모임 불러오기
+      let groups = [];
+      try { groups = JSON.parse(localStorage.getItem('capi_groups')||'[]'); } catch{}
+
+      // 평균 점수
+      const avgScore = d => {
+        const arr = Array.from({length:12},(_,i)=>{ const m=i+1,cw=d.wolun?.[m]; return cw?capiScoreMonth(d,cw).overall:50; });
         return Math.round(arr.reduce((a,b)=>a+b,0)/12);
       };
-      const sorted=[...allData].sort((a,b)=>avgScore(b.d)-avgScore(a.d));
-      return `
-        <div class="result-card">
-          <div class="result-card-title">📊 ${NOW_YEAR}년 연간 운세 비교</div>
-          ${sorted.map(({p,d},i)=>{const s=avgScore(d);return`
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);">
-              <span style="font-size:${i<3?'20':'14'}px;min-width:24px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1+'위'}</span>
-              <span style="font-size:20px;">${p.gender==='male'?'👦':'👧'}</span>
-              <span style="font-weight:700;flex:1;">${p.name||'이름없음'}</span>
-              <div style="width:80px;"><div class="result-bar-wrap" style="margin:0;"><div class="result-bar" style="width:${s}%;background:${scoreColor(s)};"></div></div></div>
-              <span style="font-weight:700;color:${scoreColor(s)};min-width:30px;">${s}</span>
-            </div>`}).join('')}
-        </div>
-        <div class="result-card">
-          <div class="result-card-title">💕 궁합 점수</div>
-          ${allData.filter((_,i)=>i!==curIdx).map(({p,d})=>{
-            const d1=allData[curIdx].d, d2=d;
+
+      // 모임 분석 함수
+      const analyzeGroup = (idxArr) => {
+        const members = idxArr.map(i=>allData[i]).filter(Boolean);
+        if(members.length < 2) return null;
+
+        // 오행 분포
+        const ohCount = {목:0,화:0,토:0,금:0,수:0};
+        members.forEach(({d})=>{ const o=OH[d?.ilgan||'甲']||'목'; ohCount[o]++; });
+        const topOh = Object.entries(ohCount).sort((a,b)=>b[1]-a[1])[0][0];
+        const topCount = ohCount[topOh];
+
+        // 모임 성격
+        const GROUP_CHAR = {
+          목:`🌳 나무(木)가 ${topCount}명! 계획과 아이디어는 넘치는데 실행이 느린 편이에요. 꿈꾸는 사람들의 모임이니라.`,
+          화:`🔥 불(火)이 ${topCount}명! 화끈하고 에너지 넘치는 모임이에요. 술자리가 항상 과열되는 편이니라.`,
+          토:`🌏 흙(土)이 ${topCount}명! 안정적이고 현실적인 모임이에요. 조용하지만 한번 모이면 오래 가는 사이니라.`,
+          금:`⚙️ 금(金)이 ${topCount}명! 냉철하고 결단력 있는 모임이에요. 말은 적지만 할 말은 정확히 하니라.`,
+          수:`💧 물(水)이 ${topCount}명! 지혜롭고 자유로운 모임이에요. 각자 개성이 강해 모임 시간 정하기가 전쟁이니라.`,
+        };
+
+        // 관계 분석
+        const relations = [];
+        for(let a=0; a<members.length; a++){
+          for(let b=0; b<members.length; b++){
+            if(a===b) continue;
+            const oA=OH[members[a].d?.ilgan||'甲']||'목';
+            const oB=OH[members[b].d?.ilgan||'甲']||'목';
+            if(SAENG[oA]===oB) relations.push({from:a,to:b,type:'생',desc:'기운을 북돋워 줘요'});
+            if(GEK[oA]===oB) relations.push({from:a,to:b,type:'극',desc:'티격태격 정드는 사이'});
+          }
+        }
+
+        // 역할 칭호
+        const saengReceived = members.map((_,i)=>relations.filter(r=>r.to===i&&r.type==='생').length);
+        const saengGiven = members.map((_,i)=>relations.filter(r=>r.from===i&&r.type==='생').length);
+        const roles = members.map((m,i)=>{
+          if(saengReceived[i]===Math.max(...saengReceived)&&saengReceived[i]>0) return '👑 정신적 지주';
+          if(saengGiven[i]===Math.max(...saengGiven)&&saengGiven[i]>0) return '🤝 프로 수발러';
+          const gek=relations.filter(r=>r.from===i&&r.type==='극').length;
+          if(gek>=2) return '💥 분위기 메이커';
+          return '🌿 균형 잡는 사람';
+        });
+
+        // 궁합 계산
+        const CHUNG={子:'午',午:'子',卯:'酉',酉:'卯',寅:'申',申:'寅',巳:'亥',亥:'巳',辰:'戌',戌:'辰',丑:'未',未:'丑'};
+        const HAP={子:'丑',丑:'子',寅:'亥',亥:'寅',卯:'戌',戌:'卯',辰:'酉',酉:'辰',巳:'申',申:'巳',午:'未',未:'午'};
+        const SAMHAP_G={子:'신자진',丑:'사유축',寅:'인오술',卯:'해묘미',辰:'신자진',巳:'사유축',午:'인오술',未:'해묘미',申:'신자진',酉:'사유축',戌:'인오술',亥:'해묘미'};
+        const pairs = [];
+        for(let a=0; a<members.length; a++){
+          for(let b=a+1; b<members.length; b++){
+            const d1=members[a].d, d2=members[b].d;
             const j1=d1?.pillars?.day?.ji||'子', j2=d2?.pillars?.day?.ji||'子';
-            const y1=d1?.pillars?.year?.ji||'子', y2=d2?.pillars?.year?.ji||'子';
-            // 충(冲)
-            const CHUNG={子:'午',午:'子',卯:'酉',酉:'卯',寅:'申',申:'寅',巳:'亥',亥:'巳',辰:'戌',戌:'辰',丑:'未',未:'丑'};
-            // 삼합(三合)
-            const SAMHAP_G={子:'신자진',丑:'사유축',寅:'인오술',卯:'해묘미',辰:'신자진',巳:'사유축',午:'인오술',未:'해묘미',申:'신자진',酉:'사유축',戌:'인오술',亥:'해묘미'};
-            const isHap=HAP[j1]===j2||HAP[j2]===j1;
-            const isChung=CHUNG[j1]===j2;
-            const isSamhap=SAMHAP_G[j1]===SAMHAP_G[j2];
-            const isYearHap=HAP[y1]===y2||HAP[y2]===y1;
-            // 오행 보완
-            const OH={甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'};
-            const SAENG={목:'화',화:'토',토:'금',금:'수',수:'목'};
-            const g1=d1?.ilgan||'甲', g2=d2?.ilgan||'甲';
-            const o1=OH[g1]||'목', o2=OH[g2]||'목';
-            const isComplement=SAENG[o1]===o2||SAENG[o2]===o1;
-            const isYongsinMatch=d1?.yongsin===o2||d2?.yongsin===o1;
-            // 점수 계산
-            let score=55;
-            if(isHap) score+=20;
-            if(isSamhap) score+=10;
-            if(isYearHap) score+=8;
-            if(isComplement) score+=8;
-            if(isYongsinMatch) score+=8;
-            if(isChung) score-=20;
-            score=Math.max(20,Math.min(95,score));
+            const o1=OH[d1?.ilgan||'甲']||'목', o2=OH[d2?.ilgan||'甲']||'목';
+            let sc=55;
+            if(HAP[j1]===j2) sc+=20;
+            if(SAMHAP_G[j1]===SAMHAP_G[j2]) sc+=10;
+            if(CHUNG[j1]===j2) sc-=20;
+            if(SAENG[o1]===o2||SAENG[o2]===o1) sc+=8;
+            if(d1?.yongsin===o2||d2?.yongsin===o1) sc+=8;
+            sc=Math.max(20,Math.min(95,sc));
             const tags=[];
-            if(isHap) tags.push('<span class="tag tag-good" style="font-size:10px;">일지합</span>');
-            if(isSamhap) tags.push('<span class="tag tag-good" style="font-size:10px;">삼합</span>');
-            if(isChung) tags.push('<span class="tag tag-bad" style="font-size:10px;">충</span>');
-            if(isYongsinMatch) tags.push('<span class="tag tag-neutral" style="font-size:10px;">용신보완</span>');
-            return`<div style="padding:10px 0;border-bottom:1px solid var(--ivory-2);">
-              <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:16px;">💕</span>
-                <span style="flex:1;font-size:13px;font-weight:700;">${profiles[curIdx].name||'나'} & ${p.name||'이름없음'}</span>
-                <span style="font-weight:700;color:${scoreColor(score)};font-size:18px;">${score}점</span>
-              </div>
-              ${tags.length?`<div style="display:flex;gap:4px;margin-top:6px;padding-left:26px;">${tags.join('')}</div>`:''}
-            </div>`;
-          }).join('')}
+            if(HAP[j1]===j2) tags.push('일지합');
+            if(CHUNG[j1]===j2) tags.push('충');
+            if(SAMHAP_G[j1]===SAMHAP_G[j2]) tags.push('삼합');
+            pairs.push({a,b,score:sc,tags,nameA:members[a].p.name,nameB:members[b].p.name});
+          }
+        }
+        const best=pairs.reduce((x,y)=>x.score>y.score?x:y,pairs[0]);
+        const worst=pairs.reduce((x,y)=>x.score<y.score?x:y,pairs[0]);
+
+        return {members,ohCount,topOh,char:GROUP_CHAR[topOh],relations,roles,pairs,best,worst,saengReceived};
+      };
+
+      // SVG 관계도
+      const renderRelationMap = (members, relations, roles) => {
+        const n = members.length;
+        const cx=150, cy=130, r=90;
+        const pts = members.map((_,i)=>({
+          x: cx + r*Math.cos((2*Math.PI*i/n)-(Math.PI/2)),
+          y: cy + r*Math.sin((2*Math.PI*i/n)-(Math.PI/2))
+        }));
+        const arrows = relations.map(rel=>{
+          const from=pts[rel.from], to=pts[rel.to];
+          const dx=to.x-from.x, dy=to.y-from.y, dist=Math.sqrt(dx*dx+dy*dy);
+          const ex=to.x-dx/dist*22, ey=to.y-dy/dist*22;
+          const sx=from.x+dx/dist*22, sy=from.y+dy/dist*22;
+          return `<line x1="${sx.toFixed(1)}" y1="${sy.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}"
+            stroke="${rel.type==='생'?'#4CAF50':'#FF5722'}" stroke-width="2" stroke-dasharray="${rel.type==='극'?'4,3':''}"
+            marker-end="url(#arr${rel.type})" opacity=".8"/>`;
+        }).join('');
+        const circles = members.map((m,i)=>{
+          const o=OH[m.d?.ilgan||'甲']||'목';
+          return `<circle cx="${pts[i].x.toFixed(1)}" cy="${pts[i].y.toFixed(1)}" r="20" fill="${OH_COLOR[o]}" opacity=".9"/>
+            <text x="${pts[i].x.toFixed(1)}" y="${(pts[i].y-24).toFixed(1)}" text-anchor="middle" font-size="10" fill="#555">${m.p.name}</text>
+            <text x="${pts[i].x.toFixed(1)}" y="${(pts[i].y+4).toFixed(1)}" text-anchor="middle" font-size="11" fill="#fff" font-weight="bold">${OH_EMOJI[o]}</text>`;
+        }).join('');
+        return `<svg viewBox="0 0 300 270" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:300px;display:block;margin:0 auto;">
+          <defs>
+            <marker id="arr생" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#4CAF50"/></marker>
+            <marker id="arr극" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#FF5722"/></marker>
+          </defs>
+          ${arrows}${circles}
+          <text x="150" y="255" text-anchor="middle" font-size="10" fill="#aaa">— 생(生)  ··· 극(剋)</text>
+        </svg>`;
+      };
+
+      // 현재 선택된 모임
+      const savedGroup = groups[0];
+      const selIdxArr = savedGroup ? savedGroup.members : profiles.map((_,i)=>i);
+      const analysis = analyzeGroup(selIdxArr);
+      const sorted = [...selIdxArr.map(i=>allData[i]).filter(Boolean)].sort((a,b)=>avgScore(b.d)-avgScore(a.d));
+
+      return `
+        <!-- 모임 선택/저장 UI -->
+        <div class="result-card">
+          <div class="result-card-title">👥 모임 구성</div>
+          <div id="group-members" style="margin-bottom:10px;">
+            ${profiles.map((p,i)=>`
+              <label style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--ivory-2);cursor:pointer;">
+                <input type="checkbox" id="gm-${i}" ${selIdxArr.includes(i)?'checked':''} style="width:16px;height:16px;accent-color:var(--petal);">
+                <span style="font-size:18px;">${p.gender==='male'?'👦':'👧'}</span>
+                <span style="font-weight:700;">${p.name}</span>
+                <span style="font-size:11px;color:var(--ink-soft);">${OH_EMOJI[OH[profileToData(p)?.ilgan||'甲']||'목']} ${OH[profileToData(p)?.ilgan||'甲']||'목'}</span>
+              </label>`).join('')}
+          </div>
+          <input id="group-name" type="text" placeholder="모임 이름 (예: 우리 팀, 친구들)" value="${savedGroup?.name||''}"
+            style="width:100%;border:1.5px solid #e8d8d0;border-radius:10px;padding:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:8px;">
+          <button onclick="saveAndAnalyzeGroup()" style="width:100%;background:var(--petal);color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+            🔮 모임 분석하기
+          </button>
+        </div>
+
+        <div id="group-analysis">
+          ${analysis ? `
+          <!-- 모임 성격 진단 -->
+          <div class="result-card" style="background:linear-gradient(135deg,#fff5ee,#fff0f8);">
+            <div class="result-card-title">🦫 카피바라 도령의 모임 진단서</div>
+            <p style="font-size:14px;line-height:1.85;font-style:italic;">"${analysis.char}"</p>
+          </div>
+
+          <!-- 관계도 -->
+          <div class="result-card">
+            <div class="result-card-title">🕸️ 인연의 관계도</div>
+            <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px;display:flex;gap:12px;">
+              <span style="color:#4CAF50;">→ 생(生): 기운을 줌</span>
+              <span style="color:#FF5722;">⇢ 극(剋): 자극하는 사이</span>
+            </div>
+            ${renderRelationMap(analysis.members, analysis.relations, analysis.roles)}
+          </div>
+
+          <!-- 역할 칭호 -->
+          <div class="result-card">
+            <div class="result-card-title">👑 모임 내 역할</div>
+            ${analysis.members.map((m,i)=>`
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);">
+                <span style="font-size:20px;">${m.p.gender==='male'?'👦':'👧'}</span>
+                <span style="font-weight:700;flex:1;">${m.p.name}</span>
+                <span style="font-size:12px;background:var(--ivory-2);padding:4px 10px;border-radius:99px;">${analysis.roles[i]}</span>
+              </div>`).join('')}
+          </div>
+
+          <!-- 찰떡 콤비 / 시한폭탄 -->
+          <div class="result-card">
+            <div class="result-card-title">💘 찰떡 콤비 vs 💣 시한폭탄</div>
+            <div style="background:#f0fff4;border-radius:12px;padding:12px;margin-bottom:8px;">
+              <div style="font-size:12px;font-weight:700;color:#2d9a6b;margin-bottom:4px;">🏆 BEST — ${analysis.best?.nameA} & ${analysis.best?.nameB}</div>
+              <div style="font-size:13px;">${analysis.best?.score}점 — 둘이 붙여놓으면 시너지 폭발! 같이 일해도 잘 맞는 사이니라 🌟</div>
+              ${analysis.best?.tags?.length?`<div style="display:flex;gap:4px;margin-top:4px;">${analysis.best.tags.map(t=>`<span class="tag tag-good" style="font-size:10px;">${t}</span>`).join('')}</div>`:''}
+            </div>
+            <div style="background:#fff0f0;border-radius:12px;padding:12px;">
+              <div style="font-size:12px;font-weight:700;color:#c4393a;margin-bottom:4px;">⚠️ CAUTION — ${analysis.worst?.nameA} & ${analysis.worst?.nameB}</div>
+              <div style="font-size:13px;">${analysis.worst?.score}점 — 둘이 있으면 조용할 날이 없으니 중재자가 필수니라! 💥</div>
+              ${analysis.worst?.tags?.length?`<div style="display:flex;gap:4px;margin-top:4px;">${analysis.worst.tags.map(t=>`<span class="tag tag-bad" style="font-size:10px;">${t}</span>`).join('')}</div>`:''}
+            </div>
+          </div>
+
+          <!-- 운세 순위 -->
+          <div class="result-card">
+            <div class="result-card-title">📊 ${NOW_YEAR}년 운세 순위</div>
+            ${sorted.map(({p,d},i)=>{const s=avgScore(d);return`
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);">
+                <span style="font-size:${i<3?'20':'14'}px;min-width:24px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1+'위'}</span>
+                <span style="font-size:18px;">${p.gender==='male'?'👦':'👧'}</span>
+                <span style="font-weight:700;flex:1;">${p.name}</span>
+                <div style="width:70px;"><div class="result-bar-wrap" style="margin:0;"><div class="result-bar" style="width:${s}%;background:${scoreColor(s)};"></div></div></div>
+                <span style="font-weight:700;color:${scoreColor(s)};min-width:28px;">${s}</span>
+              </div>`}).join('')}
+          </div>
+
+          <!-- 전체 궁합 -->
+          <div class="result-card">
+            <div class="result-card-title">💕 전체 궁합 점수</div>
+            ${analysis.pairs.map(pair=>`
+              <div style="padding:10px 0;border-bottom:1px solid var(--ivory-2);">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span>💕</span>
+                  <span style="flex:1;font-size:13px;font-weight:700;">${pair.nameA} & ${pair.nameB}</span>
+                  <span style="font-weight:700;color:${scoreColor(pair.score)};font-size:16px;">${pair.score}점</span>
+                </div>
+                ${pair.tags.length?`<div style="display:flex;gap:4px;margin-top:4px;padding-left:20px;">${pair.tags.map(t=>`<span class="tag ${t==='충'?'tag-bad':'tag-good'}" style="font-size:10px;">${t}</span>`).join('')}</div>`:''}
+              </div>`).join('')}
+          </div>` : '<div class="result-card"><p style="color:var(--ink-soft);">위에서 모임을 구성하고 분석 버튼을 눌러봐요!</p></div>'}
         </div>`;
     }
   },
@@ -3005,7 +3163,18 @@ MENU_CONFIG.gaeun_health = {
 
 document.addEventListener('DOMContentLoaded', init);
 
-// ── 추가 메뉴 정의 ──
+function saveAndAnalyzeGroup(){
+  const profiles=getProfiles();
+  const selected=profiles.map((_,i)=>i).filter(i=>document.getElementById(`gm-${i}`)?.checked);
+  if(selected.length<2){alert('2명 이상 선택해주세요!');return;}
+  const name=document.getElementById('group-name')?.value||'우리 모임';
+  const groups=[{name,members:selected,created:Date.now()}];
+  localStorage.setItem('capi_groups',JSON.stringify(groups));
+  // 결과 새로고침
+  openMenu('multi_compare');
+}
+
+
 MENU_CONFIG.charm_point = {
   title: '✨ 나의 매력 포인트',
   render(data, p) {
