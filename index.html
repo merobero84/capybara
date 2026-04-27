@@ -698,8 +698,13 @@ function profileToData(p) {
   let siJi = null;
   if(!unknown && hour) {
     let h = parseInt(hour);
+    let m = parseInt(min||0);
     if(ampm==='pm' && h!==12) h+=12;
     if(ampm==='am' && h===12) h=0;
+    // 진태양시 보정 -32분
+    let totalMin = h*60 + m - 32;
+    if(totalMin < 0) totalMin += 24*60;
+    h = Math.floor(totalMin/60) % 24;
     const hMap=['子','丑','丑','寅','寅','卯','卯','辰','辰','巳','巳','午','午','未','未','申','申','酉','酉','戌','戌','亥','亥','子'];
     siJi = hMap[h]||'子';
   }
@@ -816,9 +821,8 @@ function switchTab(tab){
 
 // ── 뒤로가기 ──
 function goBack(){
-  const history=window.capiHistory||[];
-  if(history.length>1){history.pop();const prev=history[history.length-1];openMenuDirect(prev);}
-  else{initHome();showScreen('home');}
+  initHome();
+  showScreen('home');
 }
 
 // ── 메뉴 열기 ──
@@ -2870,5 +2874,193 @@ MENU_CONFIG.gaeun_health = {
 
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ── 추가 메뉴 정의 ──
+MENU_CONFIG.ideal_type = {
+  title: '💘 내 이상형 프로필',
+  render(data, p) {
+    const isF=p.gender==='female';
+    const dGan=data.pillars?.day?.gan||'甲';
+    const yongsin=data.yongsin||'목';
+    const IDEAL={
+      목:{look:isF?'키가 크고 날씬한 체형, 눈이 크고 인상이 선한 편':'부드럽고 섬세한 인상, 눈매가 온화한 편',vibe:'자연스럽고 편안한 분위기',char:'차분하고 배려심 깊음, 성실하고 책임감 강함',mbti:isF?'ISTJ / ISFJ / ENFJ 스타일':'INFP / ENFJ / INFJ 스타일',first:'처음엔 조용해 보이지만 알수록 따뜻한 츤데레 타입',date:'숲 카페, 조용한 식당, 전시회'},
+      화:{look:isF?'눈빛이 강렬하고 카리스마 있는 인상':'밝고 활기찬 인상, 웃을 때 눈이 반달 모양',vibe:'에너지 넘치고 존재감 있는 분위기',char:'열정적이고 솔직함, 유머감각 있음',mbti:isF?'ENTJ / ENTP / ENFP 스타일':'ESFP / ENFP / ENTP 스타일',first:'처음부터 밝고 시원시원해서 금방 친해지는 타입',date:'핫플레이스, 루프탑, 활동적인 데이트'},
+      토:{look:isF?'단정하고 깔끔한 인상, 편안한 느낌':'듬직하고 신뢰감 있는 인상',vibe:'안정적이고 든든한 분위기',char:'현실적이고 성실함, 약속을 잘 지킴',mbti:isF?'ISTJ / ESTJ / ISFJ 스타일':'ISFJ / ESTJ / INFJ 스타일',first:'처음엔 평범해 보이지만 알수록 믿음직한 타입',date:'맛집 탐방, 집밥, 조용한 산책'},
+      금:{look:isF?'날카롭고 세련된 인상, 스타일리시함':'단단하고 강인한 인상, 눈매가 시원함',vibe:'세련되고 카리스마 있는 분위기',char:'결단력 있고 솔직함, 자기관리 철저함',mbti:isF?'ENTJ / INTJ / ESTJ 스타일':'INTJ / ENTJ / ISTJ 스타일',first:'차갑게 보이지만 사실은 의리 있고 따뜻한 타입',date:'고급 레스토랑, 전시회, 드라이브'},
+      수:{look:isF?'신비롭고 지적인 인상, 눈빛이 깊음':'감성적이고 부드러운 인상',vibe:'조용하고 신비로운 분위기',char:'지적이고 창의적임, 깊은 대화를 즐김',mbti:isF?'INTJ / INFJ / INTP 스타일':'INFP / INFJ / INTP 스타일',first:'말수가 적어 신비롭게 보이지만 알면 알수록 매력있는 타입',date:'영화관, 북카페, 조용한 여행'},
+    };
+    const id=IDEAL[yongsin]||IDEAL['목'];
+    return `
+      <div class="result-card" style="background:linear-gradient(135deg,#fff0f8,#f5f0ff);">
+        <div class="result-card-title" style="justify-content:center;">💘 나에게 딱 맞는 이상형</div>
+        <p style="font-size:12px;color:var(--ink-soft);text-align:center;margin:0;">용신 ${yongsin} 기운 기반 — 나를 가장 잘 보완하는 타입이에요</p>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">👀 외모·첫인상</div>
+        <div style="padding:12px;background:var(--ivory-2);border-radius:12px;margin-bottom:8px;font-size:14px;">${id.look}</div>
+        <div style="padding:12px;background:var(--ivory-2);border-radius:12px;font-size:14px;color:var(--ink-soft);">분위기: ${id.vibe}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">🎭 성격 & MBTI 스타일</div>
+        <p style="font-size:14px;line-height:1.75;">${id.char}</p>
+        <div class="tag-row" style="margin-top:8px;">${id.mbti.split('/').map(m=>`<span class="tag tag-good">${m.trim()}</span>`).join('')}</div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">✨ 첫인상 vs 실제</div>
+        <div style="padding:12px;background:rgba(155,126,200,.1);border-radius:12px;">
+          <p style="font-size:14px;line-height:1.75;margin:0;">"${id.first}"</p>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">📍 이런 곳에서 만나요</div>
+        <div class="tag-row">${id.date.split(',').map(d=>`<span class="tag tag-neutral">📍 ${d.trim()}</span>`).join('')}</div>
+      </div>
+      ${capiWarning()}
+      <div class="result-card" style="background:var(--ivory-2);">
+        <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+        <p style="font-size:14px;line-height:1.8;font-style:italic;">"${dGan}일간에게는 ${yongsin} 기운의 상대가 가장 잘 맞아요. 나에게 없는 것을 채워주는 사람이 진짜 인연이니라 💘"</p>
+      </div>`;
+  }
+};
+
+MENU_CONFIG.capi_bujuck = {
+  title: '🎴 카피바라 연애 부적',
+  render(data, p) {
+    const sinsal=data.sinsal||[];
+    const hasDohwa=sinsal.some(s=>s.includes('도화')||s==='년살');
+    const yongsin=data.yongsin||'목';
+    const cyr=data.yeonwoon?.find(y=>y.year===NOW_YEAR);
+    const isGoodYear=['정관','편관','정재','편재','식신'].includes(cyr?.sipsin);
+    const isSingle=p.love==='single';
+    const YCOLOR={목:'#2d6a2d',화:'#c0392b',토:'#8B6914',금:'#7a7a7a',수:'#1a4a8a'};
+    const YBGCOLOR={목:'#f0fff0',화:'#fff0f0',토:'#fffbf0',금:'#f8f8f8',수:'#f0f0ff'};
+    const yc=YCOLOR[yongsin]||'#c4705e';
+    const yb=YBGCOLOR[yongsin]||'#fff5f0';
+    const bujucks=[
+      {id:'solo',label:'솔로 탈출부',emoji:'❤️‍🔥',show:isSingle,hanja:'緣分成就',sub:'인연을 맺어주소서',msg:'이 부적을 품은 자에게 올해 반드시 인연이 찾아오리라. 용기를 내어 먼저 다가가거라!'},
+      {id:'some',label:'썸 성공부',emoji:'💘',show:true,hanja:'心心相印',sub:'마음이 통하게 하소서',msg:'두 마음이 하나로 이어지는 기운을 담았느니라. 오늘 먼저 연락해보거라!'},
+      {id:'dohwa',label:'도화 개화부',emoji:'🌸',show:hasDohwa,hanja:'桃花盛開',sub:'매력이 활짝 피어나소서',msg:'도화의 기운이 강한 그대에게 드리는 특별 부적이니라. 자연스러운 매력을 믿어라!'},
+    ].filter(b=>b.show);
+    const main=bujucks[0]||bujucks[1];
+    return `
+      <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;">
+        ${bujucks.map((b,i)=>`
+          <button onclick="document.querySelectorAll('.bujuck-btn').forEach(x=>x.style.background='#fff');this.style.background='${yc}22';document.querySelectorAll('.bujuck-content').forEach(x=>x.style.display='none');document.getElementById('bc-${b.id}').style.display='block';"
+            class="bujuck-btn" style="flex-shrink:0;border:1.5px solid ${yc};background:${i===0?yc+'22':'#fff'};color:var(--ink);">
+            ${b.emoji} ${b.label}
+          </button>`).join('')}
+      </div>
+      ${bujucks.map((b,i)=>`
+        <div id="bc-${b.id}" class="bujuck-content" style="display:${i===0?'block':'none'};">
+          <div class="bujuck-card" style="background:${yb};border:3px double ${yc};box-shadow:0 4px 20px ${yc}22;">
+            <span class="bujuck-corner" style="top:10px;left:14px;color:${yc};">✦</span>
+            <span class="bujuck-corner" style="top:10px;right:14px;color:${yc};">✦</span>
+            <span class="bujuck-corner" style="bottom:10px;left:14px;color:${yc};">✦</span>
+            <span class="bujuck-corner" style="bottom:10px;right:14px;color:${yc};">✦</span>
+            <div style="font-size:10px;letter-spacing:3px;color:${yc};opacity:.7;margin-bottom:8px;">🦫 카피바라 도령 謹製</div>
+            <div style="font-size:28px;margin:8px 0;">${b.emoji}</div>
+            <div class="bujuck-hanja" style="color:${yc};">${b.hanja}</div>
+            <div style="font-size:11px;color:${yc};letter-spacing:1px;">${b.sub}</div>
+            <hr class="bujuck-divider" style="border-color:${yc}44;"/>
+            <div style="font-size:13px;color:var(--ink-soft);">${p.name||'그대'}님을 위한<br><strong style="color:${yc};font-size:16px;">${b.label}</strong></div>
+            <hr class="bujuck-divider" style="border-color:${yc}44;"/>
+            <div style="font-size:11px;color:${yc};opacity:.7;">${NOW_YEAR}년 · 용신 ${yongsin}</div>
+          </div>
+          <div class="result-card"><div class="result-card-title">📜 도령의 말씀</div>
+            <p style="font-size:14px;line-height:1.85;font-style:italic;">"${b.msg}"</p>
+          </div>
+        </div>`).join('')}
+      <div class="result-card">
+        <div class="result-card-title">✅ 부적 효험 높이는 법</div>
+        <div style="font-size:14px;line-height:2.2;">
+          <div>🌈 <strong>${yongsin==='목'?'초록':yongsin==='화'?'빨강':yongsin==='토'?'노랑':yongsin==='금'?'흰색':'파랑'}</strong> 소품을 곁에 두거라</div>
+          <div>🧭 <strong>${yongsin==='목'?'동쪽':yongsin==='화'?'남쪽':yongsin==='토'?'중앙':yongsin==='금'?'서쪽':'북쪽'}</strong> 방향으로 나서면 인연이 온다</div>
+          ${isGoodYear?'<div>⭐ 올해 세운이 돕고 있으니 주저하지 말거라</div>':''}
+        </div>
+      </div>
+      <div class="result-card" style="background:var(--ivory-2);text-align:center;">
+        <p style="font-size:13px;color:var(--moss-deep);font-weight:700;margin:0 0 4px;">📸 캡처해서 저장하거라!</p>
+        <p style="font-size:12px;color:var(--ink-soft);margin:0;">"이 부적을 친구에게 공유하면 액운이 물러가느니라 🦫"</p>
+      </div>`;
+  }
+};
+
+MENU_CONFIG.inner_mind = {
+  title: '🏮 그 사람 속마음 투시',
+  render(data, p) {
+    const cmon=data.wolun?.[NOW_MONTH];
+    const sipsin=cmon?.sipsin||'비견';
+    const isF=p.gender==='female';
+    const INNER={
+      비견:`겉으로는 평온해 보여도 속으로는 "${isF?'내가 좀 더 적극적으로 나서볼까':'나도 좋은데 자존심이 허락을 안 하네'}"를 고민 중이니라. 먼저 움직이는 쪽이 이기느니라.`,
+      겁재:`지금 그 사람, "${isF?'뭔가 범상치 않은 사람이야':'경쟁의식인지 설레는 건지 모르겠어'}"를 느끼는 중이니라. 강한 끌림이 있지만 표현을 못 하고 있느니라.`,
+      식신:`이번 달 그 사람은 "${isF?'왜 이렇게 편하고 좋지':'이 사람이랑 있으면 뭔가 즐겁네'}"를 느끼고 있느니라. 지금이 다가가기 가장 좋은 타이밍이니라!`,
+      상관:`그 사람 지금 설레는 상태니라. "${isF?'말 걸어보고 싶은데 어떻게 시작하지':'나 좋아하나 아닌가 모르겠어'}"를 반복하고 있느니라.`,
+      편재:`이번 달 그 사람은 당신을 꽤 좋게 보고 있느니라. "${isF?'매력있는데... 나한테 관심 있을까':'주변에 경쟁자 있나 체크 중'}"이니라.`,
+      정재:`그 사람 지금 꽤 진지하게 생각 중이니라. "${isF?'이 사람이랑 오래 만날 수 있을까':'믿어도 될 사람인지 살펴보는 중'}"이니라.`,
+      편관:`이번 달 그 사람, 당신에게 강한 인상을 받았느니라. "${isF?'범상치 않아. 좀 더 알고 싶어':'이 사람한테 마음이 흔들리네'}"를 느끼는 중이니라.`,
+      정관:`그 사람 지금 당신을 상당히 좋게 보고 있느니라. "${isF?'믿을 수 있는 사람 같아':'책임감 있게 대하고 싶어'}"를 생각 중이니라.`,
+      편인:`이번 달 그 사람은 "${isF?'뭔가 특별한 느낌인데... 더 알고 싶어':'혼자 생각 많이 하고 있어'}"를 느끼느니라. 조급해하지 말거라.`,
+      정인:`그 사람 지금 당신에게 따뜻한 감정을 가지고 있느니라. "${isF?'좋은 사람인데. 내가 너무 기대하는 건 아닐까':'이 사람 편에서 뭔가 해주고 싶어'}"를 느끼는 중이니라.`,
+    };
+    const ACTION={비견:'먼저 가볍게 연락해봐거라.',겁재:'예상치 못한 새로운 모습을 보여줘거라.',식신:'지금 당장 연락해봐거라!',상관:'재치 있는 말로 먼저 웃게 해줘거라.',편재:'조금 더 적극적으로 나서봐거라.',정재:'꾸준하고 성실한 모습을 보여줘거라.',편관:'당당하고 자신감 있는 모습을 보여줘거라.',정관:'진지한 대화를 먼저 시도해봐거라.',편인:'조급해하지 말거라. 매력적인 모습이 그 사람을 다가오게 하느니라.',정인:'따뜻하고 진심 어린 행동을 보여줘거라.'};
+    return `
+      <div class="result-card" style="background:linear-gradient(135deg,#fff8f0,#f8f0ff);">
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-size:36px;">🔮</div>
+          <p style="font-family:'Nanum Pen Script',cursive;font-size:22px;color:var(--moss-deep);margin:4px 0;">이달 그 사람의 속마음</p>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0;">${NOW_MONTH}월 · ${cmon?.gan||''}${cmon?.ji||''} · ${sipsin}</p>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">🏮 도령의 투시</div>
+        <div style="background:rgba(232,145,126,.08);border-radius:12px;padding:14px;">
+          <p style="font-size:14px;line-height:1.85;font-style:italic;margin:0;">"${INNER[sipsin]||INNER['비견']}"</p>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">💡 지금 당장 해야 할 행동</div>
+        <div style="background:rgba(45,154,107,.08);border-radius:12px;padding:14px;">
+          <p style="font-size:14px;font-weight:700;color:var(--moss-deep);margin:0;">${ACTION[sipsin]||'먼저 가볍게 연락해봐거라.'}</p>
+        </div>
+      </div>
+      ${capiWarning()}`;
+  }
+};
+
+MENU_CONFIG.secret_inyon = {
+  title: '👥 주변의 의외의 인연',
+  render(data, p) {
+    const dJi=data.pillars?.day?.ji||'子';
+    const HAP={子:'丑',丑:'子',寅:'亥',亥:'寅',卯:'戌',戌:'卯',辰:'酉',酉:'辰',巳:'申',申:'巳',午:'未',未:'午'};
+    const hapJi=HAP[dJi]||'午';
+    const JI_SUNG={子:'이(李)·정(鄭)·윤(尹) — 물 기운 이름',丑:'김(金)·최(崔)·한(韓) — 든든한 이름',寅:'박(朴)·임(林)·강(姜) — 나무 기운 이름',卯:'류(柳)·양(梁)·문(文) — 부드러운 이름',辰:'최(崔)·진(陳)·용(龍) — 강인한 이름',巳:'허(許)·오(吳)·소(蘇) — 불 기운 이름',午:'강(姜)·홍(洪)·남(南) — 밝은 이름',未:'송(宋)·서(徐)·미(美) — 여린 이름',申:'신(申)·백(白)·금(琴) — 금속 느낌 이름',酉:'유(劉)·백(白)·옥(玉) — 세련된 이름',戌:'문(文)·황(黃)·안(安) — 믿음직한 이름',亥:'임(任)·수(水)·해(海) — 깊은 이름'};
+    const HAP_CHAR={子丑:'차분하고 성실한 타입. 처음엔 평범해 보이지만 알수록 믿음직해요.',寅亥:'자유롭고 감성적인 타입. 의외로 깊은 면이 있어요.',卯戌:'독특하고 개성 있는 타입. 겉과 속이 다른 매력이 있어요.',辰酉:'세련되고 능력 있는 타입. 처음엔 차갑지만 속은 따뜻해요.',巳申:'역동적이고 추진력 있는 타입. 함께 있으면 에너지 넘쳐요.',午未:'따뜻하고 배려심 깊은 타입. 나를 편안하게 해줘요.'};
+    const WHERE={子:'카페·도서관·강가',丑:'직장·동네·단골집',寅:'운동모임·등산·야외',卯:'공원·문화공간',辰:'업무 자리·미팅',巳:'여름 모임·스터디',午:'밝은 낮 약속·모임',未:'친구 소개·소규모 저녁',申:'여행·예상치 못한 장소',酉:'세련된 카페·문화행사',戌:'동창·오래된 지인 자리',亥:'밤 모임·깊은 대화'};
+    const hapKey=[dJi,hapJi].sort().join('');
+    const hapChar=HAP_CHAR[hapKey]||HAP_CHAR[[hapJi,dJi].sort().join('')]||'깊은 인연으로 연결될 수 있는 사람이에요.';
+    return `
+      <div class="result-card" style="background:linear-gradient(135deg,#f5f0ff,#fff5f8);">
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-size:32px;">👥</div>
+          <p style="font-family:'Nanum Pen Script',cursive;font-size:22px;color:var(--moss-deep);margin:4px 0;">이미 아는 사람 중에 있느니라</p>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0;">일지 합(合) ${dJi}↔${hapJi} 기반</p>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">🔍 이런 이름의 사람을 주목하거라</div>
+        <div style="background:rgba(155,126,200,.12);border-radius:12px;padding:14px;margin-bottom:10px;">
+          <div style="font-size:15px;font-weight:700;color:var(--moss-deep);margin-bottom:4px;">${JI_SUNG[hapJi]||hapJi+' 기운'}</div>
+        </div>
+        <p style="font-size:14px;line-height:1.8;">${hapChar}</p>
+      </div>
+      <div class="result-card">
+        <div class="result-card-title">📍 만날 가능성이 높은 장소</div>
+        <div style="font-size:15px;font-weight:700;color:var(--leaf-3);padding:10px 0;">👉 ${WHERE[hapJi]||'일상 속 어딘가'}</div>
+        <p style="font-size:13px;color:var(--ink-soft);">이미 알고 있는 사람 중에 이 조건에 맞는 사람을 한번 다시 봐거라!</p>
+      </div>
+      ${capiWarning()}`;
+  }
+};
 </script>
 </body></html>
