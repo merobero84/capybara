@@ -463,9 +463,6 @@ body{background:
     <button class="bottom-tab-btn" onclick="switchTab('yearly')" id="tab-yearly">
       <span class="tb-emoji">📅</span>연간운세
     </button>
-    <button class="bottom-tab-btn" onclick="switchTab('settings')" id="tab-settings">
-      <span class="tb-emoji">⚙️</span>설정
-    </button>
   </div>
 </div>
 
@@ -489,9 +486,6 @@ body{background:
     <button class="bottom-tab-btn" onclick="switchTab('yearly')" id="tab-yearly2">
       <span class="tb-emoji">📅</span>연간운세
     </button>
-    <button class="bottom-tab-btn" onclick="switchTab('settings')" id="tab-settings2">
-      <span class="tb-emoji">⚙️</span>설정
-    </button>
   </div>
 </div>
 
@@ -508,7 +502,6 @@ body{background:
     <button class="bottom-tab-btn" onclick="switchTab('home')"><span class="tb-emoji">🏠</span>홈</button>
     <button class="bottom-tab-btn active"><span class="tb-emoji">👤</span>프로필</button>
     <button class="bottom-tab-btn" onclick="switchTab('yearly')"><span class="tb-emoji">📅</span>연간운세</button>
-    <button class="bottom-tab-btn" onclick="switchTab('settings')"><span class="tb-emoji">⚙️</span>설정</button>
   </div>
 </div>
 
@@ -5754,14 +5747,15 @@ function profileToData(p) {
 
 // ── 화면 전환 ──
 function showScreen(id) {
-  // CSS 충돌 방지 — JS inline style로 강제 처리
   document.querySelectorAll('.screen').forEach(s => {
     s.style.setProperty('display', 'none', 'important');
     s.classList.remove('active');
   });
   const el = document.getElementById('screen-'+id);
   if (el) {
-    el.style.setProperty('display', 'block', 'important');
+    // 온보딩은 flex, 나머지는 block
+    const displayVal = id === 'onboard' ? 'flex' : 'block';
+    el.style.setProperty('display', displayVal, 'important');
     el.classList.add('active');
   }
   window.scrollTo(0,0);
