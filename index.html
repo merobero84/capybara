@@ -6165,36 +6165,7 @@ const MENU_CONFIG = {
         </div>`;
     }
   },
-        <div class="result-card">
-          <div class="result-card-title">📅 ${NOW_YEAR}년 세운</div>
-          <div style="display:flex;gap:12px;align-items:center;">
-            <div style="text-align:center;background:var(--ivory-2);border-radius:12px;padding:12px 20px;">
-              <div style="font-size:11px;color:var(--ink-soft);">년간</div>
-              <div style="font-size:30px;font-weight:700;">${cyr?.gan||'?'}</div>
-              <div style="font-size:24px;">${cyr?.ji||'?'}</div>
-            </div>
-            <div style="flex:1;font-size:14px;line-height:2;">
-              <div>관계: <strong>${cyr?.sipsin||'?'}</strong></div>
-              <div>12운성: <strong>${cyr?.unseong||'?'}</strong></div>
-            </div>
-          </div>
-        </div>
-        <div class="result-card">
-          <div class="result-card-title">📊 ${NOW_YEAR}년 월별 흐름</div>
-          <div class="month-score-grid">
-            ${monthScores.map(({m,s})=>`
-              <div class="month-score-cell ${m===NOW_MONTH?'msc-top':''}">
-                <div class="msc-month">${m}월</div>
-                <div class="msc-score" style="color:${scoreColor(s)};">${s}</div>
-                <div class="msc-label">${scoreEmoji(s)}</div>
-              </div>
-            `).join('')}
-          </div>
-          <div style="margin-top:10px;font-size:13px;display:flex;gap:16px;">
-            <span style="color:#2d9a6b;">🌟 최고: <strong>${best.m}월</strong> (${best.s}점)</span>
-            <span style="color:#c4393a;">⚠️ 주의: <strong>${worst.m}월</strong> (${worst.s}점)</span>
-          </div>
-        </div>
+
   solo_escape: {
     title: '❤️ 솔로 탈출 시기',
     render(data, p) {
@@ -6302,6 +6273,7 @@ const MENU_CONFIG = {
               </div>`;
           })()}
         </div>
+      `;
     }
   },
 
