@@ -807,89 +807,81 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
     wolun[m2]={gan:mg,ji:mj,sipsin:_ss(dGan,mg),unseong:_un(dGan,mj)};
   }
 
-  /* 12신살 계산 (년지 기준 + 일지 기준) */
-  const _SAMHAP = {
-    寅:'인오술',午:'인오술',戌:'인오술',
-    巳:'사유축',酉:'사유축',丑:'사유축',
-    申:'신자진',子:'신자진',辰:'신자진',
-    亥:'해묘미',卯:'해묘미',未:'해묘미'
-  };
-  const _SINSAL_TABLE = {
-    인오술:['亥','子','丑','寅','卯','辰','巳','午','未','申','酉','戌'],
-    사유축:['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'],
-    신자진:['巳','午','未','申','酉','戌','亥','子','丑','寅','卯','辰'],
-    해묘미:['申','酉','戌','亥','子','丑','寅','卯','辰','巳','午','未'],
-  };
-  const _SINSAL_NAMES=['겁살','재살','천살','지살','도화살','월살','망신살','장성살','반안살','역마살','육해살','화개살'];
-
+  /* ── 신살 계산 ── */
+  const _SAMHAP={寅:'인오술',午:'인오술',戌:'인오술',巳:'사유축',酉:'사유축',丑:'사유축',申:'신자진',子:'신자진',辰:'신자진',亥:'해묘미',卯:'해묘미',未:'해묘미'};
+  const _ST={인오술:['亥','子','丑','寅','卯','辰','巳','午','未','申','酉','戌'],사유축:['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'],신자진:['巳','午','未','申','酉','戌','亥','子','丑','寅','卯','辰'],해묘미:['申','酉','戌','亥','子','丑','寅','卯','辰','巳','午','未']};
+  const _SN=['겁살','재살','천살','지살','도화살','월살','망신살','장성살','반안살','역마살','육해살','화개살'];
   const sinsal=[];
   const allJi=[yJi,mJi,dJi,...(hJi?[hJi]:[])];
+  const allGan=[yGan,mGan,dGan,...(hGan?[hGan]:[])];
 
-  // 년지 기준 신살
-  const yGroup=_SAMHAP[yJi];
-  const yTable=yGroup?_SINSAL_TABLE[yGroup]:null;
-  if(yTable) {
-    // 년지 제외 나머지 지지들 체크
-    [mJi,dJi,...(hJi?[hJi]:[])].forEach(ji=>{
-      const idx=yTable.indexOf(ji);
-      if(idx>=0) sinsal.push(_SINSAL_NAMES[idx]);
-    });
-  }
+  // 12신살: 년지·월지·일지 각각 기준으로 나머지 체크
+  [[yJi,[mJi,dJi,...(hJi?[hJi]:[])]], [mJi,[yJi,dJi,...(hJi?[hJi]:[])]], [dJi,[yJi,mJi,...(hJi?[hJi]:[])]]].forEach(([ref,targets])=>{
+    const g=_SAMHAP[ref]; const t=g?_ST[g]:null; if(!t) return;
+    targets.forEach(ji=>{ const i=t.indexOf(ji); if(i>=0 && !sinsal.includes(_SN[i])) sinsal.push(_SN[i]); });
+  });
 
-  // 일지 기준 신살 (년지·월지·시지 체크)
-  const dGroup=_SAMHAP[dJi];
-  const dTable=dGroup?_SINSAL_TABLE[dGroup]:null;
-  if(dTable) {
-    [yJi,mJi,...(hJi?[hJi]:[])].forEach(ji=>{
-      const idx=dTable.indexOf(ji);
-      if(idx>=0){
-        const name=_SINSAL_NAMES[idx];
-        if(!sinsal.includes(name)) sinsal.push(name);
-      }
-    });
-  }
+  // 양인살
+  const _YI={甲:'卯',乙:'寅',丙:'午',丁:'巳',戊:'午',己:'巳',庚:'酉',辛:'申',壬:'子',癸:'亥'};
+  if(allJi.includes(_YI[dGan])) sinsal.push('양인살');
 
-  // 양인살 (일간 기준 - 일지 체크)
-  const _YANGIN={甲:'卯',乙:'寅',丙:'午',丁:'巳',戊:'午',己:'巳',庚:'酉',辛:'申',壬:'子',癸:'亥'};
-  if(allJi.includes(_YANGIN[dGan])) sinsal.push('양인살');
+  // 천을귀인
+  const _CU={甲:['丑','未'],乙:['子','申'],丙:['亥','酉'],丁:['亥','酉'],戊:['丑','未'],己:['子','申'],庚:['丑','未'],辛:['寅','午'],壬:['巳','卯'],癸:['巳','卯']};
+  if(allJi.some(j=>(_CU[dGan]||[]).includes(j))) sinsal.push('천을귀인');
 
-  // 천을귀인 (일간 기준)
-  const _CHEONUL={甲:['丑','未'],乙:['子','申'],丙:['亥','酉'],丁:['亥','酉'],戊:['丑','未'],己:['子','申'],庚:['丑','未'],辛:['寅','午'],壬:['巳','卯'],癸:['巳','卯']};
-  if(allJi.some(j=>(_CHEONUL[dGan]||[]).includes(j))) sinsal.push('천을귀인');
+  // 문창귀인
+  const _MC={甲:'巳',乙:'午',丙:'申',丁:'酉',戊:'申',己:'酉',庚:'亥',辛:'子',壬:'寅',癸:'卯'};
+  if(allJi.includes(_MC[dGan])) sinsal.push('문창귀인');
 
-  // 문창귀인 (일간 기준)
-  const _MUNCHANG={甲:'巳',乙:'午',丙:'申',丁:'酉',戊:'申',己:'酉',庚:'亥',辛:'子',壬:'寅',癸:'卯'};
-  if(allJi.includes(_MUNCHANG[dGan])) sinsal.push('문창귀인');
+  // 건록
+  const _GR={甲:'寅',乙:'卯',丙:'巳',丁:'午',戊:'巳',己:'午',庚:'申',辛:'酉',壬:'亥',癸:'子'};
+  if(allJi.includes(_GR[dGan])) sinsal.push('건록');
 
-  // 건록 (일간 기준)
-  const _GUNROK={甲:'寅',乙:'卯',丙:'巳',丁:'午',戊:'巳',己:'午',庚:'申',辛:'酉',壬:'亥',癸:'子'};
-  if(allJi.includes(_GUNROK[dGan])) sinsal.push('건록');
+  // 홍염살
+  const _HY={甲:'午',乙:'午',丙:'寅',丁:'未',戊:'辰',己:'辰',庚:'戌',辛:'酉',壬:'子',癸:'申'};
+  if(allJi.includes(_HY[dGan])) sinsal.push('홍염살');
 
-  // 홍염살 (일간 기준)
-  const _HONGYEOM={甲:'午',乙:'午',丙:'寅',丁:'未',戊:'辰',己:'辰',庚:'戌',辛:'酉',壬:'子',癸:'申'};
-  if(allJi.includes(_HONGYEOM[dGan])) sinsal.push('홍염살');
+  // 관귀학관: 일간별
+  const _GK={甲:['寅','申'],乙:['卯','酉'],丙:['巳','亥'],丁:['午','子'],戊:['丑','未'],己:['丑','未'],庚:['寅','申'],辛:['卯','酉'],壬:['巳','亥'],癸:['午','子']};
+  if(allJi.some(j=>(_GK[dGan]||[]).includes(j))) sinsal.push('관귀학관');
 
-  // 고신살/과숙살 (남자=고신, 여자=과숙, 년지 기준)
-  const _GOSHIN={寅:'巳',卯:'巳',辰:'巳',巳:'申',午:'申',未:'申',申:'亥',酉:'亥',戌:'亥',亥:'寅',子:'寅',丑:'寅'};
-  const _GWASUK={寅:'丑',卯:'丑',辰:'丑',巳:'辰',午:'辰',未:'辰',申:'未',酉:'未',戌:'未',亥:'戌',子:'戌',丑:'戌'};
-  const goshinJi=gender==='male'?_GOSHIN[yJi]:_GWASUK[yJi];
-  if(goshinJi&&allJi.includes(goshinJi)) sinsal.push(gender==='male'?'고신살':'과숙살');
+  // 월덕귀인: 월지 삼합그룹 기준 특정 천간
+  const _MD={인오술:'丙',사유축:'庚',신자진:'壬',해묘미:'甲'};
+  const mGroup=_SAMHAP[mJi];
+  if(mGroup && allGan.includes(_MD[mGroup])) sinsal.push('월덕귀인');
 
-  // 원진살 (서로 상극 지지쌍)
-  const _WONJIN={子:'未',丑:'午',寅:'酉',卯:'申',辰:'亥',巳:'戌',午:'丑',未:'子',申:'卯',酉:'寅',戌:'巳',亥:'辰'};
-  for(let a=0;a<allJi.length;a++){
-    for(let b=a+1;b<allJi.length;b++){
-      if(_WONJIN[allJi[a]]===allJi[b]&&!sinsal.includes('원진살')) sinsal.push('원진살');
-    }
-  }
+  // 태극귀인: 일간 기준
+  const _TG={甲:['子','午'],乙:['子','午'],丙:['卯','酉'],丁:['卯','酉'],戊:['子','午'],己:['子','午'],庚:['子','午'],辛:['子','午'],壬:['卯','酉'],癸:['卯','酉']};
+  if(allJi.some(j=>(_TG[dGan]||[]).includes(j))) sinsal.push('태극귀인');
+
+  // 복성귀인: 년간 기준
+  const _FS={甲:'寅',乙:'丑',丙:'子',丁:'亥',戊:'卯',己:'卯',庚:'寅',辛:'巳',壬:'巳',癸:'申'};
+  if(allJi.includes(_FS[yGan])) sinsal.push('복성귀인');
+
+  // 월공: 월간 기준
+  const _WG={甲:'寅',乙:'午',丙:'子',丁:'申',戊:'辰',己:'丑',庚:'午',辛:'亥',壬:'辰',癸:'丑'};
+  if(allJi.includes(_WG[mGan])) sinsal.push('월공');
+
+  // 현침살: 천간에 甲·辛·壬 있을 때
+  if(['甲','辛','壬'].some(g=>allGan.includes(g))) sinsal.push('현침살');
+
+  // 상문살: 년지 기준
+  const _SM={子:'寅',丑:'卯',寅:'辰',卯:'巳',辰:'午',巳:'未',午:'申',未:'酉',申:'戌',酉:'亥',戌:'子',亥:'丑'};
+  if(allJi.includes(_SM[yJi])) sinsal.push('상문살');
+
+  // 고신살/과숙살 (년지 기준 - 둘 다 체크)
+  const _GS={寅:'巳',卯:'巳',辰:'巳',巳:'申',午:'申',未:'申',申:'亥',酉:'亥',戌:'亥',亥:'寅',子:'寅',丑:'寅'};
+  const _GW={寅:'丑',卯:'丑',辰:'丑',巳:'辰',午:'辰',未:'辰',申:'未',酉:'未',戌:'未',亥:'戌',子:'戌',丑:'戌'};
+  if(_GS[yJi]&&allJi.includes(_GS[yJi])) sinsal.push('고신살');
+  if(_GW[yJi]&&allJi.includes(_GW[yJi])) sinsal.push(gender==='male'?'고신살':'과숙살');
+
+  // 원진살
+  const _WJ={子:'未',丑:'午',寅:'酉',卯:'申',辰:'亥',巳:'戌',午:'丑',未:'子',申:'卯',酉:'寅',戌:'巳',亥:'辰'};
+  for(let a=0;a<allJi.length;a++) for(let b=a+1;b<allJi.length;b++) if(_WJ[allJi[a]]===allJi[b]&&!sinsal.includes('원진살')) sinsal.push('원진살');
 
   // 귀문관살
-  const _GWIMUN={子:'酉',丑:'午',寅:'未',卯:'申',辰:'亥',巳:'戌',午:'丑',未:'寅',申:'卯',酉:'子',戌:'巳',亥:'辰'};
-  for(let a=0;a<allJi.length;a++){
-    for(let b=a+1;b<allJi.length;b++){
-      if(_GWIMUN[allJi[a]]===allJi[b]&&!sinsal.includes('귀문관살')) sinsal.push('귀문관살');
-    }
-  }
+  const _GM={子:'酉',丑:'午',寅:'未',卯:'申',辰:'亥',巳:'戌',午:'丑',未:'寅',申:'卯',酉:'子',戌:'巳',亥:'辰'};
+  for(let a=0;a<allJi.length;a++) for(let b=a+1;b<allJi.length;b++) if(_GM[allJi[a]]===allJi[b]&&!sinsal.includes('귀문관살')) sinsal.push('귀문관살');
 
   const sinsalUniq=[...new Set(sinsal)];
 
