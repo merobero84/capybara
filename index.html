@@ -28,8 +28,8 @@ body{background:
   var(--ivory);}
 
 /* ── SCREENS ── */
-.screen{display:none;min-height:100vh;}
-.screen.active{display:block;}
+.screen{display:none !important;min-height:100vh;}
+.screen.active{display:block !important;}
 
 /* ── 온보딩 ── */
 #screen-onboard{display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -6001,7 +6001,7 @@ const MENU_CONFIG = {
       const cyr = data.yeonwoon?.find(y=>y.year===NOW_YEAR)||data.yeonwoon?.[0];
       const monthScores = Array.from({length:12},(_,i)=>{
         const m=i+1,cw=data.wolun?.[m];
-        return {m, s: cw?scoreForSubFortune(data,cw).overall:50, gan:cw?.gan||'', ji:cw?.ji||''};
+        return {m, s: cw?capiScoreMonth(data,cw).overall:50, gan:cw?.gan||'', ji:cw?.ji||''};
       });
       const best = monthScores.reduce((a,b)=>a.s>b.s?a:b);
       const worst = monthScores.reduce((a,b)=>a.s<b.s?a:b);
@@ -6366,10 +6366,10 @@ const MENU_CONFIG = {
     title: '🥺 재회운 분석',
     render(data) {
       const cmon=data.wolun?.[NOW_MONTH];
-      const score=cmon?Math.round((scoreForSubFortune(data,cmon).love+scoreForSubFortune(data,cmon).overall)/2):50;
+      const score=cmon?Math.round((capiScoreMonth(data,cmon).love+capiScoreMonth(data,cmon).overall)/2):50;
       const monthScores=Array.from({length:12},(_,i)=>{
         const m=i+1,cw=data.wolun?.[m];
-        return {m,s:cw?Math.round((scoreForSubFortune(data,cw).love+scoreForSubFortune(data,cw).overall)/2):50};
+        return {m,s:cw?Math.round((capiScoreMonth(data,cw).love+capiScoreMonth(data,cw).overall)/2):50};
       });
       const best=monthScores.reduce((a,b)=>a.s>b.s?a:b);
       return `
@@ -6407,7 +6407,7 @@ const MENU_CONFIG = {
       const finalScore=Math.min(95,Math.max(20,baseScore+ohBonus+dohaBonus));
       const monthScores=Array.from({length:12},(_,i)=>{
         const m=i+1,cw=data.wolun?.[m];
-        return {m,s:cw?scoreForSubFortune(data,cw).love:50};
+        return {m,s:cw?capiScoreMonth(data,cw).love:50};
       });
       const best=monthScores.reduce((a,b)=>a.s>b.s?a:b);
       return `
@@ -6444,7 +6444,7 @@ const MENU_CONFIG = {
   month_relation:{ title:`🤝 ${NOW_MONTH}월 대인관계운`, render(data){return renderMonthResult(data,'overall','🤝','대인관계운');}},
   month_reunion: { title:`💌 ${NOW_MONTH}월 재회운`,    render(data){
     const cw=data.wolun?.[NOW_MONTH];
-    const s=cw?Math.round((scoreForSubFortune(data,cw).love+scoreForSubFortune(data,cw).overall)/2):50;
+    const s=cw?Math.round((capiScoreMonth(data,cw).love+capiScoreMonth(data,cw).overall)/2):50;
     return renderMonthResult(data,'love','💌','재회운',s);}},
 
   singang: {
@@ -6611,7 +6611,7 @@ const MENU_CONFIG = {
     render(data) {
       const scores=Array.from({length:12},(_,i)=>{
         const m=i+1,cw=data.wolun?.[m];
-        return {m,s:cw?scoreForSubFortune(data,cw).overall:50,gan:cw?.gan||'',ji:cw?.ji||''};
+        return {m,s:cw?capiScoreMonth(data,cw).overall:50,gan:cw?.gan||'',ji:cw?.ji||''};
       }).sort((a,b)=>b.s-a.s);
       return `
         <div class="result-card">
@@ -6675,24 +6675,43 @@ const MENU_CONFIG = {
       const isWood=(oh.목||0)>=(oh.금||0);
       const isFire=(oh.화||0)>=(oh.수||0);
       const isEarth=(oh.토||0)>=2;
-      const T1=isStrong?{k:'S',n:'주도형(신강)'}:{k:'W',n:'섬세형(신약)'};
-      const T2=isWood?{k:'M',n:'창의형(목)'}:{k:'G',n:'실행형(금)'};
-      const T3=isFire?{k:'F',n:'열정형(화)'}:{k:'C',n:'직관형(수)'};
-      const T4=isEarth?{k:'E',n:'안정형(토)'}:{k:'A',n:'균형형'};
-      const type=T1.k+T2.k+T3.k+T4.k;
+      const T1=isStrong?{k:'신강',n:'주도형(신강)'}:{k:'신약',n:'섬세형(신약)'};
+      const T2=isWood?{k:'목기',n:'창의형(목)'}:{k:'금기',n:'실행형(금)'};
+      const T3=isFire?{k:'화기',n:'열정형(화)'}:{k:'수기',n:'직관형(수)'};
+      const T4=isEarth?{k:'토기',n:'안정형(토)'}:{k:'균형',n:'균형형'};
+      const type=`${T1.k}-${T2.k}-${T3.k}-${T4.k}`;
+      const COMBO_DESC = {
+        '신강-목기-화기': '에너지 넘치는 리더! 추진력과 열정이 강해요.',
+        '신강-목기-수기': '지혜로운 리더! 결단력과 직관이 동시에 있어요.',
+        '신강-금기-화기': '카리스마 넘치는 승부사! 강하고 뜨거워요.',
+        '신강-금기-수기': '냉철한 리더! 결단력과 계획성이 뛰어나요.',
+        '신약-목기-화기': '감성적인 크리에이터! 예술적 재능이 있어요.',
+        '신약-목기-수기': '신비로운 감성가! 섬세하고 직관이 강해요.',
+        '신약-금기-화기': '따뜻한 완벽주의자! 열정적이지만 꼼꼼해요.',
+        '신약-금기-수기': '깊이 있는 사색가! 조용하지만 지혜로워요.',
+      };
+      const shortKey=`${T1.k}-${T2.k}-${T3.k}`;
+      const desc=COMBO_DESC[shortKey]||'독특한 사주 유형이에요!';
       return `
-        <div class="result-card" style="text-align:center;">
+        <div class="result-card" style="text-align:center;background:linear-gradient(135deg,#f5f0ff,#fff5f8);">
           <div class="result-card-title" style="justify-content:center;">🧬 나의 사주 유형</div>
-          <span class="result-big">${type}</span>
-          <p style="font-size:12px;color:var(--ink-soft);">재미용이에요 🦫</p>
+          <p style="font-family:'Nanum Pen Script',cursive;font-size:28px;color:var(--moss-deep);margin:12px 0 4px;">${type}</p>
+          <p style="font-size:14px;font-weight:700;color:var(--leaf-3);margin:0 0 8px;">${desc}</p>
+          <p style="font-size:11px;color:var(--ink-soft);">⚠️ 재미용이에요 🦫</p>
         </div>
         <div class="result-card">
-          <div class="result-card-title">📊 유형 해석</div>
+          <div class="result-card-title">📊 4가지 유형 해석</div>
           <div class="tag-row">
             <span class="tag tag-good">${T1.n}</span>
             <span class="tag tag-neutral">${T2.n}</span>
             <span class="tag" style="background:#ffe0d0;color:#c45030;">${T3.n}</span>
             <span class="tag tag-neutral">${T4.n}</span>
+          </div>
+          <div style="margin-top:12px;font-size:13px;line-height:1.9;color:var(--ink-soft);">
+            <div>• <strong>${T1.k}</strong>: ${isStrong?'기운이 강해 주도적이에요':'기운이 섬세해 배려심 깊어요'}</div>
+            <div>• <strong>${T2.k}</strong>: ${isWood?'목 기운 — 창의·성장 지향':'금 기운 — 결단·실행 지향'}</div>
+            <div>• <strong>${T3.k}</strong>: ${isFire?'화 기운 — 열정·표현이 풍부':'수 기운 — 지혜·직관이 강해'}</div>
+            <div>• <strong>${T4.k}</strong>: ${isEarth?'토 기운 — 안정을 중시해':'균형 — 두루두루 고른 편'}</div>
           </div>
         </div>`;
     }
@@ -6702,7 +6721,7 @@ const MENU_CONFIG = {
     title: '🍀 오늘의 한마디',
     render(data) {
       const cmon=data.wolun?.[NOW_MONTH];
-      const score=cmon?scoreForSubFortune(data,cmon).overall:50;
+      const score=cmon?capiScoreMonth(data,cmon).overall:50;
       const words=[
         '지금 이 순간이 가장 소중해요 🌸','천천히 가도 괜찮아요 🌿',
         '당신은 충분히 잘하고 있어요 ✨','오늘 하루도 화이팅! 💕',
@@ -6769,7 +6788,7 @@ const MENU_CONFIG = {
       const curIdx=getCurrentIdx();
       const HAP={子:'丑',丑:'子',寅:'亥',亥:'寅',卯:'戌',戌:'卯',辰:'酉',酉:'辰',巳:'申',申:'巳',午:'未',未:'午'};
       const avgScore=d=>{
-        const arr=Array.from({length:12},(_,i)=>{const m=i+1,cw=d.wolun?.[m];return cw?scoreForSubFortune(d,cw).overall:50;});
+        const arr=Array.from({length:12},(_,i)=>{const m=i+1,cw=d.wolun?.[m];return cw?capiScoreMonth(d,cw).overall:50;});
         return Math.round(arr.reduce((a,b)=>a+b,0)/12);
       };
       const sorted=[...allData].sort((a,b)=>avgScore(b.d)-avgScore(a.d));
@@ -6806,12 +6825,12 @@ const MENU_CONFIG = {
 // 월별 상세 공통 렌더러
 function renderMonthResult(data, field, emoji, label, overrideScore) {
   const cmon=data.wolun?.[NOW_MONTH];
-  const sub=cmon?scoreForSubFortune(data,cmon):null;
+  const sub=cmon?capiScoreMonth(data,cmon):null;
   const score=overrideScore!==undefined?overrideScore:sub?sub[field]||sub.overall:50;
   const monthScores=Array.from({length:12},(_,i)=>{
     const m=i+1,cw=data.wolun?.[m];
     if(!cw) return {m,s:50};
-    const s2=scoreForSubFortune(data,cw);
+    const s2=capiScoreMonth(data,cw);
     return {m,s:s2[field]||s2.overall};
   });
   const best=monthScores.reduce((a,b)=>a.s>b.s?a:b);
@@ -6857,7 +6876,7 @@ function init() {
   else { initHome(); showScreen('home'); }
 }
 
-// ── 새 앱용 운세 점수 계산 (scoreForSubFortune 대체) ──
+// ── 새 앱용 운세 점수 계산 (capiScoreMonth 대체) ──
 function capiScoreMonth(data, cw) {
   if (!cw || !data) return {love:50,money:50,work:50,health:50,overall:50};
   const sipsin = cw.sipsin||'';
@@ -6894,7 +6913,7 @@ function capiScoreMonth(data, cw) {
   };
 }
 
-// scoreForSubFortune 호환 래퍼 (구 엔진 함수가 없을 경우 대체)
+// capiScoreMonth 호환 래퍼 (구 엔진 함수가 없을 경우 대체)
 const _origScoreFor = (typeof scoreForSubFortune === 'function') ? scoreForSubFortune : null;
 function scoreForSubFortune(data, cw) {
   if (_origScoreFor) {
