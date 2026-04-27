@@ -264,37 +264,37 @@ body{background:
 <!-- ══════════════ 홈 ══════════════ -->
 <div id="screen-home" class="screen">
   <div class="home-header">
-    <!-- 왼쪽: 인사말 -->
-    <div style="padding-right:115px;">
-      <p class="home-greeting" id="home-greeting">안녕하세요 🦫</p>
+    <!-- 왼쪽: 인사말 두줄 -->
+    <div style="padding-right:10px;">
+      <p class="home-greeting" style="margin:0;font-size:22px;">안녕하세요,</p>
+      <p class="home-greeting" id="home-greeting" style="margin:0 0 4px;font-size:26px;"></p>
       <p class="home-date" id="home-date"></p>
     </div>
-    <!-- 오른쪽: 카피바라 + 말풍선 -->
-    <div style="position:absolute;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-end;">
+    <!-- 오른쪽: 말풍선 + 카피바라 나란히 -->
+    <div style="position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;gap:4px;">
       <!-- 말풍선 -->
       <div id="capi-bubble" style="
         background:#fff;
         border:1.5px solid var(--petal);
-        border-radius:12px 12px 12px 4px;
-        padding:7px 10px;
+        border-radius:12px 12px 4px 12px;
+        padding:8px 10px;
         font-size:11px;
         color:var(--ink-soft);
-        max-width:120px;
+        width:110px;
         line-height:1.5;
         box-shadow:0 2px 8px rgba(200,112,94,.12);
-        margin-right:8px;
-        margin-bottom:4px;
         position:relative;
+        flex-shrink:0;
       ">
-        <span style="font-size:10px;font-weight:700;color:var(--moss-deep);display:block;margin-bottom:2px;">🦫 카피바라 도령</span>
-        <span id="capi-bubble-text">느긋하게, 그러나 깊이 🌿</span>
-        <!-- 말풍선 꼬리 아래쪽 -->
-        <div style="position:absolute;right:14px;bottom:-7px;width:0;height:0;
-          border-left:6px solid transparent;border-right:6px solid transparent;
-          border-top:7px solid var(--petal);"></div>
-        <div style="position:absolute;right:15px;bottom:-5px;width:0;height:0;
-          border-left:5px solid transparent;border-right:5px solid transparent;
-          border-top:6px solid #fff;"></div>
+        <span style="font-size:10px;font-weight:700;color:var(--moss-deep);display:block;margin-bottom:3px;">🦫 카피바라 도령</span>
+        <span id="capi-bubble-text">느긋하게,<br>그러나 깊이 🌿</span>
+        <!-- 꼬리 오른쪽 -->
+        <div style="position:absolute;right:-8px;top:50%;transform:translateY(-50%);
+          width:0;height:0;border-top:6px solid transparent;
+          border-bottom:6px solid transparent;border-left:8px solid var(--petal);"></div>
+        <div style="position:absolute;right:-6px;top:50%;transform:translateY(-50%);
+          width:0;height:0;border-top:5px solid transparent;
+          border-bottom:5px solid transparent;border-left:7px solid #fff;"></div>
       </div>
       <!-- 카피바라 이미지 -->
       <img src="./assets/capi.png" alt="카피바라 도령" class="capi-char" />
@@ -5999,7 +5999,7 @@ function initHome() {
 
   const cur = profiles[curIdx];
   const hon = cur?.name||'나';
-  document.getElementById('home-greeting').textContent = `안녕하세요, ${hon}님 🦫`;
+  document.getElementById('home-greeting').textContent = `${hon}님`;
 
   // 프로필 탭
   const tabsEl = document.getElementById('profile-tabs');
