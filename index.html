@@ -7531,51 +7531,92 @@ function renderMonthResult(data, field, emoji, label, overrideScore) {
     </div>`;
 }
 
-// 말풍선 문구 업데이트
+// 날씨 코드 → 텍스트/이모지
+function getWeatherInfo(code) {
+  if (code === 0) return {emoji:'☀️', text:'맑음'};
+  if (code <= 2) return {emoji:'🌤️', text:'구름 조금'};
+  if (code === 3) return {emoji:'☁️', text:'흐림'};
+  if (code <= 49) return {emoji:'🌫️', text:'안개'};
+  if (code <= 59) return {emoji:'🌦️', text:'이슬비'};
+  if (code <= 69) return {emoji:'🌧️', text:'비'};
+  if (code <= 79) return {emoji:'🌨️', text:'눈'};
+  if (code <= 84) return {emoji:'🌧️', text:'소나기'};
+  if (code <= 99) return {emoji:'⛈️', text:'천둥번개'};
+  return {emoji:'🌡️', text:'날씨 확인 중'};
+}
+
+// 날씨 + 사주 기반 말풍선 문구
+function getWeatherSajuMsg(weatherCode, temp, data) {
+  const sinsal = data?.sinsal||[];
+  const yongsin = data?.yongsin||'목';
+  const w = getWeatherInfo(weatherCode);
+  const isWarm = temp >= 18;
+  const isCold = temp <= 5;
+  const isRain = weatherCode >= 51 && weatherCode <= 84;
+  const isSnow = weatherCode >= 70 && weatherCode <= 79;
+  const isClear = weatherCode <= 2;
+  const hasYeokma = sinsal.includes('역마살');
+  const hasDohwa = sinsal.some(s=>s.includes('도화'));
+
+  // 날씨 + 사주 조합 멘트
+  if (isSnow) return `${w.emoji} 눈 ${Math.round(temp)}°C\n오늘은 따뜻하게 있어요 🧣`;
+  if (isRain && hasYeokma) return `${w.emoji} 비 ${Math.round(temp)}°C\n역마살도 오늘은 쉬어요 🦫`;
+  if (isRain) return `${w.emoji} 비 ${Math.round(temp)}°C\n집에서 사주 보기 딱 좋은 날 🌿`;
+  if (isClear && hasYeokma) return `${w.emoji} ${Math.round(temp)}°C\n역마살! 나가기 딱 좋은 날 🚂`;
+  if (isClear && hasDohwa) return `${w.emoji} ${Math.round(temp)}°C\n도화가 빛나는 날이에요 🌸`;
+  if (isClear && yongsin==='화') return `${w.emoji} ${Math.round(temp)}°C\n화 기운 충전! 활동해요 🔥`;
+  if (isClear && yongsin==='목') return `${w.emoji} ${Math.round(temp)}°C\n공원 산책이 개운이에요 🌳`;
+  if (isClear) return `${w.emoji} ${Math.round(temp)}°C\n오늘 나가면 운이 열려요 ✨`;
+  if (isCold) return `${w.emoji} ${Math.round(temp)}°C\n따뜻한 음식으로 기운 충전 🍲`;
+  return `${w.emoji} ${Math.round(temp)}°C\n느긋하게, 그러나 깊이 🦫`;
+}
+
+// 말풍선 업데이트 (날씨 API 연동)
 function updateCapiBubble() {
   const p = getCurrentProfile();
   const bubble = document.getElementById('capi-bubble-text');
   if (!bubble) return;
 
-  const msgs = [
-    '느긋하게, 그러나 깊이 🌿',
-    '오늘도 좋은 하루 되세요 🌸',
-    '사주는 지도예요. 운전은 당신이 해요 🗺️',
-    '인연은 준비된 사람에게 와요 💕',
-    '지금 이 순간이 가장 소중해요 ✨',
-  ];
+  const data = p ? profileToData(p) : null;
 
-  if (!p) {
-    bubble.textContent = msgs[new Date().getDate() % msgs.length];
+  // 기본 문구 먼저 표시
+  bubble.innerHTML = '날씨 확인 중... 🌡️';
+
+  // 위치 정보 요청
+  if (!navigator.geolocation) {
+    bubble.innerHTML = '느긋하게,<br>그러나 깊이 🌿';
     return;
   }
 
-  const data = profileToData(p);
-  const cmon = data.wolun?.[NOW_MONTH];
-  const sub = cmon ? capiScoreMonth(data, cmon) : null;
-  const yongsin = data.yongsin || '목';
-  const sinsal = data.sinsal || [];
-
-  // 사주 기반 맞춤 문구
-  const YONGSIN_MSG = {
-    목:'오늘 동쪽으로 나가보세요 🌱',
-    화:'밝은 색 옷이 행운을 불러요 🔥',
-    토:'규칙적인 식사가 운을 올려요 🌏',
-    금:'서쪽 방향이 좋은 날이에요 ⚙️',
-    수:'물 한 잔으로 하루를 시작해요 💧',
-  };
-  const hasDohwa = sinsal.some(s=>s.includes('도화'));
-  const hasYeokma = sinsal.includes('역마살');
-
-  let msg = '';
-  if (sub && sub.love >= 75) msg = `오늘 ${NOW_MONTH}월 연애운 🌟 좋아요! 먼저 다가가 봐요`;
-  else if (sub && sub.overall >= 75) msg = `오늘 기운이 좋아요! 하고 싶은 거 해봐요 ✨`;
-  else if (sub && sub.overall <= 35) msg = `오늘은 쉬어가는 날이에요. 무리 NO 🦫`;
-  else if (hasDohwa) msg = `도령이 말해요: 오늘 당신의 도화가 빛나요 🌸`;
-  else if (hasYeokma) msg = `역마살이 있어요 — 움직일수록 운이 열려요 🚂`;
-  else msg = YONGSIN_MSG[yongsin] || msgs[new Date().getDate() % msgs.length];
-
-  bubble.textContent = msg;
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const {latitude: lat, longitude: lon} = pos.coords;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}&current=temperature_2m,weathercode&timezone=Asia%2FSeoul`;
+        const res = await fetch(url);
+        const json = await res.json();
+        const temp = json.current?.temperature_2m ?? 20;
+        const code = json.current?.weathercode ?? 0;
+        const msg = getWeatherSajuMsg(code, temp, data);
+        bubble.innerHTML = msg.replace('\n','<br>');
+      } catch(e) {
+        bubble.innerHTML = '느긋하게,<br>그러나 깊이 🌿';
+      }
+    },
+    () => {
+      // 위치 거부 시 사주 기반 기본 문구
+      const msgs = {
+        목:'동쪽 산책이 개운이에요 🌳',
+        화:'밝은 색 옷이 행운이에요 🔥',
+        토:'규칙적 식사가 운을 올려요 🌏',
+        금:'서쪽 방향이 좋아요 ⚙️',
+        수:'물 한 잔으로 시작해요 💧',
+      };
+      const yongsin = data?.yongsin||'목';
+      bubble.innerHTML = msgs[yongsin]||'느긋하게,<br>그러나 깊이 🌿';
+    },
+    {timeout: 5000}
+  );
 }
 
 
