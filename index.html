@@ -7531,92 +7531,46 @@ function renderMonthResult(data, field, emoji, label, overrideScore) {
     </div>`;
 }
 
-// 날씨 코드 → 텍스트/이모지
-function getWeatherInfo(code) {
-  if (code === 0) return {emoji:'☀️', text:'맑음'};
-  if (code <= 2) return {emoji:'🌤️', text:'구름 조금'};
-  if (code === 3) return {emoji:'☁️', text:'흐림'};
-  if (code <= 49) return {emoji:'🌫️', text:'안개'};
-  if (code <= 59) return {emoji:'🌦️', text:'이슬비'};
-  if (code <= 69) return {emoji:'🌧️', text:'비'};
-  if (code <= 79) return {emoji:'🌨️', text:'눈'};
-  if (code <= 84) return {emoji:'🌧️', text:'소나기'};
-  if (code <= 99) return {emoji:'⛈️', text:'천둥번개'};
-  return {emoji:'🌡️', text:'날씨 확인 중'};
-}
-
-// 날씨 + 사주 기반 말풍선 문구
-function getWeatherSajuMsg(weatherCode, temp, data) {
-  const sinsal = data?.sinsal||[];
-  const yongsin = data?.yongsin||'목';
-  const w = getWeatherInfo(weatherCode);
-  const isWarm = temp >= 18;
-  const isCold = temp <= 5;
-  const isRain = weatherCode >= 51 && weatherCode <= 84;
-  const isSnow = weatherCode >= 70 && weatherCode <= 79;
-  const isClear = weatherCode <= 2;
-  const hasYeokma = sinsal.includes('역마살');
-  const hasDohwa = sinsal.some(s=>s.includes('도화'));
-
-  // 날씨 + 사주 조합 멘트
-  if (isSnow) return `${w.emoji} 눈 ${Math.round(temp)}°C\n오늘은 따뜻하게 있어요 🧣`;
-  if (isRain && hasYeokma) return `${w.emoji} 비 ${Math.round(temp)}°C\n역마살도 오늘은 쉬어요 🦫`;
-  if (isRain) return `${w.emoji} 비 ${Math.round(temp)}°C\n집에서 사주 보기 딱 좋은 날 🌿`;
-  if (isClear && hasYeokma) return `${w.emoji} ${Math.round(temp)}°C\n역마살! 나가기 딱 좋은 날 🚂`;
-  if (isClear && hasDohwa) return `${w.emoji} ${Math.round(temp)}°C\n도화가 빛나는 날이에요 🌸`;
-  if (isClear && yongsin==='화') return `${w.emoji} ${Math.round(temp)}°C\n화 기운 충전! 활동해요 🔥`;
-  if (isClear && yongsin==='목') return `${w.emoji} ${Math.round(temp)}°C\n공원 산책이 개운이에요 🌳`;
-  if (isClear) return `${w.emoji} ${Math.round(temp)}°C\n오늘 나가면 운이 열려요 ✨`;
-  if (isCold) return `${w.emoji} ${Math.round(temp)}°C\n따뜻한 음식으로 기운 충전 🍲`;
-  return `${w.emoji} ${Math.round(temp)}°C\n느긋하게, 그러나 깊이 🦫`;
-}
-
-// 말풍선 업데이트 (날씨 API 연동)
+// 말풍선 - 월운 십신 기반
 function updateCapiBubble() {
   const p = getCurrentProfile();
   const bubble = document.getElementById('capi-bubble-text');
   if (!bubble) return;
 
   const data = p ? profileToData(p) : null;
+  const cmon = data?.wolun?.[NOW_MONTH];
+  const sinsal = data?.sinsal||[];
+  const yongsin = data?.yongsin||'목';
 
-  // 기본 문구 먼저 표시
-  bubble.innerHTML = '날씨 확인 중... 🌡️';
+  const SIPSIN_MSG = {
+    비견:`이번 달은 나를 믿고 독립적으로 나아가요 💪`,
+    겁재:`이번 달 과감한 도전이 기회가 돼요 ⚡`,
+    식신:`이번 달 즐기면 즐길수록 운이 열려요 🌸`,
+    상관:`이번 달 하고 싶은 말을 표현해보세요 🎭`,
+    편재:`이번 달 사람 많이 만날수록 복이 와요 💰`,
+    정재:`이번 달 차근차근 모으면 결실이 있어요 🏦`,
+    편관:`이번 달 압박이 있어도 이겨내면 성장해요 💎`,
+    정관:`이번 달 원칙대로 하면 인정받아요 👑`,
+    편인:`이번 달 배우고 공부하면 개운이 돼요 📚`,
+    정인:`이번 달 귀인이 도와줄 거예요 🌟`,
+  };
 
-  // 위치 정보 요청
-  if (!navigator.geolocation) {
-    bubble.innerHTML = '느긋하게,<br>그러나 깊이 🌿';
-    return;
+  const YONGSIN_MSG = {
+    목:`동쪽 산책이 이번 달 개운이에요 🌳`,
+    화:`밝은 색 옷이 이번 달 행운이에요 🔥`,
+    토:`규칙적 식사가 이번 달 운을 올려요 🌏`,
+    금:`서쪽 방향이 이번 달 좋아요 ⚙️`,
+    수:`물 한 잔으로 매일 시작해요 💧`,
+  };
+
+  let msg = '';
+  if (cmon?.sipsin && SIPSIN_MSG[cmon.sipsin]) {
+    msg = SIPSIN_MSG[cmon.sipsin];
+  } else {
+    msg = YONGSIN_MSG[yongsin] || '느긋하게, 그러나 깊이 🌿';
   }
 
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      try {
-        const {latitude: lat, longitude: lon} = pos.coords;
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(2)}&longitude=${lon.toFixed(2)}&current=temperature_2m,weathercode&timezone=Asia%2FSeoul`;
-        const res = await fetch(url);
-        const json = await res.json();
-        const temp = json.current?.temperature_2m ?? 20;
-        const code = json.current?.weathercode ?? 0;
-        const msg = getWeatherSajuMsg(code, temp, data);
-        bubble.innerHTML = msg.replace('\n','<br>');
-      } catch(e) {
-        bubble.innerHTML = '느긋하게,<br>그러나 깊이 🌿';
-      }
-    },
-    () => {
-      // 위치 거부 시 사주 기반 기본 문구
-      const msgs = {
-        목:'동쪽 산책이 개운이에요 🌳',
-        화:'밝은 색 옷이 행운이에요 🔥',
-        토:'규칙적 식사가 운을 올려요 🌏',
-        금:'서쪽 방향이 좋아요 ⚙️',
-        수:'물 한 잔으로 시작해요 💧',
-      };
-      const yongsin = data?.yongsin||'목';
-      bubble.innerHTML = msgs[yongsin]||'느긋하게,<br>그러나 깊이 🌿';
-    },
-    {timeout: 5000}
-  );
+  bubble.innerHTML = msg;
 }
 
 
