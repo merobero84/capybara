@@ -1,22 +1,185 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-<title>카피바라 사주카드 · 만세력 카드풀이</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Gowun+Batang:wght@400;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
+<title>카피바라 사주 🦫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Gowun+Batang:wght@400;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --ivory: #fff8f5; --ivory-2: #fef0ea; --cream: #fde8df;
-    --leaf-1: #ffd6cc; --leaf-2: #ffb8a8; --leaf-3: #e8917e;
-    --moss: #c4705e; --moss-deep: #9e4f3f;
-    --mint: #fce4df; --peach: #ffd4c2; --petal: #ffccc0;
-    --berry: #e8917e; --mushroom: #d4a090; --acorn: #a06858;
-    --ink: #4a2e28; --ink-soft: #8a6058;
-    --dewdrop: #f5c4b8;
-    /* 카피바라 전용 */
+:root {
+  --ivory:#fff8f5;--ivory-2:#fef0ea;--cream:#fde8df;
+  --leaf-1:#ffd6cc;--leaf-2:#ffb8a8;--leaf-3:#e8917e;
+  --moss:#c4705e;--moss-deep:#9e4f3f;
+  --mint:#fce4df;--peach:#ffd4c2;--petal:#ffccc0;
+  --berry:#e8917e;--mushroom:#d4a090;--acorn:#a06858;
+  --ink:#4a2e28;--ink-soft:#8a6058;--dewdrop:#f5c4b8;
+  --capi-brown:#c8a882;--capi-warm:#f0d5b8;--capi-pink:#ffb8c8;--capi-bg:#fff5f0;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--ivory);color:var(--ink);
+  font-family:'Gowun Dodum',sans-serif;font-size:16px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh;min-height:100dvh;}
+body{background:
+  radial-gradient(circle at 15% 10%,rgba(255,184,168,.3) 0,transparent 40%),
+  radial-gradient(circle at 85% 30%,rgba(253,232,223,.4) 0,transparent 40%),
+  var(--ivory);}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;}
+.screen.active{display:block;}
+
+/* ── 온보딩 ── */
+#screen-onboard{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:40px 24px;text-align:center;}
+.onboard-emoji{font-size:80px;animation:sway 3s ease-in-out infinite;display:inline-block;margin-bottom:16px;}
+@keyframes sway{0%,100%{transform:rotate(-3deg);}50%{transform:rotate(3deg);}}
+.onboard-title{font-family:'Nanum Pen Script',cursive;font-size:36px;color:var(--moss-deep);margin:0 0 8px;}
+.onboard-sub{font-size:15px;color:var(--ink-soft);margin:0 0 32px;line-height:1.7;}
+.onboard-card{background:#fff;border-radius:24px;padding:24px;width:100%;max-width:400px;
+  box-shadow:0 4px 20px rgba(200,112,94,.12);}
+
+/* ── 홈 ── */
+#screen-home{padding-bottom:calc(80px + var(--safe-bottom));}
+.home-header{background:linear-gradient(135deg,var(--leaf-1),var(--cream));
+  padding:28px 20px 20px;position:relative;}
+.home-greeting{font-family:'Nanum Pen Script',cursive;font-size:28px;color:var(--moss-deep);margin:0 0 4px;}
+.home-date{font-size:12px;color:var(--ink-soft);margin:0;}
+
+/* 프로필 탭 */
+.profile-tabs-wrap{padding:16px 16px 0;overflow-x:auto;scrollbar-width:none;}
+.profile-tabs-wrap::-webkit-scrollbar{display:none;}
+.profile-tabs{display:flex;gap:8px;padding-bottom:4px;}
+.profile-tab{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:10px 14px;border-radius:16px;border:2px solid var(--petal);background:#fff;
+  cursor:pointer;transition:all .15s;font-size:12px;color:var(--ink-soft);font-family:inherit;}
+.profile-tab.active{background:var(--leaf-3);border-color:var(--leaf-3);color:#fff;}
+.profile-tab .tab-emoji{font-size:24px;}
+.profile-tab .tab-name{font-weight:700;white-space:nowrap;}
+.profile-tab .tab-birth{font-size:10px;opacity:.8;}
+.profile-tab-add{border-style:dashed !important;color:var(--ink-soft) !important;}
+
+/* 현재 프로필 요약 카드 */
+.current-profile-card{margin:12px 16px;background:#fff;border-radius:20px;padding:16px 20px;
+  box-shadow:0 2px 12px rgba(200,112,94,.1);display:flex;align-items:center;gap:14px;}
+.cpcard-pillars{display:flex;gap:4px;}
+.cpcard-pillar{display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:var(--ivory-2);border-radius:8px;padding:6px 8px;min-width:36px;}
+.cpcard-pillar .p-gan{font-size:18px;font-weight:700;}
+.cpcard-pillar .p-ji{font-size:15px;color:var(--ink-soft);}
+.cpcard-pillar .p-label{font-size:9px;color:var(--ink-soft);}
+.cpcard-info{flex:1;}
+.cpcard-name{font-weight:700;font-size:15px;}
+.cpcard-singang{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+
+/* 섹션 */
+.home-section{padding:16px 16px 0;}
+.section-title{font-family:'Gowun Batang',serif;font-size:16px;font-weight:700;
+  color:var(--moss-deep);margin:0 0 10px;display:flex;align-items:center;gap:6px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--petal);}
+
+/* 메뉴 그리드 */
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.menu-card{background:#fff;border-radius:16px;padding:14px;cursor:pointer;
+  border:1.5px solid var(--petal);transition:all .15s;position:relative;overflow:hidden;}
+.menu-card:active{transform:scale(.97);}
+.menu-card::before{content:'';position:absolute;top:0;right:0;width:50px;height:50px;
+  border-radius:0 16px 0 50px;opacity:.15;}
+.menu-card.pink::before{background:var(--leaf-3);}
+.menu-card.mint::before{background:#7ec8b8;}
+.menu-card.gold::before{background:#d4a800;}
+.menu-card.purple::before{background:#9b7ec8;}
+.menu-card-emoji{font-size:26px;margin-bottom:6px;display:block;}
+.menu-card-title{font-size:13px;font-weight:700;color:var(--ink);line-height:1.3;margin-bottom:4px;}
+.menu-card-desc{font-size:11px;color:var(--ink-soft);line-height:1.4;}
+.menu-badge{position:absolute;top:8px;right:8px;font-size:9px;font-weight:700;
+  padding:2px 6px;border-radius:99px;letter-spacing:.5px;}
+.badge-hot{background:#ff6b6b;color:#fff;}
+.badge-new{background:#ffd700;color:#7a5c00;}
+.badge-ai{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;}
+
+/* 이달 운세 가로 스크롤 */
+.month-menu-scroll{overflow-x:auto;scrollbar-width:none;padding:0 0 8px;}
+.month-menu-scroll::-webkit-scrollbar{display:none;}
+.month-menu-row{display:flex;gap:8px;}
+.month-menu-item{flex-shrink:0;background:#fff;border-radius:14px;padding:12px 14px;
+  cursor:pointer;border:1.5px solid var(--petal);text-align:center;min-width:80px;
+  transition:all .15s;}
+.month-menu-item:active{transform:scale(.95);}
+.month-menu-item .mi-emoji{font-size:22px;display:block;margin-bottom:4px;}
+.month-menu-item .mi-label{font-size:11px;font-weight:700;color:var(--ink);}
+
+/* ── 하단 탭바 ── */
+.bottom-tab{position:fixed;bottom:0;left:0;right:0;
+  background:#fff;border-top:1px solid var(--petal);
+  display:flex;padding-bottom:var(--safe-bottom);z-index:100;}
+.bottom-tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;
+  gap:3px;padding:10px 0;cursor:pointer;border:none;background:none;
+  font-family:inherit;font-size:10px;color:var(--ink-soft);transition:all .15s;}
+.bottom-tab-btn.active{color:var(--leaf-3);}
+.bottom-tab-btn .tb-emoji{font-size:20px;}
+
+/* ── 메뉴 상세 화면 ── */
+#screen-detail{padding-bottom:calc(80px + var(--safe-bottom));}
+.detail-header{display:flex;align-items:center;gap:12px;padding:16px 16px 0;margin-bottom:16px;}
+.detail-back{background:none;border:none;font-size:22px;cursor:pointer;padding:4px;color:var(--ink);}
+.detail-title{font-family:'Gowun Batang',serif;font-size:18px;font-weight:700;color:var(--moss-deep);margin:0;}
+.detail-body{padding:0 16px;}
+
+/* 결과 카드들 */
+.result-card{background:#fff;border-radius:20px;padding:20px;margin-bottom:14px;
+  box-shadow:0 2px 12px rgba(200,112,94,.1);}
+.result-card-title{font-family:'Gowun Batang',serif;font-size:15px;font-weight:700;
+  color:var(--moss-deep);margin:0 0 10px;display:flex;align-items:center;gap:6px;}
+.result-big{font-family:'Nanum Pen Script',cursive;font-size:42px;color:var(--leaf-3);
+  text-align:center;margin:12px 0;display:block;}
+.result-bar-wrap{background:rgba(0,0,0,.07);border-radius:99px;height:10px;overflow:hidden;margin:8px 0;}
+.result-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--leaf-2),var(--leaf-3));
+  transition:width .6s;}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.tag{padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;}
+.tag-good{background:#d4f5e4;color:#1a7a4a;}
+.tag-bad{background:#fde8e8;color:#c4393a;}
+.tag-neutral{background:var(--ivory-2);color:var(--ink-soft);}
+
+/* 월별 운세 그리드 */
+.month-score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.month-score-cell{background:var(--ivory-2);border-radius:12px;padding:8px;text-align:center;}
+.msc-month{font-size:11px;color:var(--ink-soft);}
+.msc-score{font-size:18px;font-weight:700;}
+.msc-label{font-size:10px;}
+.msc-top{background:linear-gradient(135deg,var(--leaf-1),var(--cream));border:1.5px solid var(--leaf-3);}
+
+/* AI 로딩 */
+.ai-loading{text-align:center;padding:30px;color:var(--ink-soft);}
+.ai-spinner{font-size:30px;animation:spin 1.5s linear infinite;display:inline-block;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}};
+
+/* 입력 폼 스타일 */
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.field label{font-size:13px;font-weight:700;color:var(--ink-soft);}
+.field input,.field select,.field textarea{
+  padding:10px 14px;border:1.5px solid var(--petal);border-radius:12px;
+  font-size:14px;font-family:inherit;background:#fff;color:var(--ink);width:100%;}
+.field textarea{min-height:100px;resize:vertical;}
+.btn-primary{background:linear-gradient(135deg,var(--leaf-3),var(--moss));color:#fff;
+  border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:700;
+  font-family:inherit;cursor:pointer;width:100%;margin-top:4px;}
+.btn-secondary{background:#fff;color:var(--ink-soft);border:1.5px solid var(--petal);
+  border-radius:14px;padding:12px;font-size:14px;font-family:inherit;cursor:pointer;width:100%;}
+.paper-card{background:#fff;border-radius:20px;padding:20px;margin-bottom:14px;
+  box-shadow:0 2px 12px rgba(200,112,94,.1);}
+.error{color:#c4393a;font-size:13px;padding:8px 12px;background:#fde8e8;border-radius:8px;margin-top:4px;}
+
+/* ── 기존 사주카드 뷰어 스타일 (유지) ── */
+#screen-story{display:none;position:fixed;inset:0;z-index:200;overflow-y:auto;
+  background:var(--ivory);}
+#screen-story.is-open{display:block;}
+
+<style>
+/* 카피바라 전용 */
     --capi-brown: #c8a882; --capi-warm: #f0d5b8; --capi-pink: #ffb8c8;
     --capi-bg: #fff5f0;
   }
@@ -637,93 +800,368 @@
   .timeline-item.hot::before { background: var(--berry); border-color: #a44; }
   .timeline-item .tl-when { font-family: 'Nanum Pen Script', cursive; font-size: 17px; color: var(--moss); }
   .timeline-item .tl-what { font-size: 14px; line-height: 1.6; }
+
+</style>
 </style>
 </head>
 <body>
 
-<!-- ============================================= MAIN SCREEN ============================================= -->
-<div id="screen-main">
-  <header class="hero">
-    <span class="sparkle">🌸</span>
-    <span class="sparkle">💕</span>
-    <span class="sparkle">🌿</span>
-    <span class="hero-emoji">🦫</span>
-    <h1>카피바라 사주카드</h1>
-    <p class="hand" style="font-size:20px;color:var(--moss);">"느긋하게, 그러나 깊이"</p>
-  </header>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-    <button class="main-mode-btn" id="btn-go-single">
-      <span style="font-size:40px;">🦫</span>
-      <strong>개인 사주</strong>
-      <span>나의 올해 운세<br>카드로 풀어보기</span>
-    </button>
-    <button class="main-mode-btn" id="btn-go-multi-main">
-      <span style="font-size:40px;">🦫🦫</span>
-      <strong>다인 사주</strong>
-      <span>최대 10명 비교<br>궁합·운세 함께 보기</span>
-    </button>
+<!-- ══════════════ 온보딩 ══════════════ -->
+<div id="screen-onboard" class="screen active">
+  <div class="onboard-emoji">🦫</div>
+  <h1 class="onboard-title">카피바라 사주</h1>
+  <p class="onboard-sub">느긋하게, 그러나 깊이<br>내 사주를 먼저 등록해볼까요?</p>
+  <div class="onboard-card">
+    <div class="field">
+      <label>이름 <span style="font-size:11px;color:var(--ink-soft);">(선택)</span></label>
+      <input id="ob-name" type="text" placeholder="이름을 입력하세요" maxlength="10"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="field">
+        <label>성별</label>
+        <select id="ob-gender">
+          <option value="female">여성</option>
+          <option value="male">남성</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>연도</label>
+        <input id="ob-year" type="number" value="1990" min="1930" max="2010"/>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="field">
+        <label>월</label>
+        <select id="ob-month">
+          <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+          <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+          <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+          <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>일</label>
+        <input id="ob-day" type="number" value="1" min="1" max="31"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>태어난 시간 <span style="font-size:11px;color:var(--ink-soft);">(모르면 체크)</span></label>
+      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:6px;align-items:center;">
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="ob-unknown" onchange="['ob-ampm','ob-hour','ob-min'].forEach(i=>document.getElementById(i).disabled=this.checked)" style="width:15px;height:15px;"/>
+          모름
+        </label>
+        <select id="ob-ampm" style="padding:8px 4px;border:1.5px solid var(--petal);border-radius:10px;font-size:13px;font-family:inherit;background:#fff;">
+          <option value="am">오전</option><option value="pm">오후</option>
+        </select>
+        <div style="display:flex;align-items:center;gap:2px;">
+          <input id="ob-hour" type="number" value="12" min="1" max="12" style="width:100%;padding:8px 4px;border:1.5px solid var(--petal);border-radius:10px;font-size:13px;font-family:inherit;text-align:center;"/>
+          <span style="font-size:12px;white-space:nowrap;">시</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:2px;">
+          <input id="ob-min" type="number" value="0" min="0" max="59" style="width:100%;padding:8px 4px;border:1.5px solid var(--petal);border-radius:10px;font-size:13px;font-family:inherit;text-align:center;"/>
+          <span style="font-size:12px;white-space:nowrap;">분</span>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>연애 상황</label>
+      <select id="ob-love">
+        <option value="single">💝 싱글</option>
+        <option value="dating">💑 연애 중</option>
+        <option value="married">💍 기혼/동거</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="onboardSave()">내 사주 등록하기 🦫</button>
+    <div id="ob-error" style="display:none;" class="error"></div>
   </div>
-
-  <p class="note">※ 오락·참고용 해석이에요 🌷<br>명리학 통념을 바탕으로 한 템플릿 기반 풀이입니다.</p>
 </div>
 
-<!-- ============================================= INPUT SCREEN (개인) ============================================= -->
-<div id="screen-input">
-
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-    <button id="btn-back-main" style="background:none;border:none;font-size:20px;cursor:pointer;padding:0;color:var(--ink);">←</button>
-    <h2 style="margin:0;font-family:'Gowun Batang',serif;font-size:18px;">🦫 개인 사주</h2>
+<!-- ══════════════ 홈 ══════════════ -->
+<div id="screen-home" class="screen">
+  <div class="home-header">
+    <p class="home-greeting" id="home-greeting">안녕하세요 🦫</p>
+    <p class="home-date" id="home-date"></p>
   </div>
 
-  <!-- 저장된 프로필 목록 -->
-  <div id="profile-list-wrap" style="margin-bottom:14px;display:none;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-      <p style="margin:0;font-size:13px;color:var(--ink-soft);">📁 저장된 정보</p>
+  <!-- 프로필 탭 -->
+  <div class="profile-tabs-wrap">
+    <div class="profile-tabs" id="profile-tabs"></div>
+  </div>
+
+  <!-- 현재 프로필 요약 -->
+  <div class="current-profile-card" id="current-profile-card"></div>
+
+  <div style="padding:0 16px;margin-bottom:12px;">
+    <!-- 2026 신년운세 배너 -->
+    <div onclick="openMenu('yearly')" style="background:linear-gradient(135deg,#e8917e,#c4705e);border-radius:18px;padding:18px 20px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div>
+        <div style="font-size:11px;opacity:.8;margin-bottom:2px;">🌅 연간 운세</div>
+        <div style="font-family:'Gowun Batang',serif;font-size:20px;font-weight:700;">2026 신년 종합운세</div>
+        <div style="font-size:12px;opacity:.8;margin-top:2px;">올해 나의 키워드와 흐름</div>
+      </div>
+      <div style="font-size:40px;">🎴</div>
     </div>
-    <div id="profile-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
   </div>
 
-  <!-- 탭 전환 -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
-    <button id="tab-btn-auto" class="input-tab-btn active" onclick="switchInputTab('auto')">
-      📅 생년월일로 보기
-    </button>
-    <button id="tab-btn-raw" class="input-tab-btn" onclick="switchInputTab('raw')">
-      📋 만세력 붙여넣기
-    </button>
+  <!-- 연애운 전문관 -->
+  <div class="home-section">
+    <p class="section-title">💕 연애운 전문관</p>
+    <div class="menu-grid">
+      <div class="menu-card pink" onclick="openMenu('solo_escape')">
+        <span class="badge menu-badge badge-hot">HOT</span>
+        <span class="menu-card-emoji">❤️</span>
+        <div class="menu-card-title">솔로 탈출 시기</div>
+        <div class="menu-card-desc">인연이 오는 달은?</div>
+      </div>
+      <div class="menu-card pink" onclick="openMenu('love_count')">
+        <span class="badge menu-badge badge-hot">HOT</span>
+        <span class="menu-card-emoji">😮</span>
+        <div class="menu-card-title">남은 연애 횟수</div>
+        <div class="menu-card-desc">앞으로 몇 번 남았을까</div>
+      </div>
+      <div class="menu-card pink" onclick="openMenu('dohwa')">
+        <span class="badge menu-badge badge-new">NEW</span>
+        <span class="menu-card-emoji">🌸</span>
+        <div class="menu-card-title">나의 도화살</div>
+        <div class="menu-card-desc">매력 지수 & 도화 유형</div>
+      </div>
+      <div class="menu-card pink" onclick="openMenu('marriage_timing')">
+        <span class="menu-card-emoji">💍</span>
+        <div class="menu-card-title">결혼 적령기</div>
+        <div class="menu-card-desc">언제가 최고의 타이밍?</div>
+      </div>
+      <div class="menu-card pink" onclick="openMenu('bad_match')">
+        <span class="menu-card-emoji">🚫</span>
+        <div class="menu-card-title">절대 만나면 안 되는 상대</div>
+        <div class="menu-card-desc">충·형으로 보는 위험 신호</div>
+      </div>
+      <div class="menu-card pink" onclick="openMenu('why_dumped')">
+        <span class="badge menu-badge badge-new">NEW</span>
+        <span class="menu-card-emoji">💔</span>
+        <div class="menu-card-title">내가 차이는 이유</div>
+        <div class="menu-card-desc">솔직한 연애 약점 분석</div>
+      </div>
+      <div class="menu-card pink" onclick="openMenu('love_type')">
+        <span class="menu-card-emoji">🎭</span>
+        <div class="menu-card-title">나의 연애 유형</div>
+        <div class="menu-card-desc">일간으로 보는 연애 스타일</div>
+      </div>
+      <div class="menu-card pink" onclick="openMenu('reunion')">
+        <span class="menu-card-emoji">🥺</span>
+        <div class="menu-card-title">재회운 분석</div>
+        <div class="menu-card-desc">전 연인과 다시 될까?</div>
+      </div>
+      <div class="menu-card pink" onclick="openMenu('charm_point')">
+        <span class="badge menu-badge badge-ai">AI</span>
+        <span class="menu-card-emoji">✨</span>
+        <div class="menu-card-title">나의 매력 포인트</div>
+        <div class="menu-card-desc">사주로 보는 이성 호감 요소</div>
+      </div>
+      <div class="menu-card pink" onclick="openMenu('love_success')">
+        <span class="menu-card-emoji">🎯</span>
+        <div class="menu-card-title">올해 썸 성공 확률</div>
+        <div class="menu-card-desc">% 로 보는 연애운</div>
+      </div>
+    </div>
   </div>
 
-  <!-- ① 생년월일 자동 계산 탭 -->
-  <div id="tab-auto">
+  <!-- 이달의 운세 -->
+  <div class="home-section" style="margin-top:16px;">
+    <p class="section-title" id="month-section-title">📅 이달의 운세</p>
+    <div class="month-menu-scroll">
+      <div class="month-menu-row">
+        <div class="month-menu-item" onclick="openMenu('month_love')">
+          <span class="mi-emoji">💕</span><span class="mi-label">애정운</span>
+        </div>
+        <div class="month-menu-item" onclick="openMenu('month_money')">
+          <span class="mi-emoji">💰</span><span class="mi-label">재물운</span>
+        </div>
+        <div class="month-menu-item" onclick="openMenu('month_work')">
+          <span class="mi-emoji">💼</span><span class="mi-label">업무운</span>
+        </div>
+        <div class="month-menu-item" onclick="openMenu('month_study')">
+          <span class="mi-emoji">📚</span><span class="mi-label">학업운</span>
+        </div>
+        <div class="month-menu-item" onclick="openMenu('month_health')">
+          <span class="mi-emoji">🏥</span><span class="mi-label">건강운</span>
+        </div>
+        <div class="month-menu-item" onclick="openMenu('month_relation')">
+          <span class="mi-emoji">🤝</span><span class="mi-label">대인관계</span>
+        </div>
+        <div class="month-menu-item" onclick="openMenu('month_reunion')">
+          <span class="mi-emoji">💌</span><span class="mi-label">재회운</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 내 사주 분석 -->
+  <div class="home-section" style="margin-top:16px;">
+    <p class="section-title">🔍 내 사주 분석</p>
+    <div class="menu-grid">
+      <div class="menu-card mint" onclick="openMenu('singang')">
+        <span class="menu-card-emoji">⚖️</span>
+        <div class="menu-card-title">신강/신약 분석</div>
+        <div class="menu-card-desc">내 기운의 세기</div>
+      </div>
+      <div class="menu-card mint" onclick="openMenu('oheng')">
+        <span class="menu-card-emoji">🌳</span>
+        <div class="menu-card-title">오행 분포</div>
+        <div class="menu-card-desc">목화토금수 밸런스</div>
+      </div>
+      <div class="menu-card mint" onclick="openMenu('ilgan_char')">
+        <span class="menu-card-emoji">🎭</span>
+        <div class="menu-card-title">일간으로 보는 성격</div>
+        <div class="menu-card-desc">나는 어떤 사람?</div>
+      </div>
+      <div class="menu-card mint" onclick="openMenu('sinsal')">
+        <span class="menu-card-emoji">💫</span>
+        <div class="menu-card-title">나의 신살</div>
+        <div class="menu-card-desc">역마·도화·귀인 총정리</div>
+      </div>
+      <div class="menu-card mint" onclick="openMenu('daewoon')">
+        <span class="menu-card-emoji">🌊</span>
+        <div class="menu-card-title">대운 타임라인</div>
+        <div class="menu-card-desc">10년 단위 운의 흐름</div>
+      </div>
+      <div class="menu-card mint" onclick="openMenu('yearly_rank')">
+        <span class="menu-card-emoji">📊</span>
+        <div class="menu-card-title">올해 월별 운세 순위</div>
+        <div class="menu-card-desc">최고·최악의 달은?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 재미/바이럴 -->
+  <div class="home-section" style="margin-top:16px;margin-bottom:20px;">
+    <p class="section-title">🎪 재미로 보는 사주</p>
+    <div class="menu-grid">
+      <div class="menu-card purple" onclick="openMenu('past_life')">
+        <span class="badge menu-badge badge-new">NEW</span>
+        <span class="menu-card-emoji">🌙</span>
+        <div class="menu-card-title">전생에 무슨 인연?</div>
+        <div class="menu-card-desc">전생 인연 유형</div>
+      </div>
+      <div class="menu-card purple" onclick="openMenu('mbti_saju')">
+        <span class="menu-card-emoji">🧬</span>
+        <div class="menu-card-title">사주 MBTI</div>
+        <div class="menu-card-desc">사주로 보는 내 유형</div>
+      </div>
+      <div class="menu-card purple" onclick="openMenu('today_word')">
+        <span class="menu-card-emoji">🍀</span>
+        <div class="menu-card-title">오늘의 한마디</div>
+        <div class="menu-card-desc">오늘 나에게 필요한 말</div>
+      </div>
+      <div class="menu-card purple" onclick="openMenu('lucky_item')">
+        <span class="menu-card-emoji">🎁</span>
+        <div class="menu-card-title">이달의 행운 아이템</div>
+        <div class="menu-card-desc">색깔·숫자·방향</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 다인 비교 -->
+  <div class="home-section" style="margin-top:0;margin-bottom:20px;">
+    <p class="section-title">👥 다인 비교</p>
+    <div style="background:#fff;border-radius:16px;padding:16px;border:1.5px solid var(--petal);cursor:pointer;" onclick="openMenu('multi_compare')">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="font-size:36px;">🦫🦫</div>
+        <div>
+          <div style="font-weight:700;font-size:15px;">궁합 & 운세 비교</div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">저장된 사람들 비교하기 (최대 10명)</div>
+        </div>
+        <div style="margin-left:auto;font-size:20px;color:var(--ink-soft);">›</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 하단 탭바 -->
+  <div class="bottom-tab">
+    <button class="bottom-tab-btn active" onclick="switchTab('home')" id="tab-home">
+      <span class="tb-emoji">🏠</span>홈
+    </button>
+    <button class="bottom-tab-btn" onclick="switchTab('profile')" id="tab-profile">
+      <span class="tb-emoji">👤</span>프로필
+    </button>
+    <button class="bottom-tab-btn" onclick="switchTab('yearly')" id="tab-yearly">
+      <span class="tb-emoji">📅</span>연간운세
+    </button>
+    <button class="bottom-tab-btn" onclick="switchTab('settings')" id="tab-settings">
+      <span class="tb-emoji">⚙️</span>설정
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════ 메뉴 상세 ══════════════ -->
+<div id="screen-detail" class="screen">
+  <div class="detail-header">
+    <button class="detail-back" onclick="goBack()">←</button>
+    <h2 class="detail-title" id="detail-title">상세</h2>
+  </div>
+  <div class="detail-body" id="detail-body">
+    <!-- 동적으로 채워짐 -->
+  </div>
+  <!-- 하단 탭바 -->
+  <div class="bottom-tab">
+    <button class="bottom-tab-btn active" onclick="switchTab('home')" id="tab-home2">
+      <span class="tb-emoji">🏠</span>홈
+    </button>
+    <button class="bottom-tab-btn" onclick="switchTab('profile')" id="tab-profile2">
+      <span class="tb-emoji">👤</span>프로필
+    </button>
+    <button class="bottom-tab-btn" onclick="switchTab('yearly')" id="tab-yearly2">
+      <span class="tb-emoji">📅</span>연간운세
+    </button>
+    <button class="bottom-tab-btn" onclick="switchTab('settings')" id="tab-settings2">
+      <span class="tb-emoji">⚙️</span>설정
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════ 프로필 관리 ══════════════ -->
+<div id="screen-profile" class="screen">
+  <div style="padding:24px 16px 100px;">
+    <h2 style="font-family:'Gowun Batang',serif;color:var(--moss-deep);margin:0 0 20px;">👤 프로필 관리</h2>
+    <div id="profile-manage-list"></div>
+    <button class="btn-secondary" onclick="showAddProfile()" style="margin-top:12px;">
+      + 새 사람 추가
+    </button>
+  </div>
+  <div class="bottom-tab">
+    <button class="bottom-tab-btn" onclick="switchTab('home')"><span class="tb-emoji">🏠</span>홈</button>
+    <button class="bottom-tab-btn active"><span class="tb-emoji">👤</span>프로필</button>
+    <button class="bottom-tab-btn" onclick="switchTab('yearly')"><span class="tb-emoji">📅</span>연간운세</button>
+    <button class="bottom-tab-btn" onclick="switchTab('settings')"><span class="tb-emoji">⚙️</span>설정</button>
+  </div>
+</div>
+
+<!-- ══════════════ 프로필 추가/편집 ══════════════ -->
+<div id="screen-add-profile" class="screen">
+  <div style="padding:20px 16px 100px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <button style="background:none;border:none;font-size:22px;cursor:pointer;" onclick="showScreen('profile')">←</button>
+      <h2 style="font-family:'Gowun Batang',serif;color:var(--moss-deep);margin:0;" id="add-profile-title">새 사람 추가</h2>
+    </div>
     <div class="paper-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <h2 class="card-title" style="margin:0;"><span class="emoji">📅</span>생년월일 입력</h2>
-        <button onclick="loadSavedProfile()" style="font-size:12px;padding:6px 12px;border:1.5px solid var(--petal);border-radius:20px;background:#fff;cursor:pointer;font-family:inherit;color:var(--ink-soft);">
-          📂 저장된 정보 불러오기
-        </button>
+      <div class="field">
+        <label>이름</label>
+        <input id="ap-name" type="text" placeholder="이름을 입력하세요" maxlength="10"/>
       </div>
-      <div class="field" style="margin-bottom:10px;">
-        <label for="auto-name">이름 <span style="font-size:12px;color:var(--ink-soft);">(선택)</span></label>
-        <input id="auto-name" type="text" placeholder="이름을 입력하세요" style="width:100%;padding:10px 14px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;" />
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div class="field">
-          <label for="auto-gender">성별</label>
-          <select id="auto-gender">
-            <option value="female">여성</option>
-            <option value="male">남성</option>
-          </select>
+          <label>성별</label>
+          <select id="ap-gender"><option value="female">여성</option><option value="male">남성</option></select>
         </div>
         <div class="field">
-          <label for="auto-year">연도</label>
-          <input id="auto-year" type="number" value="1990" min="1930" max="2010" />
+          <label>연도</label>
+          <input id="ap-year" type="number" value="1990" min="1930" max="2010"/>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div class="field">
-          <label for="auto-month">월</label>
-          <select id="auto-month">
+          <label>월</label>
+          <select id="ap-month">
             <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
             <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
             <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
@@ -731,147 +1169,83 @@
           </select>
         </div>
         <div class="field">
-          <label for="auto-day">일</label>
-          <input id="auto-day" type="number" value="1" min="1" max="31" />
+          <label>일</label>
+          <input id="ap-day" type="number" value="1" min="1" max="31"/>
         </div>
-      </div>
-      <div class="field" style="margin-bottom:10px;">
-        <label>태어난 시간 <span style="font-size:12px;color:var(--ink-soft);">(모르면 체크)</span></label>
-        <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:8px;align-items:center;">
-          <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;white-space:nowrap;">
-            <input type="checkbox" id="auto-time-unknown"
-              onchange="['auto-ampm','auto-hour-sel','auto-min-sel'].forEach(id=>document.getElementById(id).disabled=this.checked)"
-              style="width:16px;height:16px;cursor:pointer;" />
-            모름
-          </label>
-          <select id="auto-ampm" style="padding:10px 6px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;">
-            <option value="am">오전</option>
-            <option value="pm">오후</option>
-          </select>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <input id="auto-hour-sel" type="number" value="12" min="1" max="12"
-              style="width:100%;padding:10px 6px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;text-align:center;" />
-            <span style="font-size:13px;color:var(--ink-soft);white-space:nowrap;">시</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <input id="auto-min-sel" type="number" value="0" min="0" max="59"
-              style="width:100%;padding:10px 6px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;text-align:center;" />
-            <span style="font-size:13px;color:var(--ink-soft);white-space:nowrap;">분</span>
-          </div>
-        </div>
-        <p style="margin:6px 0 0;font-size:11px;color:var(--ink-soft);">💡 진태양시 보정(-32분) 자동 적용</p>
-      </div>
-      <div class="field" style="margin-bottom:10px;">
-        <label for="auto-lovestatus">연애 상황</label>
-        <select id="auto-lovestatus">
-          <option value="single">💝 싱글</option>
-          <option value="dating">💑 연애 중</option>
-          <option value="married">💍 기혼 / 동거</option>
-        </select>
-      </div>
-      <div class="field" style="margin-bottom:14px;">
-        <label for="auto-viewyear">보고 싶은 연도</label>
-        <input id="auto-viewyear" type="number" value="2026" min="2020" max="2040" />
-      </div>
-      <button class="btn btn-primary btn-full" id="btn-auto-analyze">사주 카드 열기 🔮</button>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <input id="auto-save-name" type="text" placeholder="이름 (저장 시 사용)" maxlength="10"
-          style="flex:1;padding:10px;border:1.5px solid var(--petal);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;" />
-        <button onclick="saveProfileMulti()" style="padding:10px 14px;border:1.5px solid var(--petal);border-radius:12px;font-size:13px;font-family:inherit;background:#fff;cursor:pointer;color:var(--ink-soft);white-space:nowrap;">
-          💾 저장
-        </button>
-      </div>
-      <div id="save-msg" style="display:none;text-align:center;font-size:12px;color:var(--moss);margin-top:6px;"></div>
-      <div id="auto-error" style="display:none;margin-top:8px;"></div>
-      <div class="mood-card cream" style="margin-top:12px;font-size:12px;color:var(--ink-soft);">
-        <p style="margin:0;">💡 양력 기준이에요. 음력이라면 <a href="https://www.lunar-calendar.kr" target="_blank" rel="noopener" style="color:var(--moss);">음양력 변환</a> 후 입력해주세요.</p>
-        <p style="margin:6px 0 0;">⚠️ 신살·용신은 만세력 사이트에서 더 정확하게 확인할 수 있어요.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ② 만세력 붙여넣기 탭 -->
-  <div id="tab-raw" style="display:none;">
-    <div class="paper-card guide-card" style="margin-bottom:14px;">
-      <p style="margin:0 0 10px;color:var(--ink-soft);font-size:14px;line-height:1.6;">
-        만세력 사이트에서 <strong>만세력 저장</strong> 버튼을 클릭하여 복사해 주세요 🦫
-      </p>
-      <a href="https://daysaju.com/manseryeok/input" target="_blank" rel="noopener" class="btn btn-secondary btn-full">
-        🔗 만세력 뽑으러 가기 <span style="font-size:11px;opacity:0.7;">(새 창)</span>
-      </a>
-    </div>
-    <div class="paper-card">
-      <h2 class="card-title"><span class="emoji">📋</span>만세력 텍스트 입력</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-        <div class="field">
-          <label for="in-gender">성별</label>
-          <select id="in-gender">
-            <option value="female">여성</option>
-            <option value="male">남성</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="in-year">연도</label>
-          <input id="in-year" type="number" value="2026" min="1950" max="2100" />
-        </div>
-      </div>
-      <div class="field" style="margin-bottom:10px;">
-        <label for="in-lovestatus">연애 상황</label>
-        <select id="in-lovestatus">
-          <option value="single">💝 싱글</option>
-          <option value="dating">💑 연애 중</option>
-          <option value="married">💍 기혼 / 동거</option>
-        </select>
       </div>
       <div class="field">
-        <label for="in-raw">만세력 텍스트</label>
-        <textarea id="in-raw" placeholder="【만세력】 ...&#10;■ 사주 원국&#10;천간 甲 丙 甲 丙&#10;지지 子 寅 申 寅&#10;..."></textarea>
+        <label>태어난 시간</label>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:6px;align-items:center;">
+          <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
+            <input type="checkbox" id="ap-unknown" onchange="['ap-ampm','ap-hour','ap-min'].forEach(i=>document.getElementById(i).disabled=this.checked)" style="width:15px;height:15px;"/>모름
+          </label>
+          <select id="ap-ampm" style="padding:8px 4px;border:1.5px solid var(--petal);border-radius:10px;font-size:13px;font-family:inherit;background:#fff;">
+            <option value="am">오전</option><option value="pm">오후</option>
+          </select>
+          <div style="display:flex;align-items:center;gap:2px;">
+            <input id="ap-hour" type="number" value="12" min="1" max="12" style="width:100%;padding:8px 4px;border:1.5px solid var(--petal);border-radius:10px;font-size:13px;font-family:inherit;text-align:center;"/>
+            <span style="font-size:12px;">시</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:2px;">
+            <input id="ap-min" type="number" value="0" min="0" max="59" style="width:100%;padding:8px 4px;border:1.5px solid var(--petal);border-radius:10px;font-size:13px;font-family:inherit;text-align:center;"/>
+            <span style="font-size:12px;">분</span>
+          </div>
+        </div>
       </div>
-      <button class="btn btn-primary btn-full" id="btn-analyze">사주 카드 열기 🔮</button>
-      <div id="input-error" style="display:none"></div>
+      <div class="field">
+        <label>연애 상황</label>
+        <select id="ap-love">
+          <option value="single">💝 싱글</option>
+          <option value="dating">💑 연애 중</option>
+          <option value="married">💍 기혼/동거</option>
+        </select>
+      </div>
+      <input type="hidden" id="ap-edit-id" value=""/>
+      <button class="btn-primary" onclick="saveAddProfile()">저장하기 💾</button>
+      <div id="ap-error" style="display:none;" class="error"></div>
     </div>
   </div>
 </div>
 
-<!-- ============================================= MULTI SCREEN (다인) ============================================= -->
-<div id="screen-multi">
-  <div id="multi-input-wrap">
-
-    <div class="paper-card guide-card" style="margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <button id="btn-back-main-multi" style="background:none;border:none;font-size:20px;cursor:pointer;padding:0;">←</button>
-        <h2 class="card-title" style="margin:0;"><span class="emoji">📅</span>만세력이 없어요?</h2>
-      </div>
-      <p style="margin:0 0 10px;color:var(--ink-soft);font-size:14px;line-height:1.6;">
-        아래 버튼으로 무료 만세력 사이트에서 뽑아오세요.<br>
-        <strong>만세력 저장</strong> 버튼을 클릭하여 복사해 주세요 🦫
-      </p>
-      <a href="https://daysaju.com/manseryeok/input" target="_blank" rel="noopener" class="btn btn-secondary btn-full">
-        🔗 만세력 뽑으러 가기 <span style="font-size:11px;opacity:0.7;">(새 창)</span>
-      </a>
-    </div>
-
+<!-- ══════════════ 설정 ══════════════ -->
+<div id="screen-settings" class="screen">
+  <div style="padding:24px 16px 100px;">
+    <h2 style="font-family:'Gowun Batang',serif;color:var(--moss-deep);margin:0 0 20px;">⚙️ 설정</h2>
     <div class="paper-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <h2 class="card-title" style="margin:0;"><span class="emoji">🦫🦫</span>다인 사주 입력</h2>
-        <button id="btn-multi-add" class="btn btn-secondary" style="padding:8px 16px;font-size:13px;">+ 추가</button>
+      <p style="font-weight:700;margin:0 0 12px;">🤖 Gemini AI 설정</p>
+      <div class="field">
+        <label>API 키 <span style="font-size:11px;color:var(--ink-soft);">(<a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--moss);">무료 발급</a>)</span></label>
+        <input id="settings-gemini-key" type="password" placeholder="AIzaSy..."/>
       </div>
-      <div id="multi-tabs-nav" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
-      <div id="multi-tab-contents"></div>
-      <div id="multi-error" style="display:none;margin-top:8px;"></div>
-      <button class="btn btn-primary btn-full" id="btn-multi-run" style="margin-top:16px;">🔮 비교 카드 열기</button>
+      <div class="field">
+        <label>모델</label>
+        <select id="settings-gemini-model">
+          <option value="gemini-2.5-flash">⚡ Gemini 2.5 Flash (권장)</option>
+          <option value="gemini-2.5-pro">🧠 Gemini 2.5 Pro (고품질)</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="saveGeminiSettings()">저장</button>
+      <p style="font-size:11px;color:var(--ink-soft);margin:8px 0 0;">키는 이 기기에만 저장되며 외부로 전송되지 않아요.</p>
     </div>
-
-    <div style="text-align:center;padding:10px 0 40px;">
-      <button id="btn-back-single" style="background:none;border:none;color:var(--ink-soft);font-size:14px;cursor:pointer;font-family:inherit;">
-        ← 처음으로 돌아가기
+    <div class="paper-card" style="margin-top:12px;">
+      <p style="font-weight:700;margin:0 0 12px;">🗂️ 데이터 관리</p>
+      <button class="btn-secondary" onclick="if(confirm('모든 데이터를 초기화할까요?')){localStorage.clear();location.reload();}">
+        전체 초기화 (주의!)
       </button>
     </div>
   </div>
+  <div class="bottom-tab">
+    <button class="bottom-tab-btn" onclick="switchTab('home')"><span class="tb-emoji">🏠</span>홈</button>
+    <button class="bottom-tab-btn" onclick="switchTab('profile')"><span class="tb-emoji">👤</span>프로필</button>
+    <button class="bottom-tab-btn" onclick="switchTab('yearly')"><span class="tb-emoji">📅</span>연간운세</button>
+    <button class="bottom-tab-btn active"><span class="tb-emoji">⚙️</span>설정</button>
+  </div>
 </div>
 
-<!-- ============================================= STORY SCREEN ============================================= -->
+<!-- ══════════════ 기존 사주카드 뷰어 (유지) ══════════════ -->
 <div id="screen-story" role="dialog" aria-modal="true">
+
+
   <div class="story-viewport">
     <div class="story-card">
       <!-- 비교 모드 인물 탭 (비교 모드일 때만 표시) -->
@@ -915,7 +1289,12 @@
   </div>
 </div>
 
+
+</div><!-- /screen-story -->
+
+
 <script id="engine_00">
+
 /* ============================================================
  *  engine_00_manseryeok.js  v2
  *  생년월일시 → 사주팔자 자동 계산 엔진
@@ -1097,9 +1476,12 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
   };
 }
 
+
 </script>
 
+
 <script id="engine">
+
 /* ==========================================================
  *  SAJU ENGINE — Enhanced interpretations with gender & depth
  * ========================================================== */
@@ -5984,6 +6366,1369 @@ ${ask||`${yr}년 운세를 애정·재물·건강·커리어 영역별로 풀어
   if (btn) btn.textContent = '🔮 Gemini에게 해석 받기';
 };
 
+
 </script>
+
+
+<script>
+// ══════════════════════════════════════════
+//  앱 메인 JS
+// ══════════════════════════════════════════
+
+const NOW = new Date();
+const NOW_YEAR = NOW.getFullYear();
+const NOW_MONTH = NOW.getMonth() + 1;
+const MONTH_NAMES = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const DAY_PILLAR_OH = {甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'};
+
+// ── 프로필 저장소 ──
+function getProfiles() {
+  try { return JSON.parse(localStorage.getItem('capi_profiles')||'[]'); } catch{ return []; }
+}
+function saveProfiles(arr) { localStorage.setItem('capi_profiles',JSON.stringify(arr)); }
+function getCurrentIdx() { return parseInt(localStorage.getItem('capi_cur')||'0'); }
+function setCurrentIdx(i) { localStorage.setItem('capi_cur',String(i)); }
+function getCurrentProfile() { const ps=getProfiles(); return ps[getCurrentIdx()]||ps[0]; }
+
+// 시간 → 시지 변환 (진태양시 -32분)
+function timeToJi(ampm, h, m) {
+  let hh = parseInt(h);
+  if (ampm==='am' && hh===12) hh=0;
+  else if (ampm==='pm' && hh!==12) hh+=12;
+  let total = hh*60 + parseInt(m) - 32;
+  if (total<0) total+=24*60;
+  const corrH = Math.floor(total/60)%24;
+  const JI12=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  return corrH===23?'子':JI12[Math.floor((corrH+1)/2)%12];
+}
+
+// 프로필 → 사주 데이터
+function profileToData(p) {
+  const hourJi = p.unknown ? '' : timeToJi(p.ampm||'am', p.hour||12, p.min||0);
+  return calcSaju(parseInt(p.year), parseInt(p.month), parseInt(p.day), hourJi, p.gender, p.name||'');
+}
+
+// ── 화면 전환 ──
+let _prevScreen = 'home';
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el = document.getElementById('screen-'+id);
+  if (el) el.classList.add('active');
+  window.scrollTo(0,0);
+}
+function goBack() { showScreen(_prevScreen==='detail'?'home':_prevScreen); }
+
+// ── 온보딩 ──
+function onboardSave() {
+  const name = document.getElementById('ob-name').value.trim();
+  const year = parseInt(document.getElementById('ob-year').value);
+  const month = parseInt(document.getElementById('ob-month').value);
+  const day = parseInt(document.getElementById('ob-day').value);
+  const gender = document.getElementById('ob-gender').value;
+  const unknown = document.getElementById('ob-unknown').checked;
+  const ampm = document.getElementById('ob-ampm').value;
+  const hour = document.getElementById('ob-hour').value;
+  const min = document.getElementById('ob-min').value;
+  const love = document.getElementById('ob-love').value;
+  const errEl = document.getElementById('ob-error');
+
+  if (!year||!month||!day||year<1930||year>2010) {
+    errEl.textContent='생년월일을 올바르게 입력해주세요.';errEl.style.display='block';return;
+  }
+  const profile = {id:Date.now(),name:name||'나',gender,year,month,day,unknown,ampm,hour,min,love};
+  saveProfiles([profile]);
+  setCurrentIdx(0);
+  initHome();
+  showScreen('home');
+}
+
+// ── 탭 전환 ──
+function switchTab(tab) {
+  showScreen(tab==='profile'?'profile':tab==='yearly'?'detail':tab==='settings'?'settings':'home');
+  if (tab==='yearly') openMenu('yearly');
+  document.querySelectorAll('.bottom-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll(`[onclick="switchTab('${tab}')"]`).forEach(b=>b.classList.add('active'));
+}
+
+// ── 홈 초기화 ──
+function initHome() {
+  const profiles = getProfiles();
+  const curIdx = getCurrentIdx();
+  const now = new Date();
+
+  // 날짜
+  const dateStr = `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
+  document.getElementById('home-date').textContent = dateStr;
+
+  // 인사말
+  const cur = profiles[curIdx];
+  const hon = cur?.name ? cur.name+'님' : '안녕하세요';
+  document.getElementById('home-greeting').textContent = `안녕하세요, ${hon} 🦫`;
+
+  // 프로필 탭
+  const tabsEl = document.getElementById('profile-tabs');
+  tabsEl.innerHTML = profiles.map((p,i)=>`
+    <div class="profile-tab ${i===curIdx?'active':''}" onclick="selectProfile(${i})">
+      <span class="tab-emoji">${p.gender==='male'?'👦':'👧'}</span>
+      <span class="tab-name">${p.name||'나'}</span>
+      <span class="tab-birth">${p.year}.${String(p.month).padStart(2,'0')}.${String(p.day).padStart(2,'0')}</span>
+    </div>
+  `).join('') + `<div class="profile-tab profile-tab-add" onclick="showAddProfile()">
+    <span class="tab-emoji">➕</span><span class="tab-name">추가</span>
+  </div>`;
+
+  // 현재 프로필 요약
+  renderCurrentCard(cur);
+
+  // 이달 운세 제목
+  const mTitle = document.getElementById('month-section-title');
+  if (mTitle) mTitle.textContent = `📅 ${NOW_MONTH}월 운세`;
+}
+
+function selectProfile(i) {
+  setCurrentIdx(i);
+  initHome();
+}
+
+function renderCurrentCard(p) {
+  if (!p) return;
+  const el = document.getElementById('current-profile-card');
+  const data = profileToData(p);
+  const pils = data.pillars;
+  const labels = ['년','월','일','시'];
+  const pillarsArr = [pils.year, pils.month, pils.day, pils.hour].filter(x=>x?.gan);
+  el.innerHTML = `
+    <div class="cpcard-pillars">
+      ${pillarsArr.map((pl,i)=>`
+        <div class="cpcard-pillar">
+          <span class="p-label">${labels[i]}</span>
+          <span class="p-gan">${pl.gan}</span>
+          <span class="p-ji">${pl.ji}</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="cpcard-info">
+      <div class="cpcard-name">${p.name||'나'} · ${p.gender==='male'?'남':'여'}</div>
+      <div class="cpcard-singang">
+        ${data.singang} ${data.sangScore}점 · 일간 ${data.ilgan}
+      </div>
+      <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">
+        ${p.year}.${String(p.month).padStart(2,'0')}.${String(p.day).padStart(2,'0')}
+        ${!p.unknown&&p.hour?` ${p.ampm==='am'?'오전':'오후'} ${p.hour}:${String(p.min||0).padStart(2,'0')}`:''}
+      </div>
+    </div>
+  `;
+}
+
+// ── 프로필 관리 ──
+function showAddProfile(editId) {
+  _prevScreen = 'profile';
+  document.getElementById('add-profile-title').textContent = editId ? '정보 수정' : '새 사람 추가';
+  document.getElementById('ap-edit-id').value = editId||'';
+  if (editId) {
+    const p = getProfiles().find(x=>x.id===editId);
+    if (p) {
+      document.getElementById('ap-name').value = p.name||'';
+      document.getElementById('ap-gender').value = p.gender;
+      document.getElementById('ap-year').value = p.year;
+      document.getElementById('ap-month').value = p.month;
+      document.getElementById('ap-day').value = p.day;
+      document.getElementById('ap-ampm').value = p.ampm||'am';
+      document.getElementById('ap-hour').value = p.hour||12;
+      document.getElementById('ap-min').value = p.min||0;
+      document.getElementById('ap-unknown').checked = !!p.unknown;
+      document.getElementById('ap-love').value = p.love||'single';
+    }
+  } else {
+    ['ap-name'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('ap-gender').value='female';
+    document.getElementById('ap-year').value='1990';
+    document.getElementById('ap-month').value='1';
+    document.getElementById('ap-day').value='1';
+    document.getElementById('ap-ampm').value='am';
+    document.getElementById('ap-hour').value='12';
+    document.getElementById('ap-min').value='0';
+    document.getElementById('ap-unknown').checked=false;
+    document.getElementById('ap-love').value='single';
+  }
+  showScreen('add-profile');
+}
+
+function saveAddProfile() {
+  const name = document.getElementById('ap-name').value.trim();
+  const year = parseInt(document.getElementById('ap-year').value);
+  const month = parseInt(document.getElementById('ap-month').value);
+  const day = parseInt(document.getElementById('ap-day').value);
+  const errEl = document.getElementById('ap-error');
+  if (!year||year<1930||year>2010) {
+    errEl.textContent='연도를 올바르게 입력해주세요.';errEl.style.display='block';return;
+  }
+  const profile = {
+    id: parseInt(document.getElementById('ap-edit-id').value)||Date.now(),
+    name:name||'이름없음', gender:document.getElementById('ap-gender').value,
+    year, month, day,
+    unknown:document.getElementById('ap-unknown').checked,
+    ampm:document.getElementById('ap-ampm').value,
+    hour:document.getElementById('ap-hour').value,
+    min:document.getElementById('ap-min').value,
+    love:document.getElementById('ap-love').value
+  };
+  let arr = getProfiles();
+  const editId = parseInt(document.getElementById('ap-edit-id').value);
+  if (editId) arr = arr.map(p=>p.id===editId?profile:p);
+  else { if(arr.length>=10){alert('최대 10명까지 저장 가능해요');return;} arr.push(profile); }
+  saveProfiles(arr);
+  renderProfileManage();
+  showScreen('profile');
+  initHome();
+}
+
+function deleteProfile(id) {
+  if (!confirm('이 프로필을 삭제할까요?')) return;
+  let arr = getProfiles().filter(p=>p.id!==id);
+  if (arr.length===0) { alert('최소 1명은 있어야 해요'); return; }
+  saveProfiles(arr);
+  setCurrentIdx(0);
+  renderProfileManage();
+  initHome();
+}
+
+function renderProfileManage() {
+  const arr = getProfiles();
+  const el = document.getElementById('profile-manage-list');
+  if (!el) return;
+  el.innerHTML = arr.map((p,i)=>`
+    <div style="background:#fff;border-radius:16px;padding:14px 16px;margin-bottom:10px;
+      border:1.5px solid var(--petal);display:flex;align-items:center;gap:10px;">
+      <span style="font-size:28px;">${p.gender==='male'?'👦':'👧'}</span>
+      <div style="flex:1;">
+        <div style="font-weight:700;">${p.name||'이름없음'}</div>
+        <div style="font-size:12px;color:var(--ink-soft);">
+          ${p.year}.${String(p.month).padStart(2,'0')}.${String(p.day).padStart(2,'0')}
+          ${!p.unknown&&p.hour?` · ${p.ampm==='am'?'오전':'오후'} ${p.hour}시 ${p.min||0}분`:''}
+        </div>
+      </div>
+      <button onclick="showAddProfile(${p.id})" style="background:none;border:1.5px solid var(--petal);
+        border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit;">수정</button>
+      <button onclick="deleteProfile(${p.id})" style="background:none;border:none;
+        font-size:20px;cursor:pointer;color:#c4393a;">🗑️</button>
+    </div>
+  `).join('');
+}
+
+// ── Gemini 설정 ──
+function saveGeminiSettings() {
+  const key = document.getElementById('settings-gemini-key').value.trim();
+  const model = document.getElementById('settings-gemini-model').value;
+  if (key) localStorage.setItem('gemini_api_key', key);
+  localStorage.setItem('gemini_model', model);
+  alert('저장됐어요 🦫');
+}
+function getGeminiKey() { return localStorage.getItem('gemini_api_key')||''; }
+function getGeminiModel() { return localStorage.getItem('gemini_model')||'gemini-2.5-flash'; }
+
+// ── Gemini API 호출 ──
+async function callGemini(prompt) {
+  const key = getGeminiKey();
+  if (!key) return null;
+  const model = getGeminiModel();
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+      { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contents:[{parts:[{text:prompt}]}],
+          generationConfig:{maxOutputTokens:2048,temperature:0.85} }) }
+    );
+    const json = await res.json();
+    if (json.error) return '❌ '+json.error.message;
+    return json.candidates?.[0]?.content?.parts?.[0]?.text || '응답이 비어있어요.';
+  } catch(e) { return '❌ 네트워크 오류: '+e.message; }
+}
+
+// ── 메뉴 오픈 ──
+async function openMenu(menuId) {
+  _prevScreen = 'home';
+  const p = getCurrentProfile();
+  if (!p) return;
+  const data = profileToData(p);
+  const hon = (p.name||'그대')+'님';
+  const gender = p.gender==='male'?'남성':'여성';
+  const cyr = data.yeonwoon?.find(y=>y.year===NOW_YEAR)||data.yeonwoon?.[0];
+  const cmon = data.wolun?.[NOW_MONTH];
+
+  const cfg = MENU_CONFIG[menuId];
+  if (!cfg) { alert('준비 중이에요 🦫'); return; }
+
+  document.getElementById('detail-title').textContent = cfg.title;
+  document.getElementById('detail-body').innerHTML = '<div class="ai-loading"><span class="ai-spinner">🔮</span><p>풀이하는 중...</p></div>';
+  showScreen('detail');
+
+  const html = await cfg.render(data, p, hon, gender, cyr, cmon);
+  document.getElementById('detail-body').innerHTML = html;
+}
+
+// ── 운세 점수 → 색상 ──
+function scoreColor(s) {
+  if (s>=80) return '#2d9a6b';
+  if (s>=65) return '#6db87a';
+  if (s>=50) return '#c8a200';
+  if (s>=35) return '#e8917e';
+  return '#c4393a';
+}
+function scoreLabel(s) {
+  if (s>=80) return '매우 좋음';
+  if (s>=65) return '좋음';
+  if (s>=50) return '보통';
+  if (s>=35) return '주의';
+  return '힘든 시기';
+}
+function scoreEmoji(s) {
+  if (s>=80) return '🌟';
+  if (s>=65) return '✨';
+  if (s>=50) return '🌤️';
+  if (s>=35) return '⛅';
+  return '🌧️';
+}
+
+// 월운 점수 계산
+function getMonthScore(data, month, field) {
+  const cw = data.wolun?.[month];
+  if (!cw) return 50;
+  const sub = scoreForSubFortune(data, cw);
+  if (field==='love') return sub.love;
+  if (field==='money') return sub.money;
+  if (field==='work') return sub.work;
+  if (field==='health') return sub.health;
+  return sub.overall;
+}
+
+// ── 메뉴 설정 ──
+const MENU_CONFIG = {
+
+  // 1. 2026 신년운세
+  yearly: {
+    title: `🌅 ${NOW_YEAR} 신년 종합운세`,
+    render: async (data, p, hon, gender, cyr) => {
+      const pils = data.pillars;
+      const key = getGeminiKey();
+
+      // 월별 종합 점수
+      const monthScores = Array.from({length:12},(_,i)=>{
+        const m=i+1, cw=data.wolun?.[m];
+        if(!cw) return {m,s:50};
+        const sub=scoreForSubFortune(data,cw);
+        return {m, s:sub.overall};
+      });
+      const bestMonth = monthScores.reduce((a,b)=>a.s>b.s?a:b);
+      const worstMonth = monthScores.reduce((a,b)=>a.s<b.s?a:b);
+
+      let aiHtml = '';
+      if (key) {
+        const prompt = `당신은 한국 명리학 전문가입니다. 따뜻하고 희망적인 말투로 ${NOW_YEAR}년 운세를 풀어주세요.
+
+[사주] ${hon}(${gender}) · 일간 ${data.ilgan} · ${data.singang} ${data.sangScore}점
+사주: ${pils.year?.gan}${pils.year?.ji} ${pils.month?.gan}${pils.month?.ji} ${pils.day?.gan}${pils.day?.ji} ${pils.hour?.gan||''}${pils.hour?.ji||''}
+${NOW_YEAR}년 세운: ${cyr?.gan}${cyr?.ji} (${cyr?.sipsin} · ${cyr?.unseong})
+오행: 목${data.oheng?.목||0} 화${data.oheng?.화||0} 토${data.oheng?.토||0} 금${data.oheng?.금||0} 수${data.oheng?.수||0}
+용신: ${data.yongsin||'?'} / 희신: ${data.heesin||'?'} / 기신: ${data.kisin||'?'}
+
+${NOW_YEAR}년 종합운세를 200자 내외로 따뜻하게 풀어주세요. 핵심 키워드 3개도 알려주세요. 마지막에 "올해의 한마디"로 마무리해주세요.`;
+        const result = await callGemini(prompt);
+        aiHtml = result ? `<div class="result-card" style="border-left:3px solid var(--leaf-3);">
+          <div class="result-card-title">🤖 AI 종합 풀이</div>
+          <p style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${result}</p>
+        </div>` : '';
+      }
+
+      return `
+        <div class="result-card">
+          <div class="result-card-title">📅 ${NOW_YEAR}년 세운</div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="text-align:center;background:var(--ivory-2);border-radius:12px;padding:12px 20px;">
+              <div style="font-size:11px;color:var(--ink-soft);">년간</div>
+              <div style="font-size:28px;font-weight:700;">${cyr?.gan||'?'}</div>
+              <div style="font-size:22px;">${cyr?.ji||'?'}</div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:13px;margin-bottom:6px;">일간과의 관계: <strong>${cyr?.sipsin||'?'}</strong></div>
+              <div style="font-size:13px;margin-bottom:6px;">12운성: <strong>${cyr?.unseong||'?'}</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-card-title">📊 월별 운세 흐름</div>
+          <div class="month-score-grid">
+            ${monthScores.map(({m,s})=>`
+              <div class="month-score-cell ${m===bestMonth.m?'msc-top':''}">
+                <div class="msc-month">${m}월</div>
+                <div class="msc-score" style="color:${scoreColor(s)};">${s}</div>
+                <div class="msc-label">${scoreEmoji(s)}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div style="margin-top:10px;font-size:13px;">
+            <span style="color:#2d9a6b;">🌟 최고의 달: <strong>${bestMonth.m}월</strong></span>
+            &nbsp;&nbsp;
+            <span style="color:#c4393a;">⚠️ 조심할 달: <strong>${worstMonth.m}월</strong></span>
+          </div>
+        </div>
+
+        ${aiHtml}
+
+        ${!key ? `<div class="result-card" style="text-align:center;background:var(--ivory-2);">
+          <p style="margin:0;font-size:13px;color:var(--ink-soft);">🤖 AI 심화 풀이를 보려면<br>설정에서 Gemini API 키를 등록해주세요</p>
+          <button onclick="switchTab('settings')" class="btn-secondary" style="margin-top:10px;width:auto;padding:8px 20px;">설정으로 가기</button>
+        </div>` : ''}
+      `;
+    }
+  },
+
+  // 2. 솔로 탈출 시기
+  solo_escape: {
+    title: '❤️ 솔로 탈출 시기',
+    render: async (data, p, hon, gender) => {
+      const isF = p.gender==='female';
+      // 관성(여자) 또는 재성(남자)이 들어오는 달 찾기
+      const targetSS = isF ? ['정관','편관'] : ['정재','편재'];
+      const goodMonths = [];
+      for (let m=1;m<=12;m++) {
+        const cw = data.wolun?.[m];
+        if (!cw) continue;
+        const sub = scoreForSubFortune(data,cw);
+        if (targetSS.includes(cw.sipsin) || sub.love>=70) {
+          goodMonths.push({m, score:sub.love, sipsin:cw.sipsin, gan:cw.gan, ji:cw.ji});
+        }
+      }
+      goodMonths.sort((a,b)=>b.score-a.score);
+
+      const key = getGeminiKey();
+      let aiHtml = '';
+      if (key) {
+        const prompt = `명리학 전문가로서 ${hon}의 솔로 탈출 시기를 재미있고 희망차게 분석해주세요.
+일간: ${data.ilgan} · ${data.singang} · 용신: ${data.yongsin}
+올해 인연운 좋은 달: ${goodMonths.slice(0,3).map(x=>x.m+'월').join(', ')||'없음'}
+${NOW_YEAR}년 연애운을 200자 내외로 풀어주세요. 어떤 달에 어떤 사람을 만날 수 있는지 구체적으로요!`;
+        const result = await callGemini(prompt);
+        aiHtml = result ? `<div class="result-card" style="border-left:3px solid var(--leaf-3);">
+          <div class="result-card-title">🤖 AI 인연운 풀이</div>
+          <p style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${result}</p>
+        </div>` : '';
+      }
+
+      return `
+        <div class="result-card">
+          <div class="result-card-title">💕 ${NOW_YEAR}년 인연운 TOP 달</div>
+          ${goodMonths.length > 0 ? goodMonths.slice(0,4).map((x,i)=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0;${i>0?'border-top:1px solid var(--ivory-2);':''}">
+              <div style="font-size:22px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'💕'}</div>
+              <div style="flex:1;">
+                <div style="font-weight:700;">${x.m}월 <span style="font-size:12px;color:var(--ink-soft);">${x.gan}${x.ji} · ${x.sipsin}</span></div>
+                <div class="result-bar-wrap"><div class="result-bar" style="width:${x.score}%;background:${scoreColor(x.score)};"></div></div>
+              </div>
+              <div style="font-size:18px;font-weight:700;color:${scoreColor(x.score)};">${x.score}</div>
+            </div>
+          `).join('') : '<p style="color:var(--ink-soft);font-size:14px;">올해는 조금 쉬어가는 해예요. 자신을 사랑하는 시간! 🦫</p>'}
+        </div>
+
+        <div class="result-card">
+          <div class="result-card-title">🌸 이런 달에 특히 주의해요</div>
+          <div class="tag-row">
+            <span class="tag tag-good">✓ 새로운 만남 시도</span>
+            <span class="tag tag-good">✓ 소개팅 적극 수락</span>
+            <span class="tag tag-neutral">~ 자연스러운 인연</span>
+          </div>
+          <p style="font-size:13px;color:var(--ink-soft);margin-top:10px;">
+            ${isF?'관성':'재성'}이 들어오는 달에 인연이 생길 확률이 높아요!
+          </p>
+        </div>
+
+        ${aiHtml}
+      `;
+    }
+  },
+
+  // 3. 남은 연애 횟수
+  love_count: {
+    title: '😮 남은 연애 횟수',
+    render: async (data, p, hon, gender) => {
+      // 재미용: 대운 수 기반 계산
+      const age = NOW_YEAR - parseInt(p.year);
+      const remaining = data.daewoon?.filter(d=>d.age_from>age).length||0;
+      const isF = p.gender==='female';
+      const targetSS = isF ? ['정관','편관','정재','편재'] : ['정재','편재','정관','편관'];
+      let relationCount = 0;
+      data.yeonwoon?.forEach(y=>{
+        if(y.year>NOW_YEAR && targetSS.includes(y.sipsin)) relationCount++;
+      });
+      const funCount = Math.max(1, Math.min(7, Math.round(relationCount*0.6 + remaining*0.4)));
+
+      return `
+        <div class="result-card" style="text-align:center;">
+          <div class="result-card-title" style="justify-content:center;">💝 앞으로 남은 연애 횟수</div>
+          <span class="result-big">${funCount}번</span>
+          <p style="font-size:13px;color:var(--ink-soft);">대운 흐름과 세운 분석 기반 (재미용이에요 🦫)</p>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">🔮 연애 흐름 예측</div>
+          ${data.daewoon?.slice(0,4).map(d=>{
+            const score = Math.floor(Math.random()*30)+50;
+            return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ivory-2);">
+              <div style="font-size:13px;min-width:70px;">${d.age_from}~${d.age_to}세</div>
+              <div style="flex:1;">
+                <div style="font-size:12px;color:var(--ink-soft);">${d.gan}${d.ji} · ${d.sipsin}</div>
+                <div class="result-bar-wrap"><div class="result-bar" style="width:${score}%;"></div></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="result-card" style="background:var(--ivory-2);">
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">
+            ⚠️ 이 결과는 재미용이에요. 인연은 노력하기 나름이에요 💕
+          </p>
+        </div>
+      `;
+    }
+  },
+
+  // 4. 도화살
+  dohwa: {
+    title: '🌸 나의 도화살',
+    render: async (data, p, hon, gender) => {
+      const sinsal = data.sinsal||[];
+      const dohwaTypes = sinsal.filter(s=>s.includes('도화')||s.includes('咸池'));
+      const hasDohwa = dohwaTypes.length>0||sinsal.includes('도화살');
+      const doScore = hasDohwa ? Math.floor(Math.random()*20)+75 : Math.floor(Math.random()*20)+40;
+
+      const key = getGeminiKey();
+      let aiHtml='';
+      if(key){
+        const prompt=`명리학으로 ${hon}의 매력과 도화살을 분석해주세요.
+일간: ${data.ilgan} · 신살: ${sinsal.join(', ')||'없음'}
+도화살 여부: ${hasDohwa?'있음':'없음'}
+이성에게 어떤 매력이 있는지, 어떻게 매력을 발산하면 좋은지 150자 내외로 따뜻하게 풀어주세요.`;
+        const r=await callGemini(prompt);
+        aiHtml=r?`<div class="result-card" style="border-left:3px solid var(--leaf-3);">
+          <div class="result-card-title">🤖 AI 매력 분석</div>
+          <p style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${r}</p>
+        </div>`:'';
+      }
+
+      return `
+        <div class="result-card" style="text-align:center;">
+          <div class="result-card-title" style="justify-content:center;">🌸 도화살 지수</div>
+          <span class="result-big" style="color:${hasDohwa?'var(--leaf-3)':'var(--ink-soft)'};">${doScore}점</span>
+          <p style="font-size:15px;font-weight:700;">${hasDohwa?'🌟 도화살이 있어요!':'🌱 도화살은 없지만...'}</p>
+          <p style="font-size:13px;color:var(--ink-soft);">${hasDohwa?'타고난 이성 호감도가 높아요':'후천적 매력으로 충분해요!'}</p>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">💫 보유 신살</div>
+          <div class="tag-row">
+            ${sinsal.length>0 ? sinsal.slice(0,8).map(s=>`<span class="tag ${s.includes('도화')||s.includes('귀인')?'tag-good':'tag-neutral'}">${s}</span>`).join('') 
+              : '<span class="tag tag-neutral">신살 정보가 없어요</span>'}
+          </div>
+          <p style="font-size:12px;color:var(--ink-soft);margin-top:8px;">만세력 텍스트 붙여넣기를 사용하면 신살이 더 정확해요 🦫</p>
+        </div>
+        ${aiHtml}
+      `;
+    }
+  },
+
+  // 5. 이달 애정운
+  month_love: {
+    title: `💕 ${NOW_MONTH}월 애정운`,
+    render: async (data, p, hon, gender, cyr, cmon) => {
+      const score = cmon ? scoreForSubFortune(data,cmon).love : 50;
+      return renderMonthDetail(data, p, hon, gender, cmon, score, '애정운', '💕', 
+        '이성과의 인연, 연애 감정, 관계의 흐름을 봐요.');
+    }
+  },
+  month_money: {
+    title: `💰 ${NOW_MONTH}월 재물운`,
+    render: async (data, p, hon, gender, cyr, cmon) => {
+      const score = cmon ? scoreForSubFortune(data,cmon).money : 50;
+      return renderMonthDetail(data, p, hon, gender, cmon, score, '재물운', '💰',
+        '수입, 지출, 투자의 흐름을 봐요.');
+    }
+  },
+  month_work: {
+    title: `💼 ${NOW_MONTH}월 업무운`,
+    render: async (data, p, hon, gender, cyr, cmon) => {
+      const score = cmon ? scoreForSubFortune(data,cmon).work : 50;
+      return renderMonthDetail(data, p, hon, gender, cmon, score, '업무운', '💼',
+        '커리어, 업무 성과, 직장 흐름을 봐요.');
+    }
+  },
+  month_health: {
+    title: `🏥 ${NOW_MONTH}월 건강운`,
+    render: async (data, p, hon, gender, cyr, cmon) => {
+      const score = cmon ? scoreForSubFortune(data,cmon).health : 50;
+      return renderMonthDetail(data, p, hon, gender, cmon, score, '건강운', '🏥',
+        '몸과 마음의 상태를 봐요.');
+    }
+  },
+  month_study: {
+    title: `📚 ${NOW_MONTH}월 학업운`,
+    render: async (data, p, hon, gender, cyr, cmon) => {
+      const score = cmon ? scoreForSubFortune(data,cmon).work : 50;
+      return renderMonthDetail(data, p, hon, gender, cmon, score, '학업운', '📚',
+        '집중력, 시험운, 자격증 취득을 봐요.');
+    }
+  },
+  month_relation: {
+    title: `🤝 ${NOW_MONTH}월 대인관계운`,
+    render: async (data, p, hon, gender, cyr, cmon) => {
+      const score = cmon ? scoreForSubFortune(data,cmon).overall : 50;
+      return renderMonthDetail(data, p, hon, gender, cmon, score, '대인관계운', '🤝',
+        '인간관계, 협력, 사교의 흐름을 봐요.');
+    }
+  },
+  month_reunion: {
+    title: `💌 ${NOW_MONTH}월 재회운`,
+    render: async (data, p, hon, gender, cyr, cmon) => {
+      const score = cmon ? Math.round((scoreForSubFortune(data,cmon).love + scoreForSubFortune(data,cmon).overall)/2) : 50;
+      return renderMonthDetail(data, p, hon, gender, cmon, score, '재회운', '💌',
+        '전 연인과의 재회 가능성을 봐요.');
+    }
+  },
+
+  // 6. 결혼 적령기
+  marriage_timing: {
+    title: '💍 결혼 적령기',
+    render: async (data, p, hon, gender) => {
+      const age = NOW_YEAR - parseInt(p.year);
+      const isF = p.gender==='female';
+      // 관성/재성 대운 찾기
+      const targetSS = isF?['정관','편관']:['정재','편재'];
+      const goodDW = data.daewoon?.find(d=>targetSS.includes(d.sipsin)&&d.age_from>age);
+      const bestAge = goodDW ? `${goodDW.age_from}~${goodDW.age_to}세` : '현재 좋은 시기예요';
+
+      const key=getGeminiKey(); let aiHtml='';
+      if(key){
+        const prompt=`명리학으로 ${hon}의 결혼 적령기를 분석해주세요.
+일간:${data.ilgan} · ${data.singang} · 현재나이:${age}세 · 용신:${data.yongsin}
+가장 좋은 대운: ${goodDW?`${goodDW.gan}${goodDW.ji} (${goodDW.age_from}~${goodDW.age_to}세)` : '현재 진행 중'}
+결혼 타이밍과 이상적인 파트너 유형을 150자 내외로 알려주세요.`;
+        const r=await callGemini(prompt);
+        aiHtml=r?`<div class="result-card" style="border-left:3px solid var(--leaf-3);">
+          <div class="result-card-title">🤖 AI 결혼운 풀이</div>
+          <p style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${r}</p>
+        </div>`:'';
+      }
+      return `
+        <div class="result-card" style="text-align:center;">
+          <div class="result-card-title" style="justify-content:center;">💍 최적 결혼 시기</div>
+          <span class="result-big">${bestAge}</span>
+          <p style="font-size:13px;color:var(--ink-soft);">${goodDW?goodDW.gan+goodDW.ji+' 대운 · '+goodDW.sipsin:'현재가 좋은 시기예요'}</p>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">🌊 대운 타임라인</div>
+          ${data.daewoon?.slice(0,5).map(d=>{
+            const isGood=targetSS.includes(d.sipsin);
+            return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--ivory-2);">
+              <span style="font-size:${isGood?'20':'14'}px;">${isGood?'💍':'•'}</span>
+              <span style="font-size:13px;min-width:70px;">${d.age_from}~${d.age_to}세</span>
+              <span style="font-size:13px;">${d.gan}${d.ji}</span>
+              <span class="tag ${isGood?'tag-good':'tag-neutral'}" style="font-size:11px;">${d.sipsin}</span>
+            </div>`;
+          }).join('')}
+        </div>
+        ${aiHtml}
+      `;
+    }
+  },
+
+  // 7. 절대 만나면 안 되는 상대
+  bad_match: {
+    title: '🚫 절대 만나면 안 되는 상대',
+    render: async (data, p, hon) => {
+      const dJi = data.pillars?.day?.ji;
+      const CHUNG = {子:'午',午:'子',卯:'酉',酉:'卯',寅:'申',申:'寅',巳:'亥',亥:'巳',辰:'戌',戌:'辰',丑:'未',未:'丑'};
+      const chungJi = CHUNG[dJi]||'?';
+      const HYUNG = {子:'卯',卯:'子',寅:'巳',巳:'申',申:'寅',丑:'戌',戌:'未',未:'丑',辰:'辰',午:'午',酉:'酉',亥:'亥'};
+      const hyungJi = HYUNG[dJi]||'?';
+
+      return `
+        <div class="result-card">
+          <div class="result-card-title">⚡ 충(冲) 관계 - 가장 위험</div>
+          <div style="text-align:center;margin:12px 0;">
+            <span style="font-size:40px;">⚡</span>
+            <p style="font-size:20px;font-weight:700;margin:8px 0;">일지 ${dJi}와 충: <span style="color:#c4393a;">${chungJi}</span>일 생</p>
+            <p style="font-size:13px;color:var(--ink-soft);">충 관계는 처음엔 강하게 끌리지만 갈등이 심해요</p>
+          </div>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">⚠️ 형(刑) 관계 - 주의 필요</div>
+          <div style="text-align:center;margin:12px 0;">
+            <span style="font-size:36px;">⚠️</span>
+            <p style="font-size:18px;font-weight:700;margin:8px 0;">${hyungJi}일 생은 주의</p>
+            <p style="font-size:13px;color:var(--ink-soft);">형 관계는 서로 상처를 줄 수 있어요</p>
+          </div>
+        </div>
+        <div class="result-card" style="background:var(--ivory-2);">
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">
+            💡 일지(일주의 지지)가 기준이에요. 충·형이라도 천간이 잘 맞으면 괜찮을 수 있고, 그 반대도 마찬가지예요. 참고용으로만 봐주세요 🦫
+          </p>
+        </div>
+      `;
+    }
+  },
+
+  // 8. 내가 차이는 이유
+  why_dumped: {
+    title: '💔 내가 차이는 이유',
+    render: async (data, p, hon, gender) => {
+      const key=getGeminiKey(); let aiHtml='';
+      if(key){
+        const prompt=`명리학으로 ${hon}이 연애에서 어려움을 겪는 이유를 솔직하고 따뜻하게 분석해주세요.
+일간:${data.ilgan} · ${data.singang} · 오행:목${data.oheng?.목||0} 화${data.oheng?.화||0} 토${data.oheng?.토||0} 금${data.oheng?.금||0} 수${data.oheng?.수||0}
+십신 구성:${data.sipsin_gan?.year||''} ${data.sipsin_gan?.month||''} ${data.sipsin_gan?.hour||''}
+
+연애 약점 2~3가지와 개선 방법을 200자 내외로 솔직하게 (하지만 따뜻하게) 알려주세요.`;
+        const r=await callGemini(prompt);
+        aiHtml=r?`<div class="result-card" style="border-left:3px solid var(--leaf-3);">
+          <div class="result-card-title">🤖 AI 연애 약점 분석</div>
+          <p style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${r}</p>
+        </div>`:'';
+      }
+
+      // 일간별 기본 분석
+      const IL_WEAK = {
+        甲:'독립적이라 상대가 외로움을 느낄 수 있어요',乙:'우유부단함이 상대를 지치게 할 수 있어요',
+        丙:'너무 솔직해서 상대에게 상처를 줄 수 있어요',丁:'감정 기복이 상대를 혼란스럽게 해요',
+        戊:'고집이 강해 타협이 어려울 수 있어요',己:'걱정이 많아 상대를 답답하게 할 수 있어요',
+        庚:'직설적인 표현이 상대를 놀라게 해요',辛:'완벽주의로 상대에게 부담을 줄 수 있어요',
+        壬:'자유로움을 추구해 상대가 불안할 수 있어요',癸:'소극적인 표현으로 상대가 오해할 수 있어요'
+      };
+
+      return `
+        <div class="result-card">
+          <div class="result-card-title">🔍 일간 ${data.ilgan}의 연애 약점</div>
+          <p style="font-size:14px;line-height:1.7;">${IL_WEAK[data.ilgan]||'일간 분석을 확인해주세요'}</p>
+        </div>
+        ${aiHtml}
+        ${!key?`<div class="result-card" style="background:var(--ivory-2);text-align:center;">
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">AI 심화 분석을 보려면 설정에서 Gemini 키를 등록해주세요</p>
+          <button onclick="switchTab('settings')" class="btn-secondary" style="margin-top:8px;width:auto;padding:6px 16px;">설정하기</button>
+        </div>`:''}
+      `;
+    }
+  },
+
+  // 9. 연애 유형
+  love_type: {
+    title: '🎭 나의 연애 유형',
+    render: async (data, p, hon) => {
+      const types = {
+        甲:{type:'🌳 주도형 연애',desc:'리더십 있고 헌신적이에요. 상대를 이끌고 싶어하지만 가끔 독단적일 수 있어요.'},
+        乙:{type:'🌿 감성형 연애',desc:'섬세하고 배려심이 깊어요. 분위기에 민감하고 상대의 감정을 잘 읽어요.'},
+        丙:{type:'☀️ 불꽃형 연애',desc:'열정적이고 솔직해요. 감정 표현이 강렬하고 연애할 때 온도가 확 올라가요.'},
+        丁:{type:'🕯️ 감성 불꽃형',desc:'따뜻하고 로맨틱해요. 상대에게 깊이 빠지지만 감정 기복이 있을 수 있어요.'},
+        戊:{type:'🏔️ 안정형 연애',desc:'든든하고 믿음직해요. 변화보다 안정을 추구하며 장기 연애에 강해요.'},
+        己:{type:'🌏 배려형 연애',desc:'세심하고 챙겨주는 스타일이에요. 상대를 위해 희생하지만 가끔 답답할 수 있어요.'},
+        庚:{type:'⚔️ 직진형 연애',desc:'솔직하고 직접적이에요. 돌아가는 걸 싫어하고 좋으면 바로 표현해요.'},
+        辛:{type:'💎 완벽형 연애',desc:'스타일리시하고 기준이 높아요. 상대에게 최선을 다하지만 완벽함을 요구할 수 있어요.'},
+        壬:{type:'🌊 자유형 연애',desc:'자유롭고 넓은 생각을 가졌어요. 구속보다 이해를 원하고 지적 교감을 중요시해요.'},
+        癸:{type:'🌙 신비형 연애',desc:'깊고 조용한 감정의 소유자예요. 쉽게 드러내지 않지만 한번 빠지면 깊이 사랑해요.'}
+      };
+      const t = types[data.ilgan]||{type:'연애 유형',desc:'분석 중'};
+      const key=getGeminiKey(); let aiHtml='';
+      if(key){
+        const prompt=`명리학으로 ${hon}의 연애 스타일과 이상형을 200자 내외로 재미있고 따뜻하게 분석해주세요.
+일간:${data.ilgan}(${t.type}) · ${data.singang} · 오행:목${data.oheng?.목||0} 화${data.oheng?.화||0} 토${data.oheng?.토||0} 금${data.oheng?.금||0} 수${data.oheng?.수||0}
+이상형 유형과 잘 맞는 일간도 알려주세요.`;
+        const r=await callGemini(prompt);
+        aiHtml=r?`<div class="result-card" style="border-left:3px solid var(--leaf-3);">
+          <div class="result-card-title">🤖 AI 연애 스타일 분석</div>
+          <p style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${r}</p>
+        </div>`:'';
+      }
+      return `
+        <div class="result-card" style="text-align:center;">
+          <span class="result-big">${t.type}</span>
+          <p style="font-size:14px;line-height:1.7;margin-top:0;">${t.desc}</p>
+        </div>
+        ${aiHtml}
+      `;
+    }
+  },
+
+  // 10. 재회운
+  reunion: {
+    title: '🥺 재회운 분석',
+    render: async (data, p, hon, gender, cyr, cmon) => {
+      const score = cmon ? Math.round((scoreForSubFortune(data,cmon).love + scoreForSubFortune(data,cmon).overall)/2) : 50;
+      const key=getGeminiKey(); let aiHtml='';
+      if(key){
+        const prompt=`명리학으로 ${hon}의 현재 재회운을 분석해주세요.
+일간:${data.ilgan} · ${NOW_MONTH}월운:${cmon?.gan||''}${cmon?.ji||''} · ${cmon?.sipsin||''} · ${cmon?.unseong||''}
+재회 가능성과 어떻게 접근하면 좋을지 150자 내외로 솔직하게 알려주세요.`;
+        const r=await callGemini(prompt);
+        aiHtml=r?`<div class="result-card" style="border-left:3px solid var(--leaf-3);">
+          <div class="result-card-title">🤖 AI 재회운 풀이</div>
+          <p style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${r}</p>
+        </div>`:'';
+      }
+      return `
+        <div class="result-card" style="text-align:center;">
+          <div class="result-card-title" style="justify-content:center;">💌 ${NOW_MONTH}월 재회 가능성</div>
+          <span class="result-big" style="color:${scoreColor(score)};">${score}점</span>
+          <p style="font-size:15px;font-weight:700;">${scoreLabel(score)} ${scoreEmoji(score)}</p>
+        </div>
+        ${aiHtml}
+      `;
+    }
+  },
+
+  // 11. 나의 매력 포인트
+  charm_point: {
+    title: '✨ 나의 매력 포인트',
+    render: async (data, p, hon, gender) => {
+      const key=getGeminiKey(); let aiHtml='';
+      if(key){
+        const prompt=`명리학으로 ${hon}의 이성에게 어필되는 매력 포인트를 구체적으로 분석해주세요.
+일간:${data.ilgan} · ${data.singang} ${data.sangScore}점 · 오행:목${data.oheng?.목||0} 화${data.oheng?.화||0} 토${data.oheng?.토||0} 금${data.oheng?.금||0} 수${data.oheng?.수||0}
+신살:${(data.sinsal||[]).join(', ')||'없음'}
+외모/성격/말투/분위기 각 측면에서 매력 포인트를 재미있게 분석해주세요. 200자 내외.`;
+        const r=await callGemini(prompt);
+        aiHtml=r?`<div class="result-card">
+          <div class="result-card-title">✨ AI 매력 분석</div>
+          <p style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${r}</p>
+        </div>`:`<div class="result-card" style="text-align:center;background:var(--ivory-2);">
+          <p style="font-size:13px;color:var(--ink-soft);">설정에서 Gemini 키 등록 시 AI 분석이 가능해요</p>
+          <button onclick="switchTab('settings')" class="btn-secondary" style="margin-top:8px;width:auto;padding:6px 16px;">설정하기</button>
+        </div>`;
+      } else {
+        aiHtml=`<div class="result-card" style="text-align:center;background:var(--ivory-2);">
+          <p style="font-size:13px;color:var(--ink-soft);">🤖 AI 분석이 필요한 메뉴예요<br>설정에서 Gemini 키를 등록해주세요</p>
+          <button onclick="switchTab('settings')" class="btn-secondary" style="margin-top:8px;width:auto;padding:6px 16px;">설정하기</button>
+        </div>`;
+      }
+      return aiHtml;
+    }
+  },
+
+  // 12. 올해 썸 성공 확률
+  love_success: {
+    title: '🎯 올해 썸 성공 확률',
+    render: async (data, p, hon, gender, cyr) => {
+      const isF = p.gender==='female';
+      const targetSS = isF?['정관','편관']:['정재','편재'];
+      const baseScore = targetSS.includes(cyr?.sipsin) ? 75 : 50;
+      const ohBonus = isF ? (data.oheng?.금||0)*3 : (data.oheng?.목||0)*3;
+      const finalScore = Math.min(95, Math.max(20, baseScore + ohBonus));
+
+      return `
+        <div class="result-card" style="text-align:center;">
+          <div class="result-card-title" style="justify-content:center;">🎯 ${NOW_YEAR}년 썸 성공 확률</div>
+          <span class="result-big" style="color:${scoreColor(finalScore)};">${finalScore}%</span>
+          <div class="result-bar-wrap" style="margin:0 20px;">
+            <div class="result-bar" style="width:${finalScore}%;background:${scoreColor(finalScore)};"></div>
+          </div>
+          <p style="font-size:14px;margin-top:10px;">${finalScore>=70?'🌟 올해 연애 가능성이 높아요!':finalScore>=50?'✨ 노력하면 충분히 가능해요':' 조금 더 기다려야 할 것 같아요'}</p>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">📊 점수 산출 근거</div>
+          <div style="font-size:13px;line-height:2;">
+            <div>• ${NOW_YEAR}년 세운(${cyr?.gan}${cyr?.ji}): ${cyr?.sipsin} → ${targetSS.includes(cyr?.sipsin)?'+25점 (인연성 있는 해)':'+0점'}</div>
+            <div>• 오행 보너스: +${ohBonus}점</div>
+            <div>• 기본점: 50점</div>
+          </div>
+        </div>
+      `;
+    }
+  },
+
+  // 13. 신강신약
+  singang: {
+    title: '⚖️ 신강/신약 분석',
+    render: async (data, p, hon) => {
+      const sc = data.sangScore||50;
+      const getLevel = s => {
+        if(s<=10)return{label:'극약',color:'#9b8ec4'};if(s<=25)return{label:'태약',color:'#9b8ec4'};
+        if(s<=40)return{label:'신약',color:'#9b8ec4'};if(s<=48)return{label:'중화신약',color:'#c8a882'};
+        if(s<=55)return{label:'중화신강',color:'#6db87a'};if(s<=70)return{label:'신강',color:'#6db87a'};
+        if(s<=85)return{label:'태강',color:'#e8917e'};return{label:'극왕',color:'#e8917e'};
+      };
+      const lv=getLevel(sc);
+      return `
+        <div class="result-card">
+          <div class="result-card-title">⚖️ 신강/신약 지수</div>
+          <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:12px;">
+            <span style="font-family:'Nanum Pen Script',cursive;font-size:44px;color:${lv.color};">${lv.label}</span>
+            <span style="font-size:26px;font-weight:700;color:${lv.color};margin-bottom:6px;">${sc}점</span>
+          </div>
+          <div class="result-bar-wrap">
+            <div class="result-bar" style="width:${sc}%;background:linear-gradient(90deg,#9b8ec4 0%,#6db87a 50%,#e8917e 100%);"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--ink-soft);margin-top:4px;">
+            <span>극약</span><span>신약</span><span>중화</span><span>신강</span><span>극왕</span>
+          </div>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">🎯 용신/희신/기신</div>
+          <div style="display:flex;gap:10px;">
+            <div style="flex:1;text-align:center;background:var(--ivory-2);border-radius:12px;padding:10px;">
+              <div style="font-size:11px;color:var(--ink-soft);">용신</div>
+              <div style="font-size:22px;font-weight:700;color:#2d9a6b;">${data.yongsin||'?'}</div>
+            </div>
+            <div style="flex:1;text-align:center;background:var(--ivory-2);border-radius:12px;padding:10px;">
+              <div style="font-size:11px;color:var(--ink-soft);">희신</div>
+              <div style="font-size:22px;font-weight:700;color:#6db87a;">${data.heesin||'?'}</div>
+            </div>
+            <div style="flex:1;text-align:center;background:var(--ivory-2);border-radius:12px;padding:10px;">
+              <div style="font-size:11px;color:var(--ink-soft);">기신</div>
+              <div style="font-size:22px;font-weight:700;color:#c4393a;">${data.kisin||'?'}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  },
+
+  // 14. 오행 분포
+  oheng: {
+    title: '🌳 오행 분포',
+    render: async (data) => {
+      const oh = data.oheng||{};
+      const total = Object.values(oh).reduce((a,b)=>a+b,0)||1;
+      const colors = {목:'#4CAF50',화:'#FF5722',토:'#8D6E63',금:'#9E9E9E',수:'#2196F3'};
+      const emoji = {목:'🌳',화:'🔥',토:'🌏',금:'⚙️',수:'💧'};
+      return `
+        <div class="result-card">
+          <div class="result-card-title">🌳 오행 분포</div>
+          ${Object.entries(oh).map(([k,v])=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ivory-2);">
+              <span style="font-size:20px;">${emoji[k]}</span>
+              <span style="min-width:20px;font-weight:700;">${k}</span>
+              <div style="flex:1;background:rgba(0,0,0,.07);border-radius:99px;height:10px;overflow:hidden;">
+                <div style="width:${Math.round(v/total*100)}%;height:100%;background:${colors[k]};border-radius:99px;"></div>
+              </div>
+              <span style="font-weight:700;min-width:20px;text-align:right;">${v}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">💡 오행 해석</div>
+          <p style="font-size:14px;line-height:1.7;">
+            ${Object.entries(oh).sort((a,b)=>b[1]-a[1])[0][0]}이 가장 강해요.
+            ${Object.entries(oh).sort((a,b)=>a[1]-b[1])[0][0]}이 부족하니 보완이 필요해요.
+            용신 <strong>${data.yongsin||'?'}</strong>을 통해 균형을 맞추세요.
+          </p>
+        </div>
+      `;
+    }
+  },
+
+  // 15. 일간 성격
+  ilgan_char: {
+    title: '🎭 일간으로 보는 성격',
+    render: async (data, p, hon, gender) => {
+      const key=getGeminiKey(); let aiHtml='';
+      if(key){
+        const prompt=`명리학으로 ${hon}의 성격과 기질을 분석해주세요.
+일간:${data.ilgan} · ${data.singang} ${data.sangScore}점
+오행:목${data.oheng?.목||0} 화${data.oheng?.화||0} 토${data.oheng?.토||0} 금${data.oheng?.금||0} 수${data.oheng?.수||0}
+장점, 단점, 직업 적성을 200자 내외로 친근하게 알려주세요.`;
+        const r=await callGemini(prompt);
+        aiHtml=r?`<div class="result-card">
+          <div class="result-card-title">🤖 AI 성격 분석</div>
+          <p style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${r}</p>
+        </div>`:'';
+      }
+      const GAN_DESC={甲:'큰 나무 — 곧고 강직한 리더',乙:'화초 — 유연하고 감성적인 예술가',
+        丙:'태양 — 밝고 열정적인 에너지',丁:'촛불 — 따뜻하고 섬세한 감성',
+        戊:'큰 산 — 묵직하고 든든한 버팀목',己:'논밭 — 현실적이고 실용적인 조력자',
+        庚:'서리 — 날카롭고 결단력 있는 승부사',辛:'보석 — 완벽주의자, 세련된 감각',
+        壬:'큰 강 — 자유롭고 지혜로운 사색가',癸:'빗물 — 신비롭고 직관적인 내면의 깊이'};
+      return `
+        <div class="result-card" style="text-align:center;">
+          <div style="font-size:50px;margin-bottom:8px;">${data.ilgan}</div>
+          <div style="font-size:16px;font-weight:700;">${GAN_DESC[data.ilgan]||data.ilgan}</div>
+        </div>
+        ${aiHtml}
+        ${!key?`<div class="result-card" style="background:var(--ivory-2);text-align:center;">
+          <p style="font-size:13px;color:var(--ink-soft);margin:0;">AI 심화 분석을 원하시면 설정에서 Gemini 키를 등록해주세요</p>
+          <button onclick="switchTab('settings')" class="btn-secondary" style="margin-top:8px;width:auto;padding:6px 16px;">설정하기</button>
+        </div>`:''}
+      `;
+    }
+  },
+
+  // 16. 신살 총정리
+  sinsal: {
+    title: '💫 나의 신살 총정리',
+    render: async (data) => {
+      const sinsal = data.sinsal||[];
+      const SINSAL_DESC = {
+        '역마살':'자주 이동하고 변화를 좋아해요. 여행, 이민, 이직과 관련 있어요.',
+        '도화살':'매력과 이성 호감도가 높아요. 예술적 감각도 뛰어나요.',
+        '화개살':'종교, 예술, 학문에 인연이 깊어요.',
+        '귀인':'귀인의 도움을 자주 받아요.',
+        '천을귀인':'하늘의 도움이 있는 귀한 신살이에요.',
+        '문창귀인':'학문과 글쓰기에 재능이 있어요.',
+        '건록':'자립심이 강하고 독립적이에요.',
+        '양인살':'의지가 강하고 승부욕이 있어요.',
+        '백호대살':'강한 에너지, 주의가 필요해요.'
+      };
+      return `
+        <div class="result-card">
+          <div class="result-card-title">💫 보유 신살 (${sinsal.length}개)</div>
+          ${sinsal.length>0 ? sinsal.map(s=>`
+            <div style="padding:10px 0;border-bottom:1px solid var(--ivory-2);">
+              <div style="font-weight:700;font-size:14px;">✦ ${s}</div>
+              <div style="font-size:12px;color:var(--ink-soft);margin-top:3px;">
+                ${Object.entries(SINSAL_DESC).find(([k])=>s.includes(k))?.[1]||'자세한 분석은 명리사에게 문의해주세요'}
+              </div>
+            </div>
+          `).join('') : '<p style="color:var(--ink-soft);font-size:14px;">만세력 텍스트를 붙여넣으면 신살 정보가 나와요 🦫</p>'}
+        </div>
+      `;
+    }
+  },
+
+  // 17. 대운 타임라인
+  daewoon: {
+    title: '🌊 대운 타임라인',
+    render: async (data, p) => {
+      const age = NOW_YEAR - parseInt(p.year);
+      return `
+        <div class="result-card">
+          <div class="result-card-title">🌊 대운 흐름</div>
+          ${data.daewoon?.slice(0,8).map(d=>{
+            const isCur=d.age_from<=age&&age<=d.age_to;
+            return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);
+              ${isCur?'background:linear-gradient(90deg,rgba(232,145,126,.1),transparent);border-radius:8px;padding-left:8px;':''}">
+              ${isCur?'<span style="font-size:16px;">👈</span>':'<span style="font-size:16px;opacity:0;">·</span>'}
+              <div style="min-width:80px;font-size:13px;${isCur?'font-weight:700;':''}">${d.age_from}~${d.age_to}세</div>
+              <div style="font-size:20px;font-weight:700;">${d.gan}${d.ji}</div>
+              <div class="tag tag-neutral" style="font-size:11px;">${d.sipsin}</div>
+              <div style="font-size:11px;color:var(--ink-soft);">${d.unseong}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      `;
+    }
+  },
+
+  // 18. 월별 운세 순위
+  yearly_rank: {
+    title: '📊 올해 월별 운세 순위',
+    render: async (data) => {
+      const scores = Array.from({length:12},(_,i)=>{
+        const m=i+1, cw=data.wolun?.[m];
+        if(!cw) return {m,s:50,gan:'',ji:''};
+        return {m, s:scoreForSubFortune(data,cw).overall, gan:cw.gan, ji:cw.ji};
+      }).sort((a,b)=>b.s-a.s);
+      return `
+        <div class="result-card">
+          <div class="result-card-title">📊 ${NOW_YEAR}년 월별 운세 순위</div>
+          ${scores.map((x,i)=>`
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ivory-2);">
+              <span style="font-size:${i<3?'20':'14'}px;min-width:24px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1+'위'}</span>
+              <span style="font-weight:700;min-width:40px;">${x.m}월</span>
+              <span style="font-size:12px;color:var(--ink-soft);min-width:40px;">${x.gan}${x.ji}</span>
+              <div style="flex:1;background:rgba(0,0,0,.07);border-radius:99px;height:8px;overflow:hidden;">
+                <div style="width:${x.s}%;height:100%;background:${scoreColor(x.s)};border-radius:99px;"></div>
+              </div>
+              <span style="font-weight:700;color:${scoreColor(x.s)};min-width:30px;">${x.s}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+  },
+
+  // 19. 전생 인연
+  past_life: {
+    title: '🌙 전생에 무슨 인연?',
+    render: async (data, p, hon, gender) => {
+      const key=getGeminiKey(); let aiHtml='';
+      if(key){
+        const prompt=`재미있는 전생 인연 이야기를 만들어주세요 (오락용이라고 명시).
+${hon}(${gender}) · 일간:${data.ilgan} · 오행:목${data.oheng?.목||0} 화${data.oheng?.화||0} 토${data.oheng?.토||0} 금${data.oheng?.금||0} 수${data.oheng?.수||0}
+전생에 어떤 사람이었는지, 어떤 인연이 있었는지 200자 내외로 재미있고 드라마틱하게 써주세요. 오락용임을 마지막에 명시해주세요.`;
+        const r=await callGemini(prompt);
+        aiHtml=r?`<div class="result-card">
+          <div class="result-card-title">🌙 AI 전생 이야기</div>
+          <p style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${r}</p>
+        </div>`:
+        `<div class="result-card" style="background:var(--ivory-2);text-align:center;">
+          <p style="font-size:13px;color:var(--ink-soft);">Gemini 키 등록 시 AI가 전생 이야기를 만들어드려요 🌙</p>
+          <button onclick="switchTab('settings')" class="btn-secondary" style="margin-top:8px;width:auto;padding:6px 16px;">설정하기</button>
+        </div>`;
+      } else {
+        aiHtml=`<div class="result-card" style="background:var(--ivory-2);text-align:center;">
+          <p style="font-size:13px;color:var(--ink-soft);">🤖 AI가 전생 이야기를 만들어드리는 메뉴예요<br>설정에서 Gemini 키를 등록해주세요</p>
+          <button onclick="switchTab('settings')" class="btn-secondary" style="margin-top:8px;width:auto;padding:6px 16px;">설정하기</button>
+        </div>`;
+      }
+      const PAST_TYPES=[{il:'甲',t:'🌳 조선의 선비',d:'책을 가까이하고 올곧게 살았던 학자'},
+        {il:'乙',t:'🎨 예인',d:'음악과 춤으로 사람들을 위로했던 예술가'},
+        {il:'丙',t:'☀️ 장군',d:'용맹하게 싸우며 민중을 지켰던 지도자'},
+        {il:'丁',t:'🕯️ 무녀',d:'신과 인간을 잇는 신비한 능력자'},
+        {il:'戊',t:'🏔️ 농부',d:'땅을 일구며 가족을 먹여 살린 든든한 존재'},
+        {il:'己',t:'🌏 치유사',d:'아픈 이들을 돌보던 자비로운 의원'},
+        {il:'庚',t:'⚔️ 무사',d:'검과 함께 살았던 강인한 전사'},
+        {il:'辛',t:'💎 상인',d:'명품을 다루던 세련된 무역상'},
+        {il:'壬',t:'🌊 뱃사공',d:'강과 바다를 누비던 자유로운 항해사'},
+        {il:'癸',t:'🌙 점술가',d:'별과 달을 보며 미래를 읽던 예언자'}];
+      const pt=PAST_TYPES.find(x=>x.il===data.ilgan)||PAST_TYPES[0];
+      return `
+        <div class="result-card" style="text-align:center;">
+          <span class="result-big">${pt.t}</span>
+          <p style="font-size:14px;color:var(--ink-soft);">${pt.d}</p>
+        </div>
+        ${aiHtml}
+      `;
+    }
+  },
+
+  // 20. 사주 MBTI
+  mbti_saju: {
+    title: '🧬 사주 MBTI',
+    render: async (data, p, hon, gender) => {
+      // 일간 + 신강신약 + 오행으로 4글자 유형 생성
+      const oh = data.oheng||{};
+      const isStrong = data.sangScore >= 50;
+      const isWood = (oh.목||0) >= (oh.금||0);
+      const isFire = (oh.화||0) >= (oh.수||0);
+      const isEarth = (oh.토||0) >= 2;
+      const type = (isStrong?'S':'W') + (isWood?'M':'G') + (isFire?'F':'W') + (isEarth?'E':'A');
+      const typeDesc = {
+        S:'강한 기운',W:'섬세한 기운',M:'목기 우세',G:'금기 우세',
+        F:'화기 우세',W2:'수기 우세',E:'토기 우세',A:'균형형'
+      };
+      return `
+        <div class="result-card" style="text-align:center;">
+          <div class="result-card-title" style="justify-content:center;">🧬 나의 사주 유형</div>
+          <span class="result-big">${type}</span>
+          <p style="font-size:14px;color:var(--ink-soft);">일간 ${data.ilgan} · ${data.singang} · 주요 오행 분석 기반</p>
+          <p style="font-size:12px;color:var(--ink-soft);margin-top:0;">⚠️ 재미용이에요 🦫</p>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">📊 오행 성향</div>
+          <div class="tag-row">
+            ${isStrong?'<span class="tag tag-good">강한 에너지</span>':'<span class="tag tag-neutral">섬세한 에너지</span>'}
+            ${isWood?'<span class="tag tag-good">목(창의/성장)</span>':'<span class="tag tag-neutral">금(결단/실행)</span>'}
+            ${isFire?'<span class="tag" style="background:#ffe0d0;color:#c45030;">화(열정/표현)</span>':'<span class="tag" style="background:#d0e8ff;color:#2060a0;">수(지혜/직관)</span>'}
+          </div>
+        </div>
+      `;
+    }
+  },
+
+  // 21. 오늘의 한마디
+  today_word: {
+    title: '🍀 오늘의 한마디',
+    render: async (data, p, hon, gender, cyr, cmon) => {
+      const key=getGeminiKey(); let aiHtml='';
+      if(key){
+        const today=new Date();
+        const prompt=`오늘 ${hon}에게 필요한 한마디를 사주 기반으로 만들어주세요.
+일간:${data.ilgan} · ${NOW_MONTH}월운:${cmon?.gan||''}${cmon?.ji||''} · ${cmon?.sipsin||''}
+오늘 날짜: ${today.getMonth()+1}월 ${today.getDate()}일
+따뜻하고 힘이 되는 한문장 + 오늘의 행동 팁 1가지를 알려주세요.`;
+        const r=await callGemini(prompt);
+        aiHtml=r?`<div class="result-card">
+          <p style="font-size:16px;line-height:1.75;text-align:center;white-space:pre-wrap;">${r}</p>
+        </div>`:'';
+      }
+      const words=['오늘은 작은 것에도 감사해보세요 🌸','지금 이 순간이 가장 소중해요 🦫','천천히 가도 괜찮아요 🌿',
+        '당신은 충분히 잘하고 있어요 ✨','오늘 하루도 화이팅! 💕'];
+      const todayWord = words[new Date().getDate()%words.length];
+      return `
+        <div class="result-card" style="text-align:center;min-height:150px;display:flex;align-items:center;justify-content:center;">
+          <p style="font-family:'Nanum Pen Script',cursive;font-size:24px;color:var(--moss-deep);line-height:1.8;">${todayWord}</p>
+        </div>
+        ${aiHtml}
+        ${!key?`<div class="result-card" style="background:var(--ivory-2);text-align:center;">
+          <p style="font-size:13px;color:var(--ink-soft);">Gemini 키 등록 시 오늘의 사주 기반 메시지를 받아요!</p>
+          <button onclick="switchTab('settings')" class="btn-secondary" style="margin-top:8px;width:auto;padding:6px 16px;">설정하기</button>
+        </div>`:''}
+      `;
+    }
+  },
+
+  // 22. 이달의 행운 아이템
+  lucky_item: {
+    title: '🎁 이달의 행운 아이템',
+    render: async (data, p, hon, gender, cyr, cmon) => {
+      const yongsin = data.yongsin||'목';
+      const LUCKY = {
+        목:{color:'초록색',num:'3,8',dir:'동쪽',item:'나무 소품, 식물',food:'채소, 나물'},
+        화:{color:'빨간색/주황색',num:'2,7',dir:'남쪽',item:'붉은 소품, 향초',food:'쓴맛 음식'},
+        토:{color:'노란색/베이지',num:'5,0',dir:'중앙',item:'도자기, 흙 소품',food:'단맛 음식'},
+        금:{color:'흰색/금색',num:'4,9',dir:'서쪽',item:'금속 소품, 보석',food:'매운맛 음식'},
+        수:{color:'파란색/검정',num:'1,6',dir:'북쪽',item:'물 관련 소품',food:'짠맛 음식'},
+      };
+      const lucky = LUCKY[yongsin]||LUCKY['목'];
+      return `
+        <div class="result-card">
+          <div class="result-card-title">🎁 ${NOW_MONTH}월 행운 정보</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+            ${[['🎨 행운의 색','color'],['🔢 행운의 숫자','num'],['🧭 행운의 방향','dir'],['🌿 행운의 아이템','item']].map(([label,key])=>`
+              <div style="background:var(--ivory-2);border-radius:12px;padding:10px;">
+                <div style="font-size:11px;color:var(--ink-soft);">${label}</div>
+                <div style="font-size:13px;font-weight:700;margin-top:3px;">${lucky[key]}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">🍽️ 추천 음식</div>
+          <p style="font-size:14px;">${lucky.food}</p>
+          <p style="font-size:12px;color:var(--ink-soft);">용신 <strong>${yongsin}</strong> 오행 기반이에요</p>
+        </div>
+      `;
+    }
+  },
+
+  // 23. 다인 비교
+  multi_compare: {
+    title: '👥 다인 비교',
+    render: async (data, p, hon) => {
+      const profiles = getProfiles();
+      if (profiles.length<2) return `
+        <div class="result-card" style="text-align:center;">
+          <p style="font-size:40px;">🦫🦫</p>
+          <p style="font-size:15px;">비교할 사람이 없어요!</p>
+          <p style="font-size:13px;color:var(--ink-soft);">프로필 관리에서 사람을 추가해주세요</p>
+          <button onclick="switchTab('profile')" class="btn-primary" style="margin-top:12px;">프로필 추가하기</button>
+        </div>`;
+
+      const allData = profiles.map(p=>({p, d:profileToData(p)}));
+      const curData = allData[getCurrentIdx()];
+
+      return `
+        <div class="result-card">
+          <div class="result-card-title">📊 ${NOW_YEAR}년 운세 비교</div>
+          ${allData.map(({p:pp,d},i)=>{
+            const cyr2=d.yeonwoon?.find(y=>y.year===NOW_YEAR);
+            const score=d.wolun?[1,2,3,4,5,6,7,8,9,10,11,12].reduce((a,m)=>{
+              const cw=d.wolun[m];return cw?a+scoreForSubFortune(d,cw).overall:a;},0)/12:50;
+            const s=Math.round(score);
+            return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);">
+              <span style="font-size:20px;">${pp.gender==='male'?'👦':'👧'}</span>
+              <span style="font-weight:700;min-width:50px;">${pp.name||'이름없음'}</span>
+              <div style="flex:1;">
+                <div class="result-bar-wrap" style="margin:0;">
+                  <div class="result-bar" style="width:${s}%;background:${scoreColor(s)};"></div>
+                </div>
+              </div>
+              <span style="font-weight:700;color:${scoreColor(s)};">${s}</span>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">💕 궁합 점수</div>
+          ${allData.filter((_,i)=>i!==getCurrentIdx()).map(({p:pp,d:d2})=>{
+            // 일지 합 확인
+            const JI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+            const HAP={子:'丑',丑:'子',寅:'亥',亥:'寅',卯:'戌',戌:'卯',辰:'酉',酉:'辰',巳:'申',申:'巳',午:'未',未:'午'};
+            const j1=curData.d.pillars?.day?.ji, j2=d2.pillars?.day?.ji;
+            const isHap=HAP[j1]===j2;
+            const score=isHap?85:Math.floor(Math.random()*30)+50;
+            return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);">
+              <span style="font-size:16px;">💕</span>
+              <span style="min-width:80px;font-size:13px;">${hon} & ${pp.name||'이름없음'}</span>
+              <div style="flex:1;">
+                <div class="result-bar-wrap" style="margin:0;">
+                  <div class="result-bar" style="width:${score}%;background:${scoreColor(score)};"></div>
+                </div>
+              </div>
+              <span style="font-weight:700;color:${scoreColor(score)};">${score}</span>
+              ${isHap?'<span class="tag tag-good" style="font-size:10px;">합</span>':''}
+            </div>`;
+          }).join('')}
+        </div>
+      `;
+    }
+  },
+};
+
+// 이달 상세 공통 렌더러
+async function renderMonthDetail(data, p, hon, gender, cmon, score, label, emoji, desc) {
+  const key=getGeminiKey();
+  const monthScores = Array.from({length:12},(_,i)=>{
+    const m=i+1, cw=data.wolun?.[m];
+    if(!cw) return {m,s:50};
+    const sub=scoreForSubFortune(data,cw);
+    const field = label==='애정운'?'love':label==='재물운'?'money':label==='업무운'||label==='학업운'?'work':label==='건강운'?'health':'overall';
+    return {m, s:sub[field]||sub.overall};
+  });
+  const best=monthScores.reduce((a,b)=>a.s>b.s?a:b);
+
+  let aiHtml='';
+  if(key){
+    const prompt=`명리학 전문가로서 ${hon}의 ${NOW_MONTH}월 ${label}을 분석해주세요.
+일간:${data.ilgan} · ${NOW_MONTH}월운:${cmon?.gan||''}${cmon?.ji||''} (${cmon?.sipsin||''} · ${cmon?.unseong||''})
+${label} 점수:${score}점
+구체적인 조언과 주의사항을 150자 내외로 따뜻하게 알려주세요.`;
+    const r=await callGemini(prompt);
+    aiHtml=r?`<div class="result-card" style="border-left:3px solid var(--leaf-3);">
+      <div class="result-card-title">🤖 AI 풀이</div>
+      <p style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${r}</p>
+    </div>`:'';
+  }
+
+  return `
+    <div class="result-card" style="text-align:center;">
+      <div class="result-card-title" style="justify-content:center;">${emoji} ${NOW_MONTH}월 ${label}</div>
+      <span style="font-family:'Nanum Pen Script',cursive;font-size:52px;color:${scoreColor(score)};display:block;margin:8px 0;">${score}점</span>
+      <p style="font-size:15px;font-weight:700;">${scoreLabel(score)} ${scoreEmoji(score)}</p>
+      <p style="font-size:12px;color:var(--ink-soft);">${desc}</p>
+    </div>
+    <div class="result-card">
+      <div class="result-card-title">📊 월별 ${label} 흐름</div>
+      <div style="display:flex;gap:4px;align-items:flex-end;height:80px;">
+        ${monthScores.map(({m,s})=>`
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
+            <div style="width:100%;background:${scoreColor(s)};border-radius:4px 4px 0 0;
+              height:${Math.round(s*0.7)}px;${m===NOW_MONTH?'outline:2px solid var(--leaf-3);':''}opacity:${m===NOW_MONTH?1:.6};"></div>
+            <div style="font-size:9px;color:var(--ink-soft);">${m}</div>
+          </div>
+        `).join('')}
+      </div>
+      <p style="font-size:12px;color:var(--ink-soft);margin-top:6px;">✨ 최고의 달: <strong>${best.m}월</strong></p>
+    </div>
+    ${aiHtml}
+    ${!key?`<div class="result-card" style="background:var(--ivory-2);text-align:center;">
+      <p style="font-size:13px;color:var(--ink-soft);">AI 풀이를 보려면 설정에서 Gemini 키를 등록해주세요</p>
+      <button onclick="switchTab('settings')" class="btn-secondary" style="margin-top:8px;width:auto;padding:6px 16px;">설정하기</button>
+    </div>`:''}
+  `;
+}
+
+// ── 초기화 ──
+function init() {
+  // 설정 불러오기
+  const savedKey=localStorage.getItem('gemini_api_key');
+  const savedModel=localStorage.getItem('gemini_model');
+  if(savedKey) document.getElementById('settings-gemini-key').value=savedKey;
+  if(savedModel) document.getElementById('settings-gemini-model').value=savedModel;
+
+  // 프로필 확인
+  const profiles = getProfiles();
+  if (profiles.length===0) {
+    showScreen('onboard');
+  } else {
+    initHome();
+    showScreen('home');
+  }
+}
+
+// 탭 전환 시 프로필 관리 렌더링
+const origShowScreen = showScreen;
+window.switchTab = function(tab) {
+  showScreen(tab==='profile'?'profile':tab==='settings'?'settings':'home');
+  if(tab==='profile') renderProfileManage();
+  if(tab==='yearly') openMenu('yearly');
+};
+
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+
 </body>
 </html>
