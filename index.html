@@ -387,8 +387,8 @@ details summary::-webkit-details-marker{display:none;}
       <div><label class="ob-label">연애 상황</label><select id="ap-love" class="ob-select"><option value="single">❤️ 싱글</option><option value="some">💘 썸</option><option value="dating">💑 연애중</option><option value="married">💍 기혼</option></select></div>
     </div>
     <label class="ob-label">생년월일 (8자리)</label>
-    <input id="ap-birth" class="ob-input" type="text" inputmode="numeric" placeholder="예) 19840220" maxlength="8" style="margin-bottom:6px;font-size:20px;letter-spacing:3px;"/>
-    <div class="ob-hint" style="margin-bottom:14px;">📅 1984년 2월 20일 → <strong>19840220</strong></div>
+    <input id="ap-birth" class="ob-input" type="text" inputmode="numeric" placeholder="예) 19900101" maxlength="8" style="margin-bottom:6px;font-size:20px;letter-spacing:3px;"/>
+    <div class="ob-hint" style="margin-bottom:14px;">📅 1990년 1월 1일 → <strong>19900101</strong></div>
     <label class="ob-label">태어난 시간</label>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
       <input type="checkbox" id="ap-unknown" style="width:16px;height:16px;"/> <label for="ap-unknown" style="font-size:13px;">모름</label>
@@ -721,7 +721,7 @@ document.getElementById('ob-unknown').addEventListener('change',function(){
 function onboardSave(){
   const birth=parseBirth(document.getElementById('ob-birth').value);
   const errEl=document.getElementById('ob-error');
-  if(!birth){errEl.textContent='생년월일 8자리를 입력해주세요. 예) 19840220';errEl.style.display='block';return;}
+  if(!birth){errEl.textContent='생년월일 8자리를 입력해주세요. 예) 19900101';errEl.style.display='block';return;}
   errEl.style.display='none';
   const p={
     id:Date.now(),
@@ -2300,14 +2300,45 @@ const MENU_CONFIG = {
         <div class="result-card">
           <div class="result-card-title">💕 궁합 점수</div>
           ${allData.filter((_,i)=>i!==curIdx).map(({p,d})=>{
-            const j1=allData[curIdx].d.pillars?.day?.ji,j2=d.pillars?.day?.ji;
+            const d1=allData[curIdx].d, d2=d;
+            const j1=d1?.pillars?.day?.ji||'子', j2=d2?.pillars?.day?.ji||'子';
+            const y1=d1?.pillars?.year?.ji||'子', y2=d2?.pillars?.year?.ji||'子';
+            // 충(冲)
+            const CHUNG={子:'午',午:'子',卯:'酉',酉:'卯',寅:'申',申:'寅',巳:'亥',亥:'巳',辰:'戌',戌:'辰',丑:'未',未:'丑'};
+            // 삼합(三合)
+            const SAMHAP_G={子:'신자진',丑:'사유축',寅:'인오술',卯:'해묘미',辰:'신자진',巳:'사유축',午:'인오술',未:'해묘미',申:'신자진',酉:'사유축',戌:'인오술',亥:'해묘미'};
             const isHap=HAP[j1]===j2||HAP[j2]===j1;
-            const score=isHap?85:Math.min(90,Math.max(30,60+Math.round((data.sangScore-50)/5)));
-            return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);">
-              <span style="font-size:16px;">💕</span>
-              <span style="flex:1;font-size:13px;">${profiles[curIdx].name||'나'} & ${p.name||'이름없음'}</span>
-              ${isHap?'<span class="tag tag-good" style="font-size:10px;">합</span>':''}
-              <span style="font-weight:700;color:${scoreColor(score)};">${score}점</span>
+            const isChung=CHUNG[j1]===j2;
+            const isSamhap=SAMHAP_G[j1]===SAMHAP_G[j2];
+            const isYearHap=HAP[y1]===y2||HAP[y2]===y1;
+            // 오행 보완
+            const OH={甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'};
+            const SAENG={목:'화',화:'토',토:'금',금:'수',수:'목'};
+            const g1=d1?.ilgan||'甲', g2=d2?.ilgan||'甲';
+            const o1=OH[g1]||'목', o2=OH[g2]||'목';
+            const isComplement=SAENG[o1]===o2||SAENG[o2]===o1;
+            const isYongsinMatch=d1?.yongsin===o2||d2?.yongsin===o1;
+            // 점수 계산
+            let score=55;
+            if(isHap) score+=20;
+            if(isSamhap) score+=10;
+            if(isYearHap) score+=8;
+            if(isComplement) score+=8;
+            if(isYongsinMatch) score+=8;
+            if(isChung) score-=20;
+            score=Math.max(20,Math.min(95,score));
+            const tags=[];
+            if(isHap) tags.push('<span class="tag tag-good" style="font-size:10px;">일지합</span>');
+            if(isSamhap) tags.push('<span class="tag tag-good" style="font-size:10px;">삼합</span>');
+            if(isChung) tags.push('<span class="tag tag-bad" style="font-size:10px;">충</span>');
+            if(isYongsinMatch) tags.push('<span class="tag tag-neutral" style="font-size:10px;">용신보완</span>');
+            return`<div style="padding:10px 0;border-bottom:1px solid var(--ivory-2);">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:16px;">💕</span>
+                <span style="flex:1;font-size:13px;font-weight:700;">${profiles[curIdx].name||'나'} & ${p.name||'이름없음'}</span>
+                <span style="font-weight:700;color:${scoreColor(score)};font-size:18px;">${score}점</span>
+              </div>
+              ${tags.length?`<div style="display:flex;gap:4px;margin-top:6px;padding-left:26px;">${tags.join('')}</div>`:''}
             </div>`;
           }).join('')}
         </div>`;
