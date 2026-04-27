@@ -5571,13 +5571,7 @@ if (document.readyState === 'loading') {
   /* 구 엔진 init 비활성화 */
 }
 
-// ── 다중 프로필 저장/불러오기 ──
-function getProfiles() {
-  try { return JSON.parse(localStorage.getItem('saju_profiles')||'[]'); } catch{ return []; }
-}
-function saveProfiles(arr) {
-  localStorage.setItem('saju_profiles', JSON.stringify(arr));
-}
+// ── 다중 프로필 저장/불러오기 (구 버전 — 새 앱 JS로 대체됨) ──
 
 window.saveProfileMulti = function() {
   const name = document.getElementById('auto-name')?.value.trim() || document.getElementById('auto-save-name')?.value.trim() || '프로필';
@@ -5776,26 +5770,37 @@ function goBack() { showScreen('home'); initHome(); }
 
 // ── 온보딩 ──
 function onboardSave() {
-  const year = parseInt(document.getElementById('ob-year').value);
-  const month = parseInt(document.getElementById('ob-month').value);
-  const day = parseInt(document.getElementById('ob-day').value);
+  const year  = parseInt(document.getElementById('ob-year')?.value||'0');
+  const month = parseInt(document.getElementById('ob-month')?.value||'0');
+  const day   = parseInt(document.getElementById('ob-day')?.value||'0');
   const errEl = document.getElementById('ob-error');
+
   if (!year||!month||!day||year<1930||year>2010) {
-    errEl.textContent='생년월일을 올바르게 입력해주세요.';errEl.style.display='block';return;
+    if(errEl){errEl.textContent='생년월일을 올바르게 입력해주세요.';errEl.style.display='block';}
+    return;
   }
+
   const profile = {
     id: Date.now(),
-    name: document.getElementById('ob-name').value.trim()||'나',
-    gender: document.getElementById('ob-gender').value,
+    name:    document.getElementById('ob-name')?.value.trim()||'나',
+    gender:  document.getElementById('ob-gender')?.value||'female',
     year, month, day,
-    unknown: document.getElementById('ob-unknown').checked,
-    ampm: document.getElementById('ob-ampm').value,
-    hour: document.getElementById('ob-hour').value,
-    min: document.getElementById('ob-min').value,
-    love: document.getElementById('ob-love').value
+    unknown: document.getElementById('ob-unknown')?.checked||false,
+    ampm:    document.getElementById('ob-ampm')?.value||'am',
+    hour:    document.getElementById('ob-hour')?.value||'12',
+    min:     document.getElementById('ob-min')?.value||'0',
+    love:    document.getElementById('ob-love')?.value||'single'
   };
-  saveProfiles([profile]);
-  setCurrentIdx(0);
+
+  // localStorage에 저장
+  try {
+    localStorage.setItem('capi_profiles', JSON.stringify([profile]));
+    localStorage.setItem('capi_cur', '0');
+  } catch(e) {
+    console.error('저장 오류:', e);
+  }
+
+  // 홈으로 이동
   initHome();
   showScreen('home');
 }
