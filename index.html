@@ -551,7 +551,7 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
   /* ── 신살 계산 ── */
   const _SAMHAP={寅:'인오술',午:'인오술',戌:'인오술',巳:'사유축',酉:'사유축',丑:'사유축',申:'신자진',子:'신자진',辰:'신자진',亥:'해묘미',卯:'해묘미',未:'해묘미'};
   const _ST={인오술:['亥','子','丑','寅','卯','辰','巳','午','未','申','酉','戌'],사유축:['寅','卯','辰','巳','午','未','申','酉','戌','亥','子','丑'],신자진:['巳','午','未','申','酉','戌','亥','子','丑','寅','卯','辰'],해묘미:['申','酉','戌','亥','子','丑','寅','卯','辰','巳','午','未']};
-  const _SN=['겁살','재살','천살','지살','년살','월살','망신살','장성살','반안살','역마살','육해살','화개살'];
+  const _SN=['겁살','재살','천살','지살','도화살','월살','망신살','장성살','반안살','역마살','육해살','화개살'];
   const sinsal=[];
   const allJi=[yJi,mJi,dJi,...(hJi?[hJi]:[])];
   const allGan=[yGan,mGan,dGan,...(hGan?[hGan]:[])];
@@ -616,6 +616,10 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
   if(_GS[yJi]&&allJi.includes(_GS[yJi])) sinsal.push('고신살');
   if(_GW[yJi]&&allJi.includes(_GW[yJi])) sinsal.push(gender==='male'?'고신살':'과숙살');
 
+  // 금여성 (일간 기준 - 여성의 최고 매력 신살)
+  const _GY={甲:'辰',乙:'巳',丙:'未',丁:'申',戊:'未',己:'申',庚:'戌',辛:'亥',壬:'丑',癸:'寅'};
+  if(allJi.includes(_GY[dGan])) sinsal.push('금여성');
+
   // 원진살
   const _WJ={子:'未',丑:'午',寅:'酉',卯:'申',辰:'亥',巳:'戌',午:'丑',未:'子',申:'卯',酉:'寅',戌:'巳',亥:'辰'};
   for(let a=0;a<allJi.length;a++) for(let b=a+1;b<allJi.length;b++) if(_WJ[allJi[a]]===allJi[b]&&!sinsal.includes('원진살')) sinsal.push('원진살');
@@ -640,6 +644,7 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
     daewoon,yeonwoon,wolun,auto:true
   };
 }
+
 </script>
 
 <script>
@@ -1452,11 +1457,12 @@ const MENU_CONFIG = {
       const sinsal = data.sinsal||[];
       const hasDohwa = sinsal.some(s=>s.includes('도화'));
       const hasChamssi = sinsal.some(s=>s.includes('咸池')||s.includes('함지'));
+      const hasGumyeo = sinsal.includes('금여성');
       const oh = data.oheng||{};
       // 도화 점수 계산
       const fireScore = (oh.화||0)*10;
       const woodScore = (oh.목||0)*5;
-      const doScore = Math.min(95, (hasDohwa?75:hasChamssi?65:50) + fireScore*0.3 + woodScore*0.2);
+      const doScore = Math.min(95, (hasDohwa?75:hasGumyeo?80:hasChamssi?65:50) + fireScore*0.3 + woodScore*0.2);
       const doScoreRound = Math.round(doScore/5)*5;
 
       const GAN_CHARM = {
@@ -1479,7 +1485,7 @@ const MENU_CONFIG = {
           <div style="text-align:center;padding:12px 0;">
             <span style="font-family:'Nanum Pen Script',cursive;font-size:56px;color:${doScoreRound>=70?'var(--leaf-3)':'var(--ink-soft)'};">${doScoreRound}점</span>
             <p style="font-size:16px;font-weight:700;margin:4px 0;">${doScoreRound>=80?'🔥 매력 폭발형!':doScoreRound>=65?'✨ 은은한 매력형':doScoreRound>=50?'🌱 잠재력 있는 매력형':'💪 노력형 매력'}</p>
-            <p style="font-size:13px;color:var(--ink-soft);">${hasDohwa?'도화살 보유! 타고난 이성 호감도':hasChamssi?'함지살 보유! 색기 있는 매력':'후천적 노력으로 만드는 매력'}</p>
+            <p style="font-size:13px;color:var(--ink-soft);">${hasGumyeo?'👑 금여성 보유! 우아한 귀부인 매력':hasDohwa?'도화살 보유! 타고난 이성 호감도':hasChamssi?'함지살 보유! 색기 있는 매력':'후천적 노력으로 만드는 매력'}</p>
           </div>
         </div>
         <div class="result-card">
@@ -2041,6 +2047,7 @@ const MENU_CONFIG = {
     render(data) {
       const sinsal=data.sinsal||[];
       const SINSAL_DESC={
+        '금여성':'여성의 최고 매력 신살이에요! 우아하고 품격 있는 매력으로 이성을 끌어당겨요. 귀부인 기운이 있어 자연스럽게 대접받는 타입이에요.',
         '역마살':'이동·변화·해외와 인연이 깊어요. 여행·이직·이사가 잦고 한곳에 오래 있기 힘들어요.',
         '년살':'이성 호감도와 감성적 매력이 있어요. 예술·끼·매력과 관련 있어요. (함지살이라고도 해요)',
         '도화살':'이성 호감도가 높고 예술 감각이 있어요. 자연스러운 매력으로 이성이 먼저 다가와요.',
