@@ -5762,9 +5762,16 @@ function profileToData(p) {
 
 // ── 화면 전환 ──
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  // CSS 충돌 방지 — JS inline style로 강제 처리
+  document.querySelectorAll('.screen').forEach(s => {
+    s.style.setProperty('display', 'none', 'important');
+    s.classList.remove('active');
+  });
   const el = document.getElementById('screen-'+id);
-  if (el) el.classList.add('active');
+  if (el) {
+    el.style.setProperty('display', 'block', 'important');
+    el.classList.add('active');
+  }
   window.scrollTo(0,0);
 }
 function goBack() { showScreen('home'); initHome(); }
@@ -5999,13 +6006,162 @@ const MENU_CONFIG = {
     title: `🌅 ${NOW_YEAR} 신년 종합운세`,
     render(data, p) {
       const cyr = data.yeonwoon?.find(y=>y.year===NOW_YEAR)||data.yeonwoon?.[0];
+      const hon = (p.name||'그대')+'님';
+      const isF = p.gender==='female';
+
+      // 세운 십신별 연간 종합 해석
+      const YEARLY_READ = {
+        비견:{
+          overall:`${hon}, 올해는 스스로를 믿고 독립하는 해예요. 비견(比肩)의 기운이 들어오면서 '나' 자신에 집중하는 에너지가 강해져요. 경쟁도 있고 갈등도 있지만, 결국 이 과정이 당신을 더 단단하게 만들어줘요.`,
+          love:isF?'관성이 비견에 묻히는 경향이 있어 연애 시작보다는 자기 성장의 해예요. 하지만 동류끼리 만나는 인연은 강해요.':'재성이 드러나기 어려운 해예요. 새 인연보다 기존 관계를 다지는 것이 현명해요.',
+          money:'수입보다 지출이 늘 수 있어요. 투자보다는 저축에 집중하세요. 경쟁으로 인한 예상치 못한 비용을 대비하세요.',
+          work:'경쟁이 치열한 해예요. 남과 비교하지 말고 내 페이스대로 꾸준히 가세요. 독립·창업 에너지가 강해요.',
+          health:'과로 주의! 혼자 다 하려는 경향이 있어요. 규칙적인 휴식을 반드시 챙기세요.',
+          lucky:'봄(3~5월)이 가장 활발한 시기예요.'
+        },
+        겁재:{
+          overall:`${hon}, 올해는 변화와 도전의 해예요. 겁재(劫財)는 강한 승부욕과 추진력을 줘요. 예상치 못한 지출이나 관계 변화가 생길 수 있지만, 대담한 도전이 성공으로 이어지는 해이기도 해요.`,
+          love:'강렬한 만남이 있을 수 있어요. 하지만 겁재는 관계에 긴장감을 줘요. 서로 경쟁하는 느낌이 들면 한발 물러서세요.',
+          money:'예상치 못한 지출 주의! 충동 구매, 투기성 투자는 금물이에요. 수입보다 지출 관리가 중요한 해예요.',
+          work:'대담한 도전에 좋은 해예요. 남들이 못 하는 것에 과감하게 뛰어들어보세요.',
+          health:'신경계 주의. 스트레스 관리가 핵심이에요. 격렬한 운동보다는 명상·요가를 권해요.',
+          lucky:'여름(6~8월)에 기회가 와요.'
+        },
+        식신:{
+          overall:`${hon}, 올해는 인생에서 가장 즐거운 해 중 하나예요! 식신(食神)은 먹고 마시고 즐기는 기운이에요. 창의적 활동, 여행, 맛있는 것, 사랑하는 사람들과의 시간이 풍성해지는 해예요.`,
+          love:'식신의 해는 연애에 최고예요! 자연스럽게 매력이 발산되고, 상대방이 먼저 다가오는 경우가 많아요. 싱글이라면 올해 꼭 나가세요!',
+          money:'재물이 자연스럽게 들어오는 해예요. 자신의 재능으로 수입을 만드는 부업·사이드잡이 특히 잘 맞아요.',
+          work:'창의적 아이디어가 빛나는 해예요. 기획, 콘텐츠, 예술 분야에서 성과를 낼 수 있어요.',
+          health:'체중 관리에 신경 쓰세요 ㅋㅋ 맛있는 것, 즐거운 것이 넘쳐나서 과식하기 쉬워요.',
+          lucky:'봄·가을(3~5월, 9~11월)이 최고예요.'
+        },
+        상관:{
+          overall:`${hon}, 올해는 끼와 재능이 폭발하는 해예요! 상관(傷官)은 창의성, 표현력, 반항기(!)의 기운이에요. 틀을 깨고 싶은 욕구가 강해지고, 나다운 것을 찾아가는 해예요. 단, 직장이나 윗사람과의 관계는 조심하세요.`,
+          love:'매력이 넘치는 해예요. 이성에게 먼저 어필할 용기가 생겨요. 단, 자유로운 연애를 원하다 보니 구속감을 느끼면 금방 식을 수 있어요.',
+          money:'부업, 프리랜서, 독창적인 방식의 수입이 생겨요. 고정급보다 자유로운 형태가 잘 맞는 해예요.',
+          work:'규칙적인 직장보다 자유로운 환경에서 빛나요. 상사와의 관계를 각별히 신경 쓰세요.',
+          health:'신경 예민해지기 쉬운 해예요. 과도한 음주·야식 주의하세요.',
+          lucky:'가을(9~11월)에 가장 빛나요.'
+        },
+        편재:{
+          overall:`${hon}, 올해는 돈 버는 감각이 살아나는 해예요! 편재(偏財)는 활동적인 재물운이에요. 사람을 만나고, 부지런히 움직일수록 돈이 들어오는 구조예요. 여행, 새로운 사람과의 만남이 행운을 가져와요.`,
+          love:isF?'남성으로부터 호감을 받는 해예요. 단, 너무 바빠서 연애에 집중하기 어려울 수 있어요. 일과 사랑의 밸런스를 잡아보세요.':'재성이 강하게 들어와 이성과의 만남이 많아지는 해예요. 단, 너무 많은 만남보다 한 사람에게 집중해야 결실이 있어요.',
+          money:'투자·사업에 좋은 해예요. 단, 한 곳에 올인보다는 분산 투자가 안전해요.',
+          work:'영업, 마케팅, 대외 활동에 최고의 해예요. 사람을 많이 만날수록 기회가 커져요.',
+          health:'과로 주의! 너무 활발하게 움직이다 번아웃이 올 수 있어요.',
+          lucky:'여름(6~8월)과 연말이 특히 좋아요.'
+        },
+        정재:{
+          overall:`${hon}, 올해는 차근차근 쌓는 해예요. 정재(正財)는 안정적인 재물운이에요. 급하게 욕심내지 않고 꾸준히 저축하고 관리하면 연말에 뿌듯한 결과가 있어요. 성실함이 보상받는 해예요.`,
+          love:isF?'안정적이고 믿음직한 인연이 찾아와요. 오래 사귄 인연이 더 깊어지거나, 결혼으로 이어지는 경우가 많아요.':'정재의 해에는 진지한 연애를 원하게 돼요. 가볍지 않은, 미래를 함께 그릴 수 있는 인연을 원해요.',
+          money:'저축·관리가 빛나는 해예요. 무리한 투자보다 안전한 적금·부동산이 잘 맞아요.',
+          work:'성실하게 일한 만큼 인정받아요. 꾸준함이 최고의 전략이에요.',
+          health:'만성 피로 관리가 필요해요. 건강검진을 챙기기 좋은 해예요.',
+          lucky:'봄과 겨울(3~5월, 11~12월)이 좋아요.'
+        },
+        편관:{
+          overall:`${hon}, 올해는 긴장감 있지만 성장의 해예요. 편관(偏官)은 강한 외부 압력의 기운이에요. 처음엔 버거울 수 있지만 이 압력이 당신을 한 단계 성장시켜줘요. 리더십이 요구되는 상황이 많아지는 해예요.`,
+          love:isF?'강하고 카리스마 있는 이성과의 만남이 생겨요. 단, 편관의 이성은 처음엔 강렬하지만 관계에서 긴장감이 생기기 쉬워요.':'관성이 강한 해라 책임감이 커져요. 진지한 관계나 결혼 압박을 느낄 수 있어요.',
+          money:'불필요한 지출이 생기기 쉬워요. 계획적인 소비가 중요한 해예요.',
+          work:'승진·책임 증가·야근이 많아지는 해예요. 체력 관리가 핵심이에요.',
+          health:'과로, 사고 주의! 무리하지 말고 몸 신호에 귀 기울이세요.',
+          lucky:'여름~가을(6~10월)에 기회가 와요.'
+        },
+        정관:{
+          overall:`${hon}, 올해는 질서와 성취의 해예요. 정관(正官)은 안정, 규칙, 사회적 인정의 기운이에요. 원칙대로 성실하게 살면 사회적으로 인정받고, 승진·합격·자격증 취득 등 공식적인 성취가 생기는 해예요.`,
+          love:isF?'귀인 같은 인연이 나타나요. 안정적이고 사회적으로 인정받는 상대와의 만남이 생겨요. 결혼운이 강한 해예요!':'정관의 해에는 책임감이 강해지고 진지한 관계를 원하게 돼요.',
+          money:'안정적으로 수입이 늘어나는 해예요. 공식적인 루트로 재물이 들어와요.',
+          work:'승진, 합격, 취업에 최고의 해예요. 원칙을 지키고 성실하게 임하면 반드시 결과가 있어요.',
+          health:'건강이 비교적 안정적인 해예요. 다만 과로로 인한 피로는 주의하세요.',
+          lucky:'봄·겨울(3~5월, 11~12월)이 특히 좋아요.'
+        },
+        편인:{
+          overall:`${hon}, 올해는 내면을 돌아보는 해예요. 편인(偏印)은 학습, 예술, 직관의 기운이에요. 눈에 보이는 성과보다 내면의 성장이 두드러지는 해예요. 배움, 공부, 영적 탐구에 좋은 에너지가 흘러요.`,
+          love:'관계보다 혼자 있는 시간이 더 충만하게 느껴질 수 있어요. 억지로 만남을 찾기보다 자신을 채우다 보면 자연스러운 인연이 와요.',
+          money:'계획에 없던 지출이 생기기 쉬워요. 내 직관을 믿되 충동 소비는 자제하세요.',
+          work:'창의적·학문적 분야에서 빛나요. 자격증 취득, 대학원, 연구 활동에 좋은 해예요.',
+          health:'소화기 주의. 식이 불규칙해지기 쉬운 해예요. 규칙적인 식사가 중요해요.',
+          lucky:'겨울(11~12월)에 가장 집중력이 높아요.'
+        },
+        정인:{
+          overall:`${hon}, 올해는 귀인과 배움의 해예요! 정인(正印)은 가장 안정적이고 따뜻한 기운이에요. 좋은 스승, 멘토, 귀인을 만나고 배움이 성과로 이어지는 해예요. 자격증, 시험, 승진 등 공식적인 인정이 따라와요.`,
+          love:'따뜻하고 지지해주는 인연이 와요. 정인의 이성은 나를 성장시켜주는 멘토 같은 존재예요. 장기적인 관계로 발전하기 좋은 해예요.',
+          money:'안정적인 수입이 유지되는 해예요. 공부·자격증 취득에 투자하는 것이 가장 좋은 재테크예요.',
+          work:'학습, 연구, 교육 분야에서 성과가 나요. 이 해에 배운 것이 나중에 큰 자산이 돼요.',
+          health:'건강 상태가 안정적인 편이에요. 정기적인 운동을 습관으로 만들기 좋은 해예요.',
+          lucky:'봄·여름(3~8월)이 가장 좋아요.'
+        }
+      };
+
+      const yr = YEARLY_READ[cyr?.sipsin]||YEARLY_READ['식신'];
       const monthScores = Array.from({length:12},(_,i)=>{
         const m=i+1,cw=data.wolun?.[m];
-        return {m, s: cw?capiScoreMonth(data,cw).overall:50, gan:cw?.gan||'', ji:cw?.ji||''};
+        return {m,s:cw?capiScoreMonth(data,cw).overall:50,gan:cw?.gan||'',ji:cw?.ji||''};
       });
       const best = monthScores.reduce((a,b)=>a.s>b.s?a:b);
       const worst = monthScores.reduce((a,b)=>a.s<b.s?a:b);
+
       return `
+        <div class="result-card" style="background:linear-gradient(135deg,#fff5ee,#fff0f8);">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <div style="text-align:center;background:rgba(232,145,126,.12);border-radius:14px;padding:10px 16px;min-width:60px;">
+              <div style="font-size:11px;color:var(--ink-soft);margin-bottom:2px;">세운</div>
+              <div style="font-size:26px;font-weight:700;">${cyr?.gan||'?'}</div>
+              <div style="font-size:22px;">${cyr?.ji||'?'}</div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:13px;color:var(--ink-soft);">${NOW_YEAR}년 세운</div>
+              <div style="font-size:16px;font-weight:700;margin:2px 0;">${cyr?.sipsin||'?'} · ${cyr?.unseong||'?'}</div>
+              <div style="font-size:12px;color:var(--moss-deep);">${yr.lucky}</div>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,.8);border-radius:12px;padding:14px;">
+            <p style="font-size:14px;line-height:1.85;margin:0;">${yr.overall}</p>
+          </div>
+        </div>
+
+        <div class="result-card">
+          <div class="result-card-title">💕 ${NOW_YEAR}년 연애운</div>
+          <p style="font-size:14px;line-height:1.8;">${yr.love}</p>
+        </div>
+
+        <div class="result-card">
+          <div class="result-card-title">💰 ${NOW_YEAR}년 재물운</div>
+          <p style="font-size:14px;line-height:1.8;">${yr.money}</p>
+        </div>
+
+        <div class="result-card">
+          <div class="result-card-title">💼 ${NOW_YEAR}년 직장·업무운</div>
+          <p style="font-size:14px;line-height:1.8;">${yr.work}</p>
+        </div>
+
+        <div class="result-card">
+          <div class="result-card-title">🏥 건강 주의사항</div>
+          <p style="font-size:14px;line-height:1.8;">${yr.health}</p>
+        </div>
+
+        <div class="result-card">
+          <div class="result-card-title">📊 월별 운세 흐름</div>
+          <div class="month-score-grid">
+            ${monthScores.map(({m,s})=>`
+              <div class="month-score-cell ${m===NOW_MONTH?'msc-top':''}">
+                <div class="msc-month">${m}월</div>
+                <div class="msc-score" style="color:${scoreColor(s)};">${s}</div>
+                <div class="msc-label">${scoreEmoji(s)}</div>
+              </div>`).join('')}
+          </div>
+          <div style="margin-top:10px;font-size:13px;display:flex;gap:16px;">
+            <span style="color:#2d9a6b;">🌟 최고: <strong>${best.m}월</strong></span>
+            <span style="color:#c4393a;">⚠️ 주의: <strong>${worst.m}월</strong></span>
+          </div>
+        </div>
+
+        <div class="result-card" style="background:var(--ivory-2);">
+          <div class="result-card-title">🦫 카피바라의 한마디</div>
+          <p style="font-size:14px;line-height:1.8;font-style:italic;">"${NOW_YEAR}년, ${hon}은 ${cyr?.sipsin||''}의 기운을 타고 있어요. ${yr.lucky} 이 시기를 놓치지 마세요. 준비된 자에게 운이 온답니다 🌸"</p>
+        </div>`;
+    }
+  },
         <div class="result-card">
           <div class="result-card-title">📅 ${NOW_YEAR}년 세운</div>
           <div style="display:flex;gap:12px;align-items:center;">
@@ -6036,24 +6192,6 @@ const MENU_CONFIG = {
             <span style="color:#c4393a;">⚠️ 주의: <strong>${worst.m}월</strong> (${worst.s}점)</span>
           </div>
         </div>
-        <div class="result-card">
-          <div class="result-card-title">🎯 올해의 포인트</div>
-          <div class="tag-row">
-            <span class="tag tag-good">용신: ${data.yongsin||'?'}</span>
-            <span class="tag tag-neutral">희신: ${data.heesin||'?'}</span>
-            <span class="tag tag-bad">기신: ${data.kisin||'?'}</span>
-          </div>
-          <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">
-            ${cyr?.sipsin==='비견'||cyr?.sipsin==='겁재'?'올해는 경쟁·독립의 기운이 강해요. 나 자신에 집중하는 해예요.':
-            cyr?.sipsin==='식신'||cyr?.sipsin==='상관'?'올해는 표현과 창의의 기운! 새로운 시도를 해보세요.':
-            cyr?.sipsin==='편재'||cyr?.sipsin==='정재'?'올해는 재물의 기운이 들어와요. 재정 관리에 신경 쓰세요.':
-            cyr?.sipsin==='편관'||cyr?.sipsin==='정관'?'올해는 관의 기운. 책임감과 기회가 함께 와요.':
-            cyr?.sipsin==='편인'||cyr?.sipsin==='정인'?'올해는 학습과 내면 성장의 해예요.':'올해의 흐름을 잘 타보세요.'}
-          </p>
-        </div>`;
-    }
-  },
-
   solo_escape: {
     title: '❤️ 솔로 탈출 시기',
     render(data, p) {
@@ -6123,9 +6261,44 @@ const MENU_CONFIG = {
             <div>✨ 외모 관리는 그 달 시작 1~2주 전부터</div>
           </div>
         </div>
-        <div class="result-card" style="background:var(--ivory-2);">
-          <p style="font-size:12px;color:var(--ink-soft);margin:0;">🦫 인연은 준비된 사람에게 와요. 올해 적극적으로 나서보세요!</p>
-        </div>`;
+        <div class="result-card">
+          <div class="result-card-title">🗺️ 인연 만나기 좋은 장소</div>
+          ${(() => {
+            const oh=data.oheng||{};
+            const topOh=Object.entries(oh).sort((a,b)=>b[1]-a[1])[0]?.[0]||'목';
+            const PLACES={
+              목:['🌳 공원·산책로 (자연 속 만남)','📚 독서모임·도서관','🎨 미술관·갤러리','☕ 감성 카페','🌿 식물 원예 클래스'],
+              화:['🎭 공연·뮤지컬·콘서트','🍷 와인바·루프탑','💃 댄스·요가 클래스','📸 사진 동호회','🏃 러닝 크루'],
+              토:['🍽️ 맛집 탐방·쿠킹 클래스','⛳ 골프·등산 동호회','🏠 집들이·소규모 모임','🎲 보드게임 카페','🌾 농촌 체험'],
+              금:['🎵 재즈바·클래식 공연','🏋️ 헬스장·스포츠센터','💼 업무·직장 관련 모임','✈️ 해외여행·여행 동호회','🍣 고급 레스토랑'],
+              수:['🌊 바다·강변','🎤 노래방·음악 모임','🎬 영화관·영화 토론','📷 여행 사진 동호회','🧘 명상·힐링 프로그램']
+            };
+            const places=PLACES[topOh]||PLACES['목'];
+            return `<div style="font-size:13px;line-height:2.1;">${places.map(p=>`<div>${p}</div>`).join('')}</div>`;
+          })()}
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">✨ 인연 만드는 행운의 아이템</div>
+          ${(() => {
+            const yongsin=data.yongsin||'목';
+            const ITEMS={
+              목:{color:'초록·민트',item:'나뭇잎 모양 액세서리, 초록 소품',perfume:'우디·그린 계열',tip:'자연 소재 옷 입기'},
+              화:{color:'빨강·주황·핑크',item:'붉은 액세서리, 루비·가넷 주얼리',perfume:'플로럴·스파이시 계열',tip:'밝은 색상 립컬러'},
+              토:{color:'노랑·베이지·황토',item:'토파즈·시트린 주얼리, 흙 소품',perfume:'머스크·앰버 계열',tip:'따뜻한 톤 메이크업'},
+              금:{color:'흰색·실버·골드',item:'실버 주얼리, 금속 액세서리',perfume:'프레시·아쿠아 계열',tip:'깔끔하고 단정한 스타일'},
+              수:{color:'파랑·보라·네이비',item:'아쿠아마린·라피스라줄리',perfume:'오션·시트러스 계열',tip:'흘리는 라인의 옷'}
+            };
+            const it=ITEMS[yongsin]||ITEMS['목'];
+            return `
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                ${[['🎨 행운의 색',it.color],['💎 행운 주얼리',it.item],['🌸 향수 계열',it.perfume],['👗 스타일 팁',it.tip]].map(([l,v])=>`
+                  <div style="background:var(--ivory-2);border-radius:10px;padding:8px;">
+                    <div style="font-size:10px;color:var(--ink-soft);">${l}</div>
+                    <div style="font-size:12px;font-weight:700;margin-top:2px;">${v}</div>
+                  </div>`).join('')}
+              </div>`;
+          })()}
+        </div>
     }
   },
 
