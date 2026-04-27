@@ -810,7 +810,115 @@ function renderSajuCard(p){
     </div>`;
 }
 
-// ── 탭 전환 ──
+// ── 월별 운세 공통 렌더 ──
+function renderMonthResult(data, type, emoji, label, extraScore) {
+  const cw = data.wolun?.[NOW_MONTH];
+  const sub = cw ? capiScoreMonth(data, cw) : {love:50,money:50,work:50,health:50,overall:50};
+  const score = extraScore !== undefined ? extraScore : (sub[type]||sub.overall||50);
+  const SIPSIN_ADV = {
+    love: {
+      식신:'자연스러운 매력이 빛나는 달이에요. 있는 그대로의 모습으로 다가가봐요.',
+      상관:'끼와 매력이 폭발! 먼저 다가가는 용기를 내봐요.',
+      정관:'진지한 인연이 찾아올 수 있어요. 소개팅·공식 자리에 나가보세요.',
+      편관:'강렬한 만남이 예상돼요. 예상치 못한 곳에서 인연이 올 수 있어요.',
+      편재:'적극적으로 사람을 만날수록 인연이 와요.',
+      정재:'오래 알던 사람이 특별하게 느껴질 수 있어요.',
+      비견:'비슷한 에너지의 사람과 자연스럽게 가까워져요.',
+      겁재:'설레는 만남이 있지만 신중하게 접근하세요.',
+      정인:'귀인의 도움으로 좋은 인연이 연결될 수 있어요.',
+      편인:'지금은 새 만남보다 자신을 채우는 시기예요.',
+    },
+    money: {
+      식신:'재능으로 수입을 만드는 달이에요. 하고 싶은 일이 돈이 돼요.',
+      편재:'활발한 재물 활동! 부지런히 움직일수록 수입이 늘어요.',
+      정재:'꾸준히 모으는 달이에요. 저축에 최적이에요.',
+      편관:'예상치 못한 지출이 생길 수 있어요. 계획적 소비가 중요해요.',
+      정관:'안정적인 수입이 들어오는 달이에요.',
+      겁재:'투기성 투자는 금물! 충동 지출 주의하세요.',
+      비견:'수입은 있지만 지출도 있는 균형의 달이에요.',
+      상관:'부업·프리랜서 수입에 좋은 달이에요.',
+      정인:'배움에 투자하면 나중에 큰 수익이 돼요.',
+      편인:'예상치 못한 지출 주의. 직관을 믿되 충동 소비는 자제하세요.',
+    },
+    work: {
+      정관:'승진·합격·취업에 최고의 달! 원칙대로 하면 인정받아요.',
+      편관:'책임이 늘어나는 달. 체력 관리가 핵심이에요.',
+      식신:'창의적 아이디어가 빛나는 달이에요. 기획·콘텐츠에 좋아요.',
+      상관:'자유로운 환경에서 빛나요. 규칙에 얽매이지 마세요.',
+      정재:'성실함이 인정받는 달. 꾸준히 하면 결과가 나와요.',
+      편재:'영업·대외활동에 최고! 사람을 많이 만날수록 기회가 생겨요.',
+      비견:'독립적인 업무에서 빛나요. 새로운 시작에 좋아요.',
+      겁재:'대담한 도전이 기회가 될 수 있어요.',
+      정인:'배움·자격증에 좋은 달이에요.',
+      편인:'연구·창작·공부에 집중하면 좋아요.',
+    },
+    health: {
+      식신:'건강하고 활기찬 달이에요. 과식·과음만 주의하면 OK!',
+      편관:'과로 주의! 몸의 신호에 귀를 기울이세요.',
+      정관:'비교적 건강한 달. 규칙적인 운동을 시작하기 좋아요.',
+      겁재:'사고·부상 주의. 안전에 신경 쓰세요.',
+      비견:'규칙적인 운동과 수면이 중요한 달이에요.',
+      상관:'신경 예민, 스트레스 관리가 핵심이에요.',
+      정재:'만성 피로 관리. 건강검진 챙기기 좋은 달이에요.',
+      편재:'과로 번아웃 주의. 너무 활발하게 움직이다 쓰러질 수 있어요.',
+      정인:'건강 안정적. 규칙적인 운동을 습관으로 만들기 좋아요.',
+      편인:'소화기 주의. 불규칙한 식사 패턴을 바꿔봐요.',
+    },
+    overall: {
+      식신:'즐거움이 넘치는 달이에요. 인간관계가 자연스럽게 좋아져요.',
+      정관:'주변에서 인정받는 달이에요. 리더십을 발휘해봐요.',
+      편재:'활발한 사교의 달이에요. 새로운 사람들과 잘 어울려요.',
+      정재:'신뢰가 쌓이는 달이에요. 오래된 관계가 더 깊어져요.',
+      비견:'비슷한 취향의 사람들과 어울리기 좋아요.',
+      상관:'솔직하게 표현하되 말 실수는 주의하세요.',
+      편관:'갈등이 생길 수 있어요. 인내심을 가지고 대처해요.',
+      정인:'귀인의 도움을 받는 달이에요. 주변의 조언에 귀 기울여요.',
+      겁재:'경쟁 관계가 생길 수 있어요. 여유 있게 대응하세요.',
+      편인:'혼자만의 시간이 더 충만한 달이에요.',
+    }
+  };
+  const advKey = type==='work'&&label==='학업운'?'work':type;
+  const advMap = SIPSIN_ADV[advKey]||SIPSIN_ADV.overall;
+  const adv = advMap[cw?.sipsin||'']||'이달의 흐름을 자연스럽게 따라가봐요.';
+  const scoreDesc = score>=75?`${emoji} 이달 ${label}이 아주 좋아요!`:score>=55?`${emoji} 이달 ${label}이 안정적이에요.`:`${emoji} 이달 ${label}을 조심해야 해요.`;
+  return `
+    <div class="result-card" style="background:linear-gradient(135deg,#fff5ee,#fff0f8);">
+      <div style="text-align:center;padding:12px 0;">
+        <span style="font-family:'Nanum Pen Script',cursive;font-size:64px;color:${scoreColor(score)};">${score}점</span>
+        <p style="font-size:16px;font-weight:700;margin:4px 0;">${scoreDesc}</p>
+        <p style="font-size:13px;color:var(--ink-soft);">${NOW_MONTH}월 · ${cw?.gan||''}${cw?.ji||''} · ${cw?.sipsin||''}</p>
+      </div>
+    </div>
+    <div class="result-card">
+      <div class="result-card-title">📊 점수 분석</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0;">
+        <span style="font-size:13px;min-width:80px;">${emoji} ${label}</span>
+        <div style="flex:1;"><div class="result-bar-wrap"><div class="result-bar" style="width:${score}%;background:${scoreColor(score)};"></div></div></div>
+        <span style="font-weight:700;color:${scoreColor(score)};">${score}</span>
+      </div>
+    </div>
+    <div class="result-card">
+      <div class="result-card-title">💡 이달 ${label} 조언</div>
+      <p style="font-size:14px;line-height:1.85;">${adv}</p>
+    </div>
+    <div class="result-card">
+      <div class="result-card-title">📅 다음 달 예고</div>
+      <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;">${(()=>{
+        const nw=data.wolun?.[NOW_MONTH+1>12?1:NOW_MONTH+1];
+        if(!nw) return '다음 달 데이터를 준비 중이에요.';
+        const ns=capiScoreMonth(data,nw);
+        const ns2=ns[type]||ns.overall;
+        return `${NOW_MONTH+1>12?1:NOW_MONTH+1}월은 ${nw.gan}${nw.ji} (${nw.sipsin}) — ${label} ${ns2}점 예상이에요. ${ns2>score?'이번 달보다 올라가요! 기대해봐요 📈':'이번 달보다 조심해야 해요. 미리 준비해봐요 📉'}`;
+      })()}</p>
+    </div>
+    <div class="result-card" style="background:var(--ivory-2);">
+      <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+      <p style="font-size:14px;line-height:1.8;font-style:italic;">"${score>=70?`이달 ${label}은 하늘이 돕는 시기니라. 적극적으로 나서거라!`:score>=50?`이달 ${label}은 평온한 흐름이니라. 꾸준히 하면 결실이 있느니라.`:`이달 ${label}은 쉬어가는 시기니라. 무리하지 말고 체력을 아껴거라 🦫`}"
+      <p style="font-size:11px;color:var(--petal);text-align:right;margin:6px 0 0;opacity:.8;">${['이 풀이가 마음에 들면 공유가 개운법이니라 🌸','혼자 간직하면 반만 이루어지느니라 🤫','친구에게 보내면 그 친구도 복 받느니라 💌','캡처해서 저장해두거라 ✨'][(NOW_DAY+NOW_MONTH)%4]}</p>
+    </div>`;
+}
+
+
 function switchTab(tab){
   document.querySelectorAll('.btab-btn').forEach(b=>b.classList.remove('active'));
   if(tab==='profile'){renderProfileList();showScreen('profile');}
