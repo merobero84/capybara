@@ -3939,6 +3939,7 @@ MENU_CONFIG.capi_bujuck = {
     const cyr=data.yeonwoon?.find(y=>y.year===NOW_YEAR);
     const isGoodYear=['정관','편관','정재','편재','식신'].includes(cyr?.sipsin);
     const loveStatus=p.love||'single';
+    const BUJUCK_IMG={solo:'./assets/bujuck_solo.png',some:'./assets/bujuck_some.png',keep:'./assets/bujuck_dating.png',couple:'./assets/bujuck_married.png',dohwa:'./assets/bujuck_dohwa.png'};
     const YCOLOR={목:'#2d6a2d',화:'#c0392b',토:'#8B6914',금:'#7a7a7a',수:'#1a4a8a'};
     const YBGCOLOR={목:'#f0fff0',화:'#fff0f0',토:'#fffbf0',금:'#f8f8f8',수:'#f0f0ff'};
     const yc=YCOLOR[yongsin]||'#c4705e';
@@ -3967,9 +3968,8 @@ MENU_CONFIG.capi_bujuck = {
             <span class="bujuck-corner" style="bottom:10px;left:14px;color:${yc};">✦</span>
             <span class="bujuck-corner" style="bottom:10px;right:14px;color:${yc};">✦</span>
             <div style="font-size:10px;letter-spacing:3px;color:${yc};opacity:.7;margin-bottom:8px;">🦫 카피바라 도령 謹製</div>
-            <div style="font-size:28px;margin:8px 0;">${b.emoji}</div>
-            <div class="bujuck-hanja" style="color:${yc};">${b.hanja}</div>
-            <div style="font-size:11px;color:${yc};letter-spacing:1px;">${b.sub}</div>
+            <img src="${BUJUCK_IMG[b.id]}" style="width:72%;max-width:210px;margin:8px 0 4px;object-fit:contain;filter:drop-shadow(0 2px 10px ${yc}66);" alt="${b.label}"/>
+            <div style="font-size:11px;color:${yc};letter-spacing:1px;opacity:.8;">${b.sub}</div>
             <hr class="bujuck-divider" style="border-color:${yc}44;"/>
             <div style="font-size:13px;color:var(--ink-soft);">${p.name||'그대'}님을 위한<br><strong style="color:${yc};font-size:16px;">${b.label}</strong></div>
             <hr class="bujuck-divider" style="border-color:${yc}44;"/>
