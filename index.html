@@ -3598,10 +3598,7 @@ MENU_CONFIG.tarot_worry = {
     const yongsin = data?.yongsin||'목';
     const ilgan = data?.ilgan||'甲';
     const sinsal = (data?.sinsal||[]).slice(0,3).join(', ');
-    const seed = NOW_YEAR*10000+NOW_MONTH*100+(p?.year||0)+99;
-    const [card] = drawCards(seed, 1);
-    const m = card.isReversed ? card.reversed : card.upright;
-
+    // 처음엔 카드 뒷면만 보여주고 버튼 클릭시 랜덤으로 뽑기
     return `
       <div class="result-card" style="background:linear-gradient(135deg,#f5f0ff,#fff5f8);">
         <div style="text-align:center;padding:8px 0;">
@@ -3610,37 +3607,48 @@ MENU_CONFIG.tarot_worry = {
           <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">사주 + 타로 + AI가 함께 답해드려요 ✨</div>
         </div>
       </div>
-
       <div class="result-card">
         <div class="result-card-title">💬 고민 입력</div>
-        <textarea id="worry-input" placeholder="예) 지금 만나는 사람이랑 잘 될까요? / 이직해야 할까요? / 올해 돈 좀 벌 수 있을까요?" 
+        <textarea id="worry-input" placeholder="예) 지금 만나는 사람이랑 잘 될까요? / 이직해야 할까요? / 올해 돈 좀 벌 수 있을까요?"
           style="width:100%;border:1.5px solid #e8d8d0;border-radius:12px;padding:12px;font-size:14px;font-family:inherit;resize:none;height:100px;outline:none;line-height:1.6;"></textarea>
-        <button onclick="askWorryTarot('${ilgan}','${yongsin}','${sinsal}',${card.id},${card.isReversed},'${m.key}')" 
+        <button onclick="startWorryTarot('${ilgan}','${yongsin}','${sinsal}')"
           style="width:100%;margin-top:10px;background:linear-gradient(135deg,#9b7ec8,#6b4fa8);color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">
-          <img src="./assets/dolyeong_face.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" alt="🦫"/> 도령에게 물어보기
+          🔮 도령에게 물어보기
         </button>
       </div>
-
-      <!-- 오늘의 카드 -->
-      <div class="result-card">
-        <div class="result-card-title">🃏 오늘 뽑힌 카드</div>
-        <div style="display:flex;justify-content:center;padding:8px 0;">
-          ${_tarotCard(card, '고민의 카드')}
-        </div>
-        ${_tarotResult(card, null)}
-        <div style="font-size:12px;color:var(--ink-soft);text-align:center;margin-top:8px;">카드를 탭하면 뒤집혀요 ✨</div>
-      </div>
-
-      <!-- AI 답변 영역 -->
+      <div id="worry-card-area"></div>
       <div id="worry-result"></div>`;
   }
 };
 
+
 // 고민 타로 AI 호출
-async function askWorryTarot(ilgan, yongsin, sinsal, cardId, isReversed, cardKey) {
-  const input = document.getElementById('worry-input');
-  const worry = input?.value?.trim();
+// 고민 타로 시작 - 카드 먼저 랜덤으로 뽑기
+function startWorryTarot(ilgan, yongsin, sinsal) {
+  const worry = document.getElementById('worry-input')?.value?.trim();
   if(!worry) { alert('고민을 입력해주세요!'); return; }
+
+  // 랜덤 카드 뽑기 (고민마다 다름)
+  const [card] = drawCardsRandom(1, 800);
+  const m = card.isReversed ? card.reversed : card.upright;
+
+  // 카드 표시
+  const cardArea = document.getElementById('worry-card-area');
+  cardArea.innerHTML = `
+    <div class="result-card">
+      <div class="result-card-title">🃏 도령이 뽑은 카드</div>
+      <div style="display:flex;justify-content:center;padding:8px 0;">
+        ${_tarotCard(card, '고민의 카드')}
+      </div>
+      ${_tarotResult(card, null)}
+      <div style="font-size:12px;color:var(--ink-soft);text-align:center;margin-top:8px;">카드를 탭하면 뒤집혀요 ✨</div>
+    </div>`;
+
+  // AI 호출
+  askWorryTarot(ilgan, yongsin, sinsal, card.id, card.isReversed, m.key, worry);
+}
+
+async function askWorryTarot(ilgan, yongsin, sinsal, cardId, isReversed, cardKey, worry) {
 
   const resultEl = document.getElementById('worry-result');
   showAILoading('worry-result');
