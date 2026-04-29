@@ -4,7 +4,30 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
 <meta name="theme-color" content="#f5ede8"/>
-<title>카피바라 사주 🦫</title>
+<title>카피바라 사주 🦫 — 느긋하게, 그러나 깊이</title>
+<meta name="description" content="카피바라 도령이 봐주는 사주! 연애운·타로·신살·개운법까지. 느긋하게, 그러나 깊이 🦫"/>
+
+<!-- OG 태그 (카카오/인스타 공유) -->
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="카피바라 사주 🦫"/>
+<meta property="og:description" content="카피바라 도령이 봐주는 사주! 연애운·타로·신살·개운법까지. 느긋하게, 그러나 깊이"/>
+<meta property="og:image" content="https://merobero84.github.io/capybara/assets/capi.png"/>
+<meta property="og:url" content="https://merobero84.github.io/capybara/"/>
+<meta property="og:locale" content="ko_KR"/>
+
+<!-- 트위터 카드 -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="카피바라 사주 🦫"/>
+<meta name="twitter:description" content="카피바라 도령이 봐주는 사주! 연애운·타로·신살·개운법까지."/>
+<meta name="twitter:image" content="https://merobero84.github.io/capybara/assets/capi.png"/>
+
+<!-- PWA -->
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="카피바라 사주"/>
+<link rel="apple-touch-icon" href="./assets/capi.png"/>
+
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet"/>
 <style>
 :root{
@@ -132,6 +155,19 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(
 .msc-score{font-size:18px;font-weight:700;}
 .msc-label{font-size:14px;}
 
+@keyframes shuffle{
+  0%{transform:translateX(0) rotate(0deg);}
+  25%{transform:translateX(-8px) rotate(-5deg);}
+  50%{transform:translateX(8px) rotate(5deg);}
+  75%{transform:translateX(-4px) rotate(-2deg);}
+  100%{transform:translateX(0) rotate(0deg);}
+}
+@keyframes dealIn{
+  from{transform:translateY(-30px) scale(.8);opacity:0;}
+  to{transform:translateY(0) scale(1);opacity:1;}
+}
+.tarot-card.shuffling{animation:shuffle .4s ease-in-out 3;}
+.tarot-card.dealing{animation:dealIn .4s ease-out;}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 /* ── 타로 카드 ── */
 .tarot-scene{perspective:1000px;width:120px;height:200px;cursor:pointer;flex-shrink:0;}
@@ -141,7 +177,7 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(
 .tarot-back{background:linear-gradient(135deg,#9b7ec8,#6b4fa8);border:2px solid #c4a8f0;box-shadow:0 8px 24px rgba(107,79,168,.3);}
 .tarot-back-pattern{font-size:28px;opacity:.6;}
 .tarot-back-label{font-size:10px;color:rgba(255,255,255,.7);margin-top:6px;letter-spacing:1px;}
-.tarot-face{background:linear-gradient(160deg,#fff9f0,#fff5f8);border:2px solid var(--petal);transform:rotateY(180deg);box-shadow:0 8px 24px rgba(200,112,94,.2);}
+.tarot-face{background:linear-gradient(160deg,#fff9f0,#fff5f8);border:2px solid var(--petal);transform:rotateY(180deg);box-shadow:0 8px 24px rgba(200,112,94,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;}
 .tarot-face.reversed{transform:rotateY(180deg) rotate(180deg);}
 .tarot-emoji{font-size:36px;margin-bottom:6px;}
 .tarot-name{font-family:'Gowun Batang',serif;font-size:11px;font-weight:700;color:var(--moss-deep);text-align:center;line-height:1.3;}
@@ -3373,16 +3409,21 @@ const WORKER_URL = 'https://capybara-ai.huyu220.workers.dev';
 
 async function askCapybara(prompt, system) {
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(), 15000); // 15초 타임아웃
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, system })
+      body: JSON.stringify({ prompt, system }),
+      signal: controller.signal
     });
+    clearTimeout(timeout);
+    if(!res.ok) throw new Error(`서버 오류 (${res.status})`);
     const data = await res.json();
     return data.result || null;
   } catch(e) {
-    console.error('AI 오류:', e);
-    return null;
+    if(e.name==='AbortError') throw new Error('timeout');
+    throw e;
   }
 }
 
@@ -3435,14 +3476,37 @@ function drawCards(seed, count) {
   return cards;
 }
 
+// 진짜 랜덤 (타로 셔플용)
+function drawCardsRandom(count) {
+  const shuffled=[...TAROT_MAJOR].sort(()=>Math.random()-.5);
+  return shuffled.slice(0,count).map(c=>({...c,isReversed:Math.random()<0.25}));
+}
+
 function flipTarotCard(idx) {
   const card=document.getElementById('tc-'+idx);
-  if(!card) return;
-  card.classList.toggle('flipped');
+  if(!card||card.classList.contains('flipped')) return;
+  // 뒤집기 애니메이션
+  card.classList.add('flipped');
   setTimeout(()=>{
     const res=document.getElementById('tr-'+idx);
-    if(res) res.style.display=card.classList.contains('flipped')?'block':'none';
+    if(res){res.style.display='block';res.style.animation='dealIn .4s ease-out';}
   },400);
+}
+
+// 타로 다시 뽑기 (셔플)
+function reshuffleTarot(menuId) {
+  // 모든 카드 셔플 애니메이션
+  document.querySelectorAll('.tarot-card').forEach(c=>{
+    c.classList.remove('flipped');
+    c.classList.add('shuffling');
+    const res=document.getElementById('tr-'+c.id.replace('tc-',''));
+    if(res) res.style.display='none';
+  });
+  setTimeout(()=>{
+    document.querySelectorAll('.tarot-card').forEach(c=>c.classList.remove('shuffling'));
+    // 새 카드로 다시 렌더
+    openMenu(menuId);
+  },1300);
 }
 
 function _tarotCard(card, label) {
@@ -3450,13 +3514,11 @@ function _tarotCard(card, label) {
     <div class="tarot-slot-label">${label}</div>
     <div class="tarot-scene" onclick="flipTarotCard(${card.id})">
       <div class="tarot-card" id="tc-${card.id}">
-        <div class="tarot-back">
-          <div style="font-size:32px;opacity:.7;">🦫</div>
-          <div style="font-size:18px;margin-top:4px;opacity:.4;">✦✦✦</div>
-          <div class="tarot-back-label">TAP ✨</div>
+        <div class="tarot-back" style="padding:0;overflow:hidden;border:none;background:none;box-shadow:0 8px 24px rgba(0,0,0,.2);">
+          <img src="./assets/tarot_back.png" alt="카드 뒷면" style="width:100%;height:100%;object-fit:cover;border-radius:14px;"/>
         </div>
         <div class="tarot-face${card.isReversed?' reversed':''}">
-          <div class="tarot-emoji">${card.emoji}</div>
+          <img src="./assets/도령얼굴.png" alt="도령" style="width:52px;height:52px;object-fit:contain;margin-bottom:4px;"/>
           <div class="tarot-name">${card.name}</div>
           <div class="tarot-num">${card.num}${card.isReversed?' ↑역':''}</div>
         </div>
@@ -3557,9 +3619,9 @@ async function askWorryTarot(ilgan, yongsin, sinsal, cardId, isReversed, cardKey
 
   const system = '당신은 카피바라 도령이에요. 사주와 타로를 보는 신비로운 존재로, 반드시 "~이니라", "~거라", "~느니라", "~하거라" 말투만 사용해요. 따뜻하지만 핵심을 찌르는 조언을 해요. 답변은 150자 이내로 짧고 명확하게.';
 
-  const result = await askCapybara(prompt, system);
+  const result = await askCapybara(prompt, system).catch(e=>({error:e.message}));
 
-  if(result) {
+  if(result && typeof result === 'string') {
     resultEl.innerHTML = `
       <div class="result-card" style="background:linear-gradient(135deg,#fff8e8,#f5f0ff);">
         <div class="result-card-title">🦫 카피바라 도령의 답변</div>
@@ -3567,9 +3629,16 @@ async function askWorryTarot(ilgan, yongsin, sinsal, cardId, isReversed, cardKey
         <p style="font-size:11px;color:var(--petal);text-align:right;margin:8px 0 0;opacity:.8;">${_tarotWarn()}</p>
       </div>`;
   } else {
+    const errMsg = result?.error==='timeout'
+      ? '도령이 너무 깊이 생각하고 있느니라... 잠시 후 다시 물어봐거라 ⏳'
+      : '도령이 잠시 자리를 비웠느니라. 다시 시도해봐요 🦫';
     resultEl.innerHTML = `
-      <div class="result-card" style="background:var(--ivory-2);">
-        <p style="font-size:13px;color:var(--ink-soft);text-align:center;">도령이 잠시 자리를 비웠느니라... 다시 시도해봐요 🦫</p>
+      <div class="result-card" style="background:var(--ivory-2);text-align:center;">
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">${errMsg}</p>
+        <button onclick="askWorryTarot('${ilgan}','${yongsin}','${sinsal}',${card.id},${card.isReversed},'${m.key}')"
+          style="background:var(--petal);color:#fff;border:none;border-radius:12px;padding:10px 24px;font-size:14px;font-family:inherit;cursor:pointer;">
+          🔄 다시 물어보기
+        </button>
       </div>`;
   }
 }
@@ -3605,8 +3674,7 @@ MENU_CONFIG.tarot_today = {
 MENU_CONFIG.tarot_love = {
   title: '💕 연애 타로',
   render(data,p) {
-    const seed=NOW_YEAR*10000+NOW_MONTH*100+(p?.year||0)+7;
-    const cards=drawCards(seed,3);
+    const cards=drawCardsRandom(3);
     const slots=['과거','현재','미래'];
     const ctxs=[
       c=>`과거 연애에서 ${c.isReversed?c.reversed.key:c.upright.key}의 흔적이 남아있느니라. 이것이 현재의 당신을 만들었어요.`,
@@ -3622,6 +3690,7 @@ MENU_CONFIG.tarot_love = {
       </div>
       <div class="tarot-row">${cards.map((c,i)=>_tarotCard(c,slots[i])).join('')}</div>
       <div class="tarot-result">${cards.map((c,i)=>_tarotResult(c,ctxs[i](c))).join('')}</div>
+      <div style="text-align:center;margin:8px 0;"><button onclick="reshuffleTarot('tarot_love')" style="background:var(--ivory-2);border:1.5px solid var(--petal);border-radius:12px;padding:10px 24px;font-size:13px;font-family:inherit;cursor:pointer;color:var(--moss-deep);">🔀 카드 다시 섞기</button></div>
       <div class="result-card" style="background:var(--ivory-2);">
         <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
         <p style="font-size:14px;line-height:1.8;font-style:italic;">"과거에서 배우고, 현재를 살고, 미래를 향해 나아가거라. 카드 세 장이 그대의 연애 흐름을 말해주느니라 💕"</p>
@@ -3633,8 +3702,7 @@ MENU_CONFIG.tarot_love = {
 MENU_CONFIG.tarot_money = {
   title: '💰 재물 타로',
   render(data,p) {
-    const seed=NOW_YEAR*10000+NOW_MONTH*100+(p?.year||0)+13;
-    const cards=drawCards(seed,3);
+    const cards=drawCardsRandom(3);
     const slots=['현재 상황','조언','결과'];
     const ctxs=[
       c=>`지금 재물 상황은 ${c.isReversed?c.reversed.key:c.upright.key}이니라. 현재 재정 상태를 파악해봐요.`,
@@ -3650,6 +3718,7 @@ MENU_CONFIG.tarot_money = {
       </div>
       <div class="tarot-row">${cards.map((c,i)=>_tarotCard(c,slots[i])).join('')}</div>
       <div class="tarot-result">${cards.map((c,i)=>_tarotResult(c,ctxs[i](c))).join('')}</div>
+      <div style="text-align:center;margin:8px 0;"><button onclick="reshuffleTarot('tarot_money')" style="background:var(--ivory-2);border:1.5px solid var(--petal);border-radius:12px;padding:10px 24px;font-size:13px;font-family:inherit;cursor:pointer;color:var(--moss-deep);">🔀 카드 다시 섞기</button></div>
       <div class="result-card" style="background:var(--ivory-2);">
         <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
         <p style="font-size:14px;line-height:1.8;font-style:italic;">"재물은 흐르는 물과 같느니라. 막으면 썩고 흘리면 마르느니라. 카드가 가리키는 방향으로 지혜롭게 다뤄봐거라 💰"</p>
