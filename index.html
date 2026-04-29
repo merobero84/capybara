@@ -3521,15 +3521,15 @@ function drawCards(seed, count) {
 }
 
 // 진짜 랜덤 (타로 셔플용)
-function drawCardsRandom(count) {
+function drawCardsRandom(count, offset=0) {
   const shuffled=[...TAROT_MAJOR].sort(()=>Math.random()-.5);
-  return shuffled.slice(0,count).map(c=>({...c,isReversed:Math.random()<0.25}));
+  return shuffled.slice(0,count).map((c,i)=>({...c,id:offset+i,isReversed:Math.random()<0.25}));
 }
 
 function flipTarotCard(idx) {
   const card=document.getElementById('tc-'+idx);
-  if(!card||card.classList.contains('flipped')) return;
-  // 뒤집기 애니메이션
+  if(!card) return;
+  if(card.classList.contains('flipped')) return; // 한번 뒤집으면 고정
   card.classList.add('flipped');
   setTimeout(()=>{
     const res=document.getElementById('tr-'+idx);
@@ -3562,7 +3562,7 @@ function _tarotCard(card, label) {
           <img src="./assets/tarot_back.png" alt="카드 뒷면" style="width:100%;height:100%;object-fit:cover;border-radius:14px;"/>
         </div>
         <div class="tarot-face${card.isReversed?' reversed':''}">
-          <img src="./assets/dolyeong_face.png" alt="도령" style="width:52px;height:52px;object-fit:contain;margin-bottom:4px;"/>
+          <div class="tarot-emoji">${card.emoji}</div>
           <div class="tarot-name">${card.name}</div>
           <div class="tarot-num">${card.num}${card.isReversed?' ↑역':''}</div>
         </div>
@@ -3718,7 +3718,7 @@ MENU_CONFIG.tarot_today = {
 MENU_CONFIG.tarot_love = {
   title: '💕 연애 타로',
   render(data,p) {
-    const cards=drawCardsRandom(3);
+    const cards=drawCardsRandom(3,100);
     const slots=['과거','현재','미래'];
     const ctxs=[
       c=>`과거 연애에서 ${c.isReversed?c.reversed.key:c.upright.key}의 흔적이 남아있느니라. 이것이 현재의 당신을 만들었어요.`,
@@ -3746,7 +3746,7 @@ MENU_CONFIG.tarot_love = {
 MENU_CONFIG.tarot_money = {
   title: '💰 재물 타로',
   render(data,p) {
-    const cards=drawCardsRandom(3);
+    const cards=drawCardsRandom(3,200);
     const slots=['현재 상황','조언','결과'];
     const ctxs=[
       c=>`지금 재물 상황은 ${c.isReversed?c.reversed.key:c.upright.key}이니라. 현재 재정 상태를 파악해봐요.`,
@@ -3785,6 +3785,7 @@ MENU_CONFIG.tarot_saju = {
       const card={...TAROT_MAJOR[pool[Math.abs(s)%pool.length]]};
       s=(s*1664525+1013904223)&0xffffffff;
       card.isReversed=Math.abs(s)%4===0;
+      card.id=900+i; // 고유 id (다른 타로와 충돌 방지)
       drawn.push(card);
     }
     const slots=['현재 나의 기운','이번 달 흐름','도령의 조언'];
