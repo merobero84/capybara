@@ -131,6 +131,7 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(
 .msc-score{font-size:18px;font-weight:700;}
 .msc-label{font-size:14px;}
 
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 /* ── 타로 카드 ── */
 .tarot-scene{perspective:1000px;width:120px;height:200px;cursor:pointer;flex-shrink:0;}
 .tarot-card{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,0,.2,1);}
@@ -333,6 +334,12 @@ details summary::-webkit-details-marker{display:none;}
           <span class="menu-card-emoji">✨</span>
           <div class="menu-card-title">사주 타로</div>
           <div class="menu-card-desc">용신 기반 맞춤 해석</div>
+        </div>
+        <div class="menu-card" style="border-color:#ffd8d0;background:linear-gradient(135deg,#fff5f3,#fff);" onclick="openMenu('tarot_worry')">
+          <span class="badge menu-badge badge-new">AI</span>
+          <span class="menu-card-emoji">🔮</span>
+          <div class="menu-card-title">고민 타로</div>
+          <div class="menu-card-desc">도령에게 직접 물어봐요</div>
         </div>
       </div>
     </div>
@@ -3274,7 +3281,35 @@ function saveAndAnalyzeGroup(){
   openMenu('multi_compare');
 }
 
-// ══ 타로 데이터 ══
+// ══ AI 호출 함수 ══
+const WORKER_URL = 'https://capybara-ai.huyu220.workers.dev';
+
+async function askCapybara(prompt, system) {
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, system })
+    });
+    const data = await res.json();
+    return data.result || null;
+  } catch(e) {
+    console.error('AI 오류:', e);
+    return null;
+  }
+}
+
+// AI 로딩 중 UI
+function showAILoading(targetId) {
+  const el = document.getElementById(targetId);
+  if(el) el.innerHTML = `
+    <div style="text-align:center;padding:20px;">
+      <div style="font-size:32px;animation:spin 1.5s linear infinite;display:inline-block;">🦫</div>
+      <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">도령이 점을 치는 중이니라...</p>
+    </div>`;
+}
+
+
 const TAROT_MAJOR = [
   {id:0,name:'광대',emoji:'🃏',num:'0',upright:{key:'새로운 시작',desc:'두려움 없이 새로운 길로 나아갈 때예요. 직관을 믿고 도전해봐요.'},reversed:{key:'무모한 도전',desc:'준비 없이 뛰어들 수 있어요. 잠시 멈추고 신중하게 생각해봐요.'}},
   {id:1,name:'마법사',emoji:'🎩',num:'I',upright:{key:'의지와 능력',desc:'지금 모든 능력이 갖춰져 있어요. 실행하는 것만 남았어요.'},reversed:{key:'재능 낭비',desc:'능력이 있는데 쓰지 못하고 있어요. 자신을 믿어봐요.'}},
@@ -3362,6 +3397,94 @@ function _tarotResult(card, ctx) {
 
 function _tarotWarn() {
   return ['이 풀이가 마음에 들면 공유가 개운법이니라 🌸','혼자 간직하면 반만 이루어지느니라 🤫','친구에게 보내면 그 친구도 복 받느니라 💌','캡처해서 저장해두거라 ✨'][(NOW_DAY+NOW_MONTH)%4];
+}
+
+MENU_CONFIG.tarot_worry = {
+  title: '🔮 고민 타로',
+  render(data, p) {
+    const yongsin = data?.yongsin||'목';
+    const ilgan = data?.ilgan||'甲';
+    const sinsal = (data?.sinsal||[]).slice(0,3).join(', ');
+    const seed = NOW_YEAR*10000+NOW_MONTH*100+(p?.year||0)+99;
+    const [card] = drawCards(seed, 1);
+    const m = card.isReversed ? card.reversed : card.upright;
+
+    return `
+      <div class="result-card" style="background:linear-gradient(135deg,#f5f0ff,#fff5f8);">
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-size:36px;">🔮</div>
+          <div style="font-family:'Gowun Batang',serif;font-size:17px;color:var(--moss-deep);margin-top:6px;">도령에게 고민을 털어놓아 봐요</div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">사주 + 타로 + AI가 함께 답해드려요 ✨</div>
+        </div>
+      </div>
+
+      <div class="result-card">
+        <div class="result-card-title">💬 고민 입력</div>
+        <textarea id="worry-input" placeholder="예) 지금 만나는 사람이랑 잘 될까요? / 이직해야 할까요? / 올해 돈 좀 벌 수 있을까요?" 
+          style="width:100%;border:1.5px solid #e8d8d0;border-radius:12px;padding:12px;font-size:14px;font-family:inherit;resize:none;height:100px;outline:none;line-height:1.6;"></textarea>
+        <button onclick="askWorryTarot('${ilgan}','${yongsin}','${sinsal}',${card.id},${card.isReversed},'${m.key}')" 
+          style="width:100%;margin-top:10px;background:linear-gradient(135deg,#9b7ec8,#6b4fa8);color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">
+          🦫 도령에게 물어보기
+        </button>
+      </div>
+
+      <!-- 오늘의 카드 -->
+      <div class="result-card">
+        <div class="result-card-title">🃏 오늘 뽑힌 카드</div>
+        <div style="display:flex;justify-content:center;padding:8px 0;">
+          ${_tarotCard(card, '고민의 카드')}
+        </div>
+        ${_tarotResult(card, null)}
+        <div style="font-size:12px;color:var(--ink-soft);text-align:center;margin-top:8px;">카드를 탭하면 뒤집혀요 ✨</div>
+      </div>
+
+      <!-- AI 답변 영역 -->
+      <div id="worry-result"></div>`;
+  }
+};
+
+// 고민 타로 AI 호출
+async function askWorryTarot(ilgan, yongsin, sinsal, cardId, isReversed, cardKey) {
+  const input = document.getElementById('worry-input');
+  const worry = input?.value?.trim();
+  if(!worry) { alert('고민을 입력해주세요!'); return; }
+
+  const resultEl = document.getElementById('worry-result');
+  showAILoading('worry-result');
+
+  const card = TAROT_MAJOR[cardId];
+  const m = isReversed ? card.reversed : card.upright;
+
+  const prompt = `
+사용자 고민: "${worry}"
+
+사용자 사주 정보:
+- 일간: ${ilgan} / 용신: ${yongsin}
+- 주요 신살: ${sinsal}
+
+오늘 뽑힌 타로 카드: ${card.name} (${isReversed?'역방향':'정방향'}) — ${m.key}
+카드 의미: ${m.desc}
+
+위 사주와 타로 카드를 바탕으로 이 고민에 대해 카피바라 도령 말투로 답해주세요.
+반드시 "~이니라", "~거라", "~느니라" 말투를 사용하고 150자 이내로 핵심만 말해주세요.`;
+
+  const system = '당신은 카피바라 도령이에요. 사주와 타로를 보는 신비로운 존재로, 반드시 "~이니라", "~거라", "~느니라", "~하거라" 말투만 사용해요. 따뜻하지만 핵심을 찌르는 조언을 해요. 답변은 150자 이내로 짧고 명확하게.';
+
+  const result = await askCapybara(prompt, system);
+
+  if(result) {
+    resultEl.innerHTML = `
+      <div class="result-card" style="background:linear-gradient(135deg,#fff8e8,#f5f0ff);">
+        <div class="result-card-title">🦫 카피바라 도령의 답변</div>
+        <p style="font-size:15px;line-height:1.85;font-style:italic;">"${result}"</p>
+        <p style="font-size:11px;color:var(--petal);text-align:right;margin:8px 0 0;opacity:.8;">${_tarotWarn()}</p>
+      </div>`;
+  } else {
+    resultEl.innerHTML = `
+      <div class="result-card" style="background:var(--ivory-2);">
+        <p style="font-size:13px;color:var(--ink-soft);text-align:center;">도령이 잠시 자리를 비웠느니라... 다시 시도해봐요 🦫</p>
+      </div>`;
+  }
 }
 
 MENU_CONFIG.tarot_today = {
