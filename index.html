@@ -1678,44 +1678,70 @@ const MENU_CONFIG = {
         ? data.yeonwoon.find(y=>y.year>=NOW_YEAR && y.year<=NOW_YEAR+8 && targetSS.includes(y.sipsin))
         : null;
 
+      // 현실적 결합 타이밍용: 재성(정재/편재) 포함 확장 기준
+      const realistSS = isF ? ['정관','편관','정재','편재'] : ['정재','편재','정관','편관'];
+      const nearRealistYear = Array.isArray(data.yeonwoon)
+        ? data.yeonwoon.find(y=>y.year>=NOW_YEAR && y.year<=NOW_YEAR+8 && realistSS.includes(y.sipsin))
+        : null;
+      const goodRealistYear = Array.isArray(data.yeonwoon)
+        ? data.yeonwoon.find(y=>y.year>=NOW_YEAR && realistSS.includes(y.sipsin))
+        : null;
+
+      // 최적 타이밍 (정관/편관 순수 기준)
       let bestAge, bestDesc;
+      // 현실적 타이밍 (재성 포함)
+      let realistAge, realistDesc;
+
       if(love==='dating'||love==='some'){
-        // 연애중/썸: 연운(특정 년도) 우선 → 더 구체적 타이밍 제시
+        // 최적: 정관/편관 연운 우선
         if(nearYearObj){
-          const targetAge = age + (nearYearObj.year - NOW_YEAR);
-          bestAge = `${nearYearObj.year}년 (${targetAge}세)`;
-          bestDesc = `${nearYearObj.gan}${nearYearObj.ji}년에 결혼 기운이 강하게 들어와요`;
+          const a = age+(nearYearObj.year-NOW_YEAR);
+          bestAge=`${nearYearObj.year}년 (${a}세)`;
+          bestDesc=`${nearYearObj.gan}${nearYearObj.ji}년 · ${nearYearObj.sipsin} — 인연운이 가장 강한 해`;
         } else if(goodYearObj){
-          const targetAge = age + (goodYearObj.year - NOW_YEAR);
-          bestAge = `${goodYearObj.year}년 (${targetAge}세)`;
-          bestDesc = `${goodYearObj.gan}${goodYearObj.ji}년 연운 · ${goodYearObj.sipsin}`;
+          const a = age+(goodYearObj.year-NOW_YEAR);
+          bestAge=`${goodYearObj.year}년 (${a}세)`;
+          bestDesc=`${goodYearObj.gan}${goodYearObj.ji}년 · ${goodYearObj.sipsin}`;
         } else if(curIsGood){
-          bestAge = `${curDW.age_from}~${curDW.age_to}세 사이`;
-          bestDesc = `현재 대운(${curDW.gan}${curDW.ji}) 안에 결혼 기운이 있어요`;
+          bestAge=`${curDW.age_from}~${curDW.age_to}세 사이`;
+          bestDesc=`현재 대운(${curDW.gan}${curDW.ji}) 안에 결혼 기운이 있어요`;
         } else if(goodDW){
-          bestAge = `${goodDW.age_from}~${goodDW.age_to}세`;
-          bestDesc = `${goodDW.gan}${goodDW.ji} 대운 · ${goodDW.sipsin}`;
+          bestAge=`${goodDW.age_from}~${goodDW.age_to}세`;
+          bestDesc=`${goodDW.gan}${goodDW.ji} 대운 · ${goodDW.sipsin}`;
         } else {
-          const nextDW = data.daewoon?.find(d=>d.age_from>age);
-          bestAge = nextDW ? `${nextDW.age_from}~${nextDW.age_to}세` : `${age+2}~${age+5}세`;
-          bestDesc = '지금 인연과 차근차근 준비해가는 시기예요';
+          const nDW=data.daewoon?.find(d=>d.age_from>age);
+          bestAge=nDW?`${nDW.age_from}~${nDW.age_to}세`:`${age+4}~${age+7}세`;
+          bestDesc='사주 흐름상 조금 여유를 갖고 준비해가는 시기예요';
+        }
+        // 현실적: 재성 포함 — 더 빠른 해 찾기
+        if(nearRealistYear && nearRealistYear.year !== (nearYearObj?.year)){
+          const a = age+(nearRealistYear.year-NOW_YEAR);
+          realistAge=`${nearRealistYear.year}년 (${a}세)`;
+          realistDesc=`${nearRealistYear.gan}${nearRealistYear.ji}년 · ${nearRealistYear.sipsin} — 현실적 결합 에너지`;
+        } else if(goodRealistYear && goodRealistYear.year !== (goodYearObj?.year)){
+          const a = age+(goodRealistYear.year-NOW_YEAR);
+          realistAge=`${goodRealistYear.year}년 (${a}세)`;
+          realistDesc=`${goodRealistYear.gan}${goodRealistYear.ji}년 · ${goodRealistYear.sipsin}`;
+        } else {
+          realistAge = bestAge;
+          realistDesc = '최적 타이밍과 같아요';
         }
       } else {
-        // 싱글: 기존 로직 유지 (대운 우선)
+        // 싱글: 기존 로직
         if(curIsGood){
-          bestAge = `${curDW.age_from}~${curDW.age_to}세`;
-          bestDesc = `지금 이 대운(${curDW.gan}${curDW.ji})이 결혼운이 가장 강해요!`;
+          bestAge=`${curDW.age_from}~${curDW.age_to}세`;
+          bestDesc=`지금 이 대운(${curDW.gan}${curDW.ji})이 결혼운이 가장 강해요!`;
         } else if(goodDW){
-          bestAge = `${goodDW.age_from}~${goodDW.age_to}세`;
-          bestDesc = `${goodDW.gan}${goodDW.ji} 대운 · ${goodDW.sipsin}`;
+          bestAge=`${goodDW.age_from}~${goodDW.age_to}세`;
+          bestDesc=`${goodDW.gan}${goodDW.ji} 대운 · ${goodDW.sipsin}`;
         } else if(goodYearObj){
-          const targetAge = age + (goodYearObj.year - NOW_YEAR);
-          bestAge = `${goodYearObj.year}년 (${targetAge}세)`;
-          bestDesc = `${goodYearObj.gan}${goodYearObj.ji}년 연운 · ${goodYearObj.sipsin}`;
+          const a=age+(goodYearObj.year-NOW_YEAR);
+          bestAge=`${goodYearObj.year}년 (${a}세)`;
+          bestDesc=`${goodYearObj.gan}${goodYearObj.ji}년 연운 · ${goodYearObj.sipsin}`;
         } else {
-          const nextDW = data.daewoon?.find(d=>d.age_from>age);
-          bestAge = nextDW ? `${nextDW.age_from}~${nextDW.age_to}세` : `${age+2}~${age+5}세`;
-          bestDesc = '지금도 충분히 좋은 시기예요';
+          const nDW=data.daewoon?.find(d=>d.age_from>age);
+          bestAge=nDW?`${nDW.age_from}~${nDW.age_to}세`:`${age+2}~${age+5}세`;
+          bestDesc='지금도 충분히 좋은 시기예요';
         }
       }
 
@@ -1748,19 +1774,38 @@ const MENU_CONFIG = {
         <div class="result-card" style="background:linear-gradient(135deg,#fff5ee,#fff0f8);">
           <div class="result-card-title" style="justify-content:center;">${sectionTitle}</div>
           <div style="text-align:center;padding:12px 0;">
-            <span style="font-family:'Nanum Pen Script',cursive;font-size:40px;color:var(--leaf-3);">${bestAge}</span>
-            <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;">${bestDesc}</p>
+            ${love==='dating'||love==='some' ? `
+              <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:6px;">
+                <div style="text-align:center;">
+                  <div style="font-size:10px;letter-spacing:1px;color:var(--ink-soft);margin-bottom:2px;">🌸 현실적 결합 시기</div>
+                  <span style="font-family:'Nanum Pen Script',cursive;font-size:30px;color:#c0392b;">${realistAge}</span>
+                  <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">${realistDesc}</div>
+                </div>
+                <div style="width:1px;background:var(--ivory-2);margin:4px 0;"></div>
+                <div style="text-align:center;">
+                  <div style="font-size:10px;letter-spacing:1px;color:var(--ink-soft);margin-bottom:2px;">💍 사주 최적 시기</div>
+                  <span style="font-family:'Nanum Pen Script',cursive;font-size:30px;color:var(--leaf-3);">${bestAge}</span>
+                  <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;">${bestDesc}</div>
+                </div>
+              </div>
+            ` : `
+              <span style="font-family:'Nanum Pen Script',cursive;font-size:40px;color:var(--leaf-3);">${bestAge}</span>
+              <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;">${bestDesc}</p>
+            `}
           </div>
         </div>
         ${love==='dating'||love==='some' ? `
         <div class="result-card">
-          <div class="result-card-title">💑 지금 인연과의 결혼 준비 타이밍</div>
-          <div style="background:rgba(232,145,126,.08);border-radius:12px;padding:14px;margin-bottom:10px;">
-            <p style="font-size:14px;line-height:1.8;margin:0;">${PARTNER_DESC[data.ilgan]||'나를 이해해주고 함께 성장할 수 있는 사람이 최고예요.'}</p>
-          </div>
-          <div style="font-size:13px;line-height:2;padding:10px;background:var(--ivory-2);border-radius:10px;">
-            <div>💬 결혼 이야기를 꺼내기 좋은 시기: <strong>${bestAge}</strong></div>
-            <div>⏳ 지금부터 준비하면 ${data.singang==='신강'?'1~2년':'2~3년'} 안에 자연스럽게 이어져요</div>
+          <div class="result-card-title">💑 두 타이밍의 차이는?</div>
+          <div style="font-size:13px;line-height:1.9;">
+            <div style="padding:10px;background:rgba(192,57,43,.06);border-radius:10px;margin-bottom:8px;">
+              <strong style="color:#c0392b;">🌸 현실적 결합 시기 (${realistAge})</strong><br>
+              <span style="color:var(--ink-soft);">재성(재물·현실 결합 에너지)이 들어오는 시기예요. 법적 결혼은 아니더라도 동거·약혼·청첩장 등 현실적 결합이 자연스럽게 이루어지기 좋아요.</span>
+            </div>
+            <div style="padding:10px;background:rgba(46,125,50,.06);border-radius:10px;">
+              <strong style="color:var(--leaf-3);">💍 사주 최적 시기 (${bestAge})</strong><br>
+              <span style="color:var(--ink-soft);">관성(인연·공식 관계 에너지)이 들어오는 시기예요. 혼인신고·결혼식 등 공식적이고 사회적으로 인정받는 결합에 가장 강한 기운이에요.</span>
+            </div>
           </div>
         </div>` : `
         <div class="result-card">
@@ -1795,7 +1840,7 @@ const MENU_CONFIG = {
         </div>
                 <div class="result-card" style="background:var(--ivory-2);">
           <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
-          <p style="font-size:14px;line-height:1.8;font-style:italic;">${love==='dating' ? `"좋은 인연은 이미 곁에 있느니라. ${bestAge}에 결혼 기운이 강하게 들어오니, 그 시기에 진지한 이야기를 나눠보거라. 준비된 마음이 좋은 결실을 맺느니라 💍"` : love==='some' ? `"지금 마음이 통하는 인연이 있다면 놓치지 말거라. ${bestAge}이 이 인연이 결실 맺기 좋은 시기니라. 용기 있는 자에게 좋은 결과가 오느니라 💕"` : `"결혼은 타이밍이 절반이에요. ${bestAge}에 좋은 기운이 있으니 그 시기에 ${meetPlace.slice(0,15)}... 적극적으로 나가보세요. 준비된 마음에 좋은 인연이 와요 💍"`}</p>
+          <p style="font-size:14px;line-height:1.8;font-style:italic;">${love==='dating' ? `"좋은 인연은 이미 곁에 있느니라. ${realistAge}에 현실적 결합 기운이, ${bestAge}에 공식 혼인 기운이 강하게 들어오니 그 흐름을 타거라. 억지로 서두르지도, 놓치지도 말거라 💍"` : love==='some' ? `"마음이 통하는 인연이 있다면 ${realistAge}을 노려봐거라. 현실적 결합 에너지가 들어오는 시기니라. 사주 최적 타이밍은 ${bestAge}이나, 인연은 준비된 자에게 먼저 오느니라 💕"` : `"결혼은 타이밍이 절반이에요. ${bestAge}에 좋은 기운이 있으니 그 시기에 ${meetPlace.slice(0,15)}... 적극적으로 나가보세요. 준비된 마음에 좋은 인연이 와요 💍"`}</p>
         <p style="font-size:11px;color:var(--petal);text-align:right;margin:8px 0 0;opacity:.8;">${['이 풀이가 마음에 들면 공유가 개운법이니라 🌸','혼자 간직하면 반만 이루어지느니라 🤫','친구에게 보내면 그 친구도 복 받느니라 💌','캡처해서 저장해두거라 ✨'][(NOW_DAY+NOW_MONTH)%4]}}</p>
         </div>`;
     }
