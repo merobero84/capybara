@@ -833,7 +833,7 @@ function initHome(){
   if(!cur) return;
 
   // 이름 표시
-  document.getElementById('home-name').textContent=`${cur.name}님 🦫`;
+  document.getElementById('home-name').textContent=`${cur.name}님 ${cur.gender==='male'?'🎩':'🌸'}`;
 
   // 날짜
   const d=new Date();
@@ -848,7 +848,7 @@ function initHome(){
     btn.className='profile-tab'+(i===idx?' active':'');
     const imgSrc = p.gender==='male'?'./assets/capi_male.png':'./assets/capi_female.png';
     btn.innerHTML=`
-      <img src="${imgSrc}" alt="${p.name}" style="width:44px;height:44px;object-fit:cover;border-radius:10px;display:block;margin:0 auto 2px;"/>
+      <img src="${imgSrc}" alt="${p.name}" style="width:48px;height:48px;object-fit:cover;object-position:top center;border-radius:10px;display:block;margin:0 auto 2px;"/>
       <div style="font-size:11px;font-weight:700;">${p.name||'나'}</div>
       <div style="font-size:10px;color:var(--ink-soft);">${p.year}.${String(p.month).padStart(2,'0')}.${String(p.day).padStart(2,'0')}</div>`;
     btn.onclick=()=>{setCurrentIdx(i);initHome();};
@@ -888,7 +888,7 @@ function renderSajuCard(p){
       </div>`).join('')}
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
-      <img src="./assets/${p.gender==='male'?'capi_male':'capi_female'}.png" style="width:40px;height:40px;object-fit:cover;border-radius:10px;flex-shrink:0;"/>
+      <img src="./assets/${p.gender==='male'?'capi_male':'capi_female'}.png" style="width:40px;height:40px;object-fit:cover;object-position:top center;border-radius:10px;flex-shrink:0;"/>
       <div class="saju-info">
         <strong>${p.name}</strong> · ${p.gender==='male'?'남':'여'} &nbsp;|&nbsp;
         신강${data.singang==='신강'?'':'약'} ${data.sangScore}점 &nbsp;|&nbsp; 일간 <strong>${data.ilgan}</strong><br>
