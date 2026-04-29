@@ -46,7 +46,8 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(
 
 /* ── 프로필 탭 ── */
 .profile-tabs-wrap{padding:12px 16px 0;background:var(--cream);}
-.profile-tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.profile-tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;cursor:grab;}
+.profile-tabs:active{cursor:grabbing;}
 .profile-tabs::-webkit-scrollbar{display:none;}
 .profile-tab{flex-shrink:0;padding:8px 14px;border-radius:12px;font-size:12px;border:1.5px solid #e8d8d0;background:#fff;cursor:pointer;text-align:center;}
 .profile-tab.active{background:var(--petal);color:#fff;border-color:var(--petal);}
@@ -3281,7 +3282,7 @@ MENU_CONFIG.gaeun_health = {
 
 // ── 가로스크롤 PC 지원 (드래그 + 휠) ──
 function initScrollDrag(){
-  document.querySelectorAll('.month-scroll').forEach(el=>{
+  document.querySelectorAll('.month-scroll, .profile-tabs').forEach(el=>{
     let isDown=false, startX, scrollLeft;
     el.addEventListener('mousedown',e=>{isDown=true;startX=e.pageX-el.offsetLeft;scrollLeft=el.scrollLeft;});
     el.addEventListener('mouseleave',()=>isDown=false);
