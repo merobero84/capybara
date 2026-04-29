@@ -2929,67 +2929,212 @@ const MENU_CONFIG = {
 
 // ══ 그룹 분석 모드 ══
 function renderGroupMode(analysis, sorted, nowYear, scoreColor, renderRelationMap) {
-  const bestTagsHtml = analysis.best?.tags?.length
-    ? '<div style="display:flex;gap:4px;margin-top:4px;">' + analysis.best.tags.map(t=>'<span class="tag tag-good" style="font-size:10px;">'+t+'</span>').join('') + '</div>'
-    : '';
-  const worstTagsHtml = analysis.worst?.tags?.length
-    ? '<div style="display:flex;gap:4px;margin-top:4px;">' + analysis.worst.tags.map(t=>'<span class="tag tag-bad" style="font-size:10px;">'+t+'</span>').join('') + '</div>'
-    : '';
-  const pairsHtml = analysis.pairs.map(pair => {
-    const pairTagsHtml = pair.tags.length
-      ? '<div style="display:flex;gap:4px;margin-top:4px;padding-left:20px;">' + pair.tags.map(t=>'<span class="tag '+(t==='충'?'tag-bad':'tag-good')+'" style="font-size:10px;">'+t+'</span>').join('') + '</div>'
-      : '';
-    return '<div style="padding:10px 0;border-bottom:1px solid var(--ivory-2);">'
-      + '<div style="display:flex;align-items:center;gap:8px;">'
-      + '<span>💕</span>'
-      + '<span style="flex:1;font-size:13px;font-weight:700;">'+pair.nameA+' &amp; '+pair.nameB+'</span>'
-      + '<span style="font-weight:700;color:'+scoreColor(pair.score)+';font-size:16px;">'+pair.score+'점</span>'
-      + '</div>' + pairTagsHtml + '</div>';
-  }).join('');
-  const rolesHtml = analysis.members.map((m,i) =>
-    '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);">'
-    + '<span style="font-size:20px;">'+(m.p.gender==='male'?'👦':'👧')+'</span>'
-    + '<span style="font-weight:700;flex:1;">'+m.p.name+'</span>'
-    + '<span style="font-size:12px;background:var(--ivory-2);padding:4px 10px;border-radius:99px;">'+analysis.roles[i]+'</span>'
-    + '</div>'
-  ).join('');
-  const rankHtml = sorted.map(({p,d},i) => {
-    const s = Math.round(Array.from({length:12},(_,k)=>{ const cw=d.wolun?.[k+1]; return cw?capiScoreMonth(d,cw).overall:50; }).reduce((a,b)=>a+b,0)/12);
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);">'
-      + '<span style="font-size:'+(i<3?'20':'14')+'px;min-width:24px;">'+(i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위')+'</span>'
-      + '<span style="font-size:18px;">'+(p.gender==='male'?'👦':'👧')+'</span>'
-      + '<span style="font-weight:700;flex:1;">'+p.name+'</span>'
-      + '<div style="width:70px;"><div class="result-bar-wrap" style="margin:0;"><div class="result-bar" style="width:'+s+'%;background:'+scoreColor(s)+';"></div></div></div>'
-      + '<span style="font-weight:700;color:'+scoreColor(s)+';min-width:28px;">'+s+'</span>'
-      + '</div>';
-  }).join('');
+  const members = analysis.members;
+  const OH_COLOR = {목:'#4CAF50',화:'#FF5722',토:'#8D6E63',금:'#9E9E9E',수:'#2196F3'};
+  const OH_EMOJI = {목:'🌳',화:'🔥',토:'🌏',금:'⚙️',수:'💧'};
+  const OH = {甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'};
 
-  return '<div class="result-card" style="background:linear-gradient(135deg,#fff5ee,#fff0f8);">'
+  // ── 탭1: 궁합 매트릭스 ──
+  const matrixHtml = (() => {
+    const n = members.length;
+    // 헤더 행
+    let table = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">';
+    table += '<tr><th style="padding:6px;background:var(--ivory-2);"></th>';
+    members.forEach(m => {
+      table += '<th style="padding:6px;background:var(--ivory-2);text-align:center;font-size:11px;">' + m.p.name + '</th>';
+    });
+    table += '</tr>';
+    // 데이터 행
+    members.forEach((mA, i) => {
+      table += '<tr><td style="padding:6px;background:var(--ivory-2);font-weight:700;font-size:11px;">' + mA.p.name + '</td>';
+      members.forEach((mB, j) => {
+        if(i === j) {
+          table += '<td style="padding:6px;text-align:center;background:#f5f5f5;color:#ccc;">—</td>';
+        } else {
+          const pair = analysis.pairs.find(p => (p.a===i&&p.b===j)||(p.a===j&&p.b===i));
+          const sc = pair ? pair.score : 55;
+          const bg = sc>=80?'#e8f5e9':sc>=65?'#fff8e1':sc>=50?'#fff3e0':'#ffebee';
+          const col = sc>=80?'#2d9a6b':sc>=65?'#f57f17':sc>=50?'#e65100':'#c62828';
+          table += '<td style="padding:6px;text-align:center;background:'+bg+';color:'+col+';font-weight:700;">'+sc+'</td>';
+        }
+      });
+      table += '</tr>';
+    });
+    table += '</table></div>';
+
+    // 진단 멘트
+    const best = analysis.best;
+    const worst = analysis.worst;
+    const diagHtml = '<div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;">'
+      + '<div style="background:#e8f5e9;border-radius:10px;padding:10px;font-size:13px;">'
+      + '🏆 <b>찰떡 콤비</b>: ' + (best?.nameA||'') + ' &amp; ' + (best?.nameB||'')
+      + ' <span style="font-weight:700;color:#2d9a6b;">' + (best?.score||0) + '점</span>'
+      + '<br><span style="color:var(--ink-soft);font-size:12px;">둘이 붙여놓으면 시너지 폭발! 🌟</span></div>'
+      + '<div style="background:#ffebee;border-radius:10px;padding:10px;font-size:13px;">'
+      + '💣 <b>갈등 뇌관</b>: ' + (worst?.nameA||'') + ' &amp; ' + (worst?.nameB||'')
+      + ' <span style="font-weight:700;color:#c62828;">' + (worst?.score||0) + '점</span>'
+      + '<br><span style="color:var(--ink-soft);font-size:12px;">중재자가 꼭 필요한 조합이니라 💥</span></div>'
+      + '</div>';
+
+    // 운세 순위
+    const rankHtml = '<div style="margin-top:14px;">'
+      + '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">📊 ' + nowYear + '년 운세 순위</div>'
+      + sorted.map(({p,d},i) => {
+          const s = Math.round(Array.from({length:12},(_,k)=>{ const cw=d.wolun?.[k+1]; return cw?capiScoreMonth(d,cw).overall:50; }).reduce((a,b)=>a+b,0)/12);
+          return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--ivory-2);">'
+            + '<span style="font-size:'+(i<3?'18':'13')+'px;min-width:22px;">'+(i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'위')+'</span>'
+            + '<span style="font-size:16px;">'+(p.gender==='male'?'👦':'👧')+'</span>'
+            + '<span style="font-weight:700;flex:1;">'+p.name+'</span>'
+            + '<div style="width:60px;"><div class="result-bar-wrap" style="margin:0;"><div class="result-bar" style="width:'+s+'%;background:'+scoreColor(s)+';"></div></div></div>'
+            + '<span style="font-weight:700;color:'+scoreColor(s)+';min-width:26px;">'+s+'</span></div>';
+        }).join('')
+      + '</div>';
+
+    return table + diagHtml + rankHtml;
+  })();
+
+  // ── 탭2: 오행 레이더 ──
+  const radarHtml = (() => {
+    const ohCount = {목:0,화:0,토:0,금:0,수:0};
+    members.forEach(({d}) => { const o=OH[d?.ilgan||'甲']||'목'; ohCount[o]++; });
+    const total = members.length;
+    const keys = ['목','화','토','금','수'];
+    const labels = {목:'木 창의/성장',화:'火 열정/표현',토:'土 안정/배려',금:'金 추진/결단',수:'水 지혜/직관'};
+    const desc = {목:'아이디어는 넘쳐요. 계획을 실행으로 옮기는 사람이 더 필요해요.',화:'에너지가 넘쳐요! 너무 과열되지 않도록 냉정한 시각이 필요해요.',토:'안정적이고 따뜻해요. 가끔 변화에 더 적극적으로 나서봐요.',금:'추진력이 강해요. 부드럽게 감싸줄 포용력이 더 필요해요.',수:'지혜롭고 자유로워요. 현실적으로 실행하는 사람이 있으면 균형이 맞아요.'};
+
+    // SVG 레이더 차트
+    const cx=130, cy=130, r=90;
+    const angles = keys.map((_,i) => (Math.PI*2*i/5) - Math.PI/2);
+    const maxVal = Math.max(...keys.map(k=>ohCount[k]), 1);
+    const pts = keys.map((k,i) => {
+      const val = (ohCount[k]/Math.max(total,1));
+      return {
+        x: cx + r*val*Math.cos(angles[i]),
+        y: cy + r*val*Math.sin(angles[i]),
+        lx: cx + (r+28)*Math.cos(angles[i]),
+        ly: cy + (r+28)*Math.sin(angles[i])
+      };
+    });
+    const gridPts = keys.map((_,i) => ({ x: cx+r*Math.cos(angles[i]), y: cy+r*Math.sin(angles[i]) }));
+
+    let svg = '<svg viewBox="0 0 260 260" style="width:100%;max-width:260px;display:block;margin:0 auto;">';
+    // 그리드
+    [0.25,0.5,0.75,1].forEach(scale => {
+      const gps = gridPts.map(p => (cx+(p.x-cx)*scale)+','+(cy+(p.y-cy)*scale)).join(' ');
+      svg += '<polygon points="'+gps+'" fill="none" stroke="#e0e0e0" stroke-width="1"/>';
+    });
+    gridPts.forEach(p => { svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+p.x+'" y2="'+p.y+'" stroke="#e0e0e0" stroke-width="1"/>'; });
+    // 데이터 폴리곤
+    const dataPts = pts.map(p=>p.x+','+p.y).join(' ');
+    svg += '<polygon points="'+dataPts+'" fill="rgba(232,145,126,.35)" stroke="#e8917e" stroke-width="2"/>';
+    // 점
+    pts.forEach((p,i) => {
+      svg += '<circle cx="'+p.x+'" cy="'+p.y+'" r="5" fill="'+OH_COLOR[keys[i]]+'"/>';
+    });
+    // 라벨
+    pts.forEach((p,i) => {
+      const anchor = p.lx < cx-10 ? 'end' : p.lx > cx+10 ? 'start' : 'middle';
+      svg += '<text x="'+p.lx+'" y="'+(p.ly+4)+'" text-anchor="'+anchor+'" font-size="11" fill="'+OH_COLOR[keys[i]]+'" font-weight="bold">'
+        + OH_EMOJI[keys[i]]+' '+keys[i]+'('+ohCount[keys[i]]+'명)</text>';
+    });
+    svg += '</svg>';
+
+    // 분석 카드
+    const minOh = keys.reduce((a,b)=>ohCount[a]<=ohCount[b]?a:b);
+    const maxOh = keys.reduce((a,b)=>ohCount[a]>=ohCount[b]?a:b);
+    const analysisCards = '<div style="margin-top:12px;font-size:13px;line-height:1.85;">'
+      + '<div style="background:rgba(232,145,126,.08);border-radius:10px;padding:10px;margin-bottom:8px;">'
+      + '<b>💪 이 그룹의 강점</b>: ' + OH_EMOJI[maxOh] + ' ' + labels[maxOh]
+      + '<br><span style="color:var(--ink-soft);">' + desc[maxOh] + '</span></div>'
+      + '<div style="background:rgba(33,150,243,.08);border-radius:10px;padding:10px;">'
+      + '<b>🔍 보완이 필요한 기운</b>: ' + OH_EMOJI[minOh] + ' ' + labels[minOh]
+      + '<br><span style="color:var(--ink-soft);">' + desc[minOh] + ' <b>' + OH_EMOJI[minOh] + ' ' + minOh + ' 기운이 강한 사람</b>을 한 명 더 데려오면 균형이 딱 맞아요!</span></div>'
+      + '</div>';
+
+    // 멤버별 오행 바
+    const memberBars = '<div style="margin-top:14px;">'
+      + '<div style="font-weight:700;font-size:13px;margin-bottom:8px;">👥 멤버별 오행</div>'
+      + members.map(({p,d}) => {
+          const o = OH[d?.ilgan||'甲']||'목';
+          return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--ivory-2);">'
+            + '<span>'+(p.gender==='male'?'👦':'👧')+'</span>'
+            + '<span style="font-weight:700;flex:1;">'+p.name+'</span>'
+            + '<span style="font-size:13px;">'+OH_EMOJI[o]+'</span>'
+            + '<span style="font-size:12px;color:'+OH_COLOR[o]+';font-weight:700;">'+o+'</span>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+
+    return svg + analysisCards + memberBars;
+  })();
+
+  // ── 탭3: 그룹 시뮬레이션 ──
+  const simHtml = (() => {
+    const OH_ROLE = {
+      목: {travel:'계획표 짜는 사람',zombie:'생존 매뉴얼 작성하는 사람',chat:'아이디어 링크 폭탄 투하하는 사람',dinner:'다음 모임 날짜 잡자는 사람'},
+      화: {travel:'가서 즉흥으로 결정하자는 사람',zombie:'무기 들고 제일 먼저 뛰쳐나가는 사람',chat:'새벽 2시에 갑자기 활성화시키는 사람',dinner:'2차 3차 끝까지 가자는 사람'},
+      토: {travel:'아무 데나 다 좋다는 사람',zombie:'모두를 모아 베이스캠프 꾸리는 사람',chat:'읽씹의 달인',dinner:'조용히 먹으면서 다 듣는 사람'},
+      금: {travel:'리뷰 다 읽고 최적 코스 짜는 사람',zombie:'냉정하게 탈출 루트 계산하는 사람',chat:'오타 교정 담당',dinner:'주량 계산하며 마시는 사람'},
+      수: {travel:'혼자만 아는 숨은 명소 찾는 사람',zombie:'아무도 모르는 지하 벙커 알고 있는 사람',chat:'짤 전문 공급책',dinner:'술은 안 마시고 분위기만 즐기는 사람'}
+    };
+
+    const sims = [
+      {icon:'✈️', title:'같이 여행을 간다면?', key:'travel'},
+      {icon:'🧟', title:'좀비 사태가 터진다면?', key:'zombie'},
+      {icon:'📱', title:'단톡방에서의 역할은?', key:'chat'},
+      {icon:'🍺', title:'회식 자리에서는?', key:'dinner'},
+    ];
+
+    return sims.map(sim => {
+      const rows = members.map(({p,d}) => {
+        const o = OH[d?.ilgan||'甲']||'목';
+        return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--ivory-2);">'
+          + '<span style="font-size:16px;">'+(p.gender==='male'?'👦':'👧')+'</span>'
+          + '<span style="font-weight:700;min-width:44px;">'+p.name+'</span>'
+          + '<span style="font-size:13px;color:var(--ink-soft);">'+OH_ROLE[o][sim.key]+'</span>'
+          + '</div>';
+      }).join('');
+      return '<div class="result-card">'
+        + '<div class="result-card-title">'+sim.icon+' '+sim.title+'</div>'
+        + rows + '</div>';
+    }).join('')
+    + '<div class="result-card" style="background:var(--ivory-2);text-align:center;">'
+    + '<p style="font-size:13px;color:var(--moss-deep);font-weight:700;margin:0 0 4px;">📸 멤버들한테 공유해봐라!</p>'
+    + '<p style="font-size:12px;color:var(--ink-soft);margin:0;">"이 결과 보고 웃으면 인연이 더 깊어지느니라 🦫"</p>'
+    + '</div>';
+  })();
+
+  // ── 모임 진단 헤더 ──
+  const headerHtml = '<div class="result-card" style="background:linear-gradient(135deg,#fff5ee,#fff0f8);">'
     + '<div class="result-card-title">🦫 카피바라 도령의 모임 진단서</div>'
     + '<p style="font-size:14px;line-height:1.85;font-style:italic;">"' + analysis.char + '"</p>'
-    + '</div>'
+    + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">'
+    + members.map(({p,d}) => {
+        const o = OH[d?.ilgan||'甲']||'목';
+        return '<span style="background:'+OH_COLOR[o]+'22;color:'+OH_COLOR[o]+';border:1px solid '+OH_COLOR[o]+'44;border-radius:99px;padding:3px 10px;font-size:11px;font-weight:700;">'
+          + OH_EMOJI[o]+' '+p.name+'</span>';
+      }).join('')
+    + '</div></div>';
+
+  // ── 탭 UI ──
+  const tabBtns = [['⚡ 궁합 매트릭스','gtab-matrix'],['🌀 오행 레이더','gtab-radar'],['🎬 시뮬레이션','gtab-sim']].map((t,i) =>
+    '<button onclick="document.querySelectorAll(\'.gtab-btn\').forEach(x=>{x.style.background=\'#fff\';x.style.color=\'var(--ink-soft)\'});this.style.background=\'var(--petal)\';this.style.color=\'#fff\';document.querySelectorAll(\'.gtab-content\').forEach(x=>x.style.display=\'none\');document.getElementById(\''+t[1]+'\').style.display=\'block\';"'
+    + ' class="gtab-btn bujuck-btn" style="flex:1;border:1.5px solid var(--petal);background:'+(i===0?'var(--petal)':'#fff')+';color:'+(i===0?'#fff':'var(--ink-soft)')+';font-size:12px;padding:8px 4px;border-radius:10px;cursor:pointer;font-family:inherit;">'
+    + t[0] + '</button>'
+  ).join('');
+
+  return headerHtml
+    + '<div style="display:flex;gap:6px;margin-bottom:2px;">' + tabBtns + '</div>'
+    + '<div id="gtab-matrix" class="gtab-content" style="display:block;">'
     + '<div class="result-card">'
-    + '<div class="result-card-title">🕸️ 인연의 관계도</div>'
-    + '<div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px;display:flex;gap:12px;">'
-    + '<span style="color:#4CAF50;">→ 생(生): 기운을 줌</span>'
-    + '<span style="color:#FF5722;">⇢ 극(剋): 자극하는 사이</span>'
-    + '</div>'
-    + renderRelationMap(analysis.members, analysis.relations, analysis.roles)
-    + '</div>'
-    + '<div class="result-card"><div class="result-card-title">👑 모임 내 역할</div>' + rolesHtml + '</div>'
+    + '<div class="result-card-title">⚡ 1:1 궁합 매트릭스</div>'
+    + matrixHtml + '</div></div>'
+    + '<div id="gtab-radar" class="gtab-content" style="display:none;">'
     + '<div class="result-card">'
-    + '<div class="result-card-title">💘 찰떡 콤비 vs 💣 시한폭탄</div>'
-    + '<div style="background:#f0fff4;border-radius:12px;padding:12px;margin-bottom:8px;">'
-    + '<div style="font-size:12px;font-weight:700;color:#2d9a6b;margin-bottom:4px;">🏆 BEST — '+(analysis.best?.nameA||'')+' &amp; '+(analysis.best?.nameB||'')+'</div>'
-    + '<div style="font-size:13px;">'+(analysis.best?.score||0)+'점 — 둘이 붙여놓으면 시너지 폭발! 같이 일해도 잘 맞는 사이니라 🌟</div>'
-    + bestTagsHtml + '</div>'
-    + '<div style="background:#fff0f0;border-radius:12px;padding:12px;">'
-    + '<div style="font-size:12px;font-weight:700;color:#c4393a;margin-bottom:4px;">⚠️ CAUTION — '+(analysis.worst?.nameA||'')+' &amp; '+(analysis.worst?.nameB||'')+'</div>'
-    + '<div style="font-size:13px;">'+(analysis.worst?.score||0)+'점 — 둘이 있으면 조용할 날이 없으니 중재자가 필수니라! 💥</div>'
-    + worstTagsHtml + '</div>'
-    + '</div>'
-    + '<div class="result-card"><div class="result-card-title">📊 '+nowYear+'년 운세 순위</div>' + rankHtml + '</div>'
-    + '<div class="result-card"><div class="result-card-title">💕 전체 궁합 점수</div>' + pairsHtml + '</div>';
+    + '<div class="result-card-title">🌀 그룹 오행 레이더</div>'
+    + radarHtml + '</div></div>'
+    + '<div id="gtab-sim" class="gtab-content" style="display:none;">'
+    + simHtml + '</div>';
 }
 
 // ══ 2인 딥다이브 모드 ══
