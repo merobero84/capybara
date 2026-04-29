@@ -1238,12 +1238,63 @@ function updateCapiBubble(){
   if(!bubble) return;
   const p=getCurrentProfile();
   const data=p?profileToData(p):null;
+  const name=p?.name||'그대';
+  const love=p?.love||'single';
+  const h=new Date().getHours();
   const cmon=data?.wolun?.[NOW_MONTH];
-  const SIPSIN_MSG={비견:'이번 달 나를 믿고 독립적으로 나아가요 💪',겁재:'이번 달 과감한 도전이 기회가 돼요 ⚡',식신:'이번 달 즐기면 즐길수록 운이 열려요 🌸',상관:'이번 달 하고 싶은 말을 표현해봐요 🎭',편재:'이번 달 사람 많이 만날수록 복이 와요 💰',정재:'이번 달 차근차근 모으면 결실이 있어요 🏦',편관:'이번 달 압박이 있어도 이겨내면 성장해요 💎',정관:'이번 달 원칙대로 하면 인정받아요 👑',편인:'이번 달 배우고 공부하면 개운이 돼요 📚',정인:'이번 달 귀인이 도와줄 거예요 🌟'};
-  const LOVE_MSG={single:'이번 달 인연운이 강해요! 적극적으로 나가봐요 💕',some:'그 사람 마음이 기울고 있어요. 지금이 타이밍이에요 💘',dating:'이 인연, 결혼으로 이어질 수 있어요 💑',married:'부부 이달 궁합은? 함께하는 시간을 늘려봐요 💍'};
-  const loveStatus = p?.love||'single';
-  const baseSipsinMsg = cmon?.sipsin?SIPSIN_MSG[cmon.sipsin]||'느긋하게,<br>그러나 깊이 🌿':'느긋하게,<br>그러나 깊이 🌿';
-  bubble.innerHTML = LOVE_MSG[loveStatus]||baseSipsinMsg;
+  const sub=cmon?capiScoreMonth(data,cmon):{love:50,money:50,work:50,health:50,overall:50};
+
+  // 시간대
+  const isMorning=h>=5&&h<12;
+  const isAfternoon=h>=12&&h<18;
+  const isEvening=h>=18&&h<22;
+  const isNight=h>=22||h<5;
+
+  // 오늘 날짜 기반 시드 (하루에 한 번씩 바뀜)
+  const seed=(NOW_YEAR*10000+NOW_MONTH*100+NOW_DAY)%7;
+
+  // 운세 상태
+  const isLoveGood=sub.love>=70;
+  const isMoneyGood=sub.money>=70;
+  const isWorkGood=sub.work>=70;
+  const isLoveBad=sub.love<40;
+  const isOverallGood=sub.overall>=70;
+  const isOverallBad=sub.overall<40;
+
+  const msgs = [];
+
+  // 시간대별 + 운세 조합
+  if(isMorning){
+    if(isMoneyGood) msgs.push(`${name}님, 아침부터 재물운이 반짝이는구려! 💰`);
+    if(isLoveGood) msgs.push(`좋은 아침이오, ${name}님. 오늘 설레는 일이 생길 것 같소 🌸`);
+    if(isWorkGood) msgs.push(`${name}님, 오늘 일이 술술 풀릴 날이오! 자신 있게 나서봐거라 ☀️`);
+    if(isOverallBad) msgs.push(`${name}님, 오늘은 무리하지 말고 천천히 시작해봐거라 ☕`);
+    msgs.push(`좋은 아침이오, ${name}님. 오늘도 느긋하게 시작하는 것이 최고라오 ☕`);
+  }
+  if(isAfternoon){
+    if(isLoveGood) msgs.push(`${name}님, 오늘 오후 핑크빛 기운이 도는데...? 💕`);
+    if(isMoneyGood) msgs.push(`${name}님, 오늘 뜻밖의 횡재 소식이 올지도 모르오 💰`);
+    if(isOverallGood) msgs.push(`${name}님, 지금 이 기운 놓치지 마시오. 오늘은 뭘 해도 잘 될 날이오 ✨`);
+    msgs.push(`${name}님, 점심은 든든히 드셨소? 오후도 도령이 응원하오 🍀`);
+  }
+  if(isEvening){
+    if(isLoveGood&&love==='single') msgs.push(`밤공기가 달달하오, ${name}님. 오늘 저녁 인연이 찾아올지도...? 💖`);
+    if(isLoveGood&&love==='some') msgs.push(`${name}님, 오늘 저녁 그 사람에게 연락해봐거라. 타이밍이 좋소 💘`);
+    if(isLoveGood&&love==='dating') msgs.push(`${name}님, 오늘 저녁 애인이 보고 싶지 않소? 연락해봐거라 💑`);
+    if(isLoveBad) msgs.push(`${name}님, 오늘 저녁은 혼자만의 시간을 갖는 게 좋겠소 🌙`);
+    msgs.push(`${name}님, 하루 수고 많았소. 오늘 저녁은 도령도 쉬어가오 🌙`);
+  }
+  if(isNight){
+    if(seed%2===0) msgs.push(`${name}님, 이 밤에 앱을 켜다니... 도령도 잠을 못 자겠구려 🌕`);
+    else msgs.push(`${name}님, 오늘 하루 어땠소? 내일은 더 좋은 날이 될 것이오 ⭐`);
+  }
+
+  // 연애 상황별 특별 문구 (seed 기반)
+  if(love==='single'&&seed===0) msgs.unshift(`${name}님, 도령이 점괘를 보니 머지않아 인연이 오겠소! 준비하거라 💕`);
+  if(love==='some'&&seed===1) msgs.unshift(`${name}님, 그 사람 생각이 나지 않소? 도령도 알고 있다오 💘`);
+  if(love==='married'&&seed===2) msgs.unshift(`${name}님, 오늘 배우자에게 따뜻한 말 한마디 건네봐거라 💍`);
+
+  bubble.innerHTML = msgs[0] || `느긋하게, 그러나 깊이 🌿`;
 }
 
 // ── init ──
