@@ -1674,28 +1674,52 @@ const MENU_CONFIG = {
       const goodYearObj = Array.isArray(data.yeonwoon)
         ? data.yeonwoon.find(y=>y.year>=NOW_YEAR && targetSS.includes(y.sipsin))
         : null;
+      const nearYearObj = Array.isArray(data.yeonwoon)
+        ? data.yeonwoon.find(y=>y.year>=NOW_YEAR && y.year<=NOW_YEAR+8 && targetSS.includes(y.sipsin))
+        : null;
 
       let bestAge, bestDesc;
-      if(curIsGood){
-        bestAge = `${curDW.age_from}~${curDW.age_to}세`;
-        bestDesc = `지금 이 대운(${curDW.gan}${curDW.ji})이 결혼운이 가장 강해요!`;
-      } else if(goodDW){
-        bestAge = `${goodDW.age_from}~${goodDW.age_to}세`;
-        bestDesc = `${goodDW.gan}${goodDW.ji} 대운 · ${goodDW.sipsin}`;
-      } else if(goodYearObj){
-        const targetAge = age + (goodYearObj.year - NOW_YEAR);
-        bestAge = `${goodYearObj.year}년 (${targetAge}세)`;
-        bestDesc = `${goodYearObj.gan}${goodYearObj.ji}년 연운 · ${goodYearObj.sipsin}`;
+      if(love==='dating'||love==='some'){
+        // 연애중/썸: 연운(특정 년도) 우선 → 더 구체적 타이밍 제시
+        if(nearYearObj){
+          const targetAge = age + (nearYearObj.year - NOW_YEAR);
+          bestAge = `${nearYearObj.year}년 (${targetAge}세)`;
+          bestDesc = `${nearYearObj.gan}${nearYearObj.ji}년에 결혼 기운이 강하게 들어와요`;
+        } else if(goodYearObj){
+          const targetAge = age + (goodYearObj.year - NOW_YEAR);
+          bestAge = `${goodYearObj.year}년 (${targetAge}세)`;
+          bestDesc = `${goodYearObj.gan}${goodYearObj.ji}년 연운 · ${goodYearObj.sipsin}`;
+        } else if(curIsGood){
+          bestAge = `${curDW.age_from}~${curDW.age_to}세 사이`;
+          bestDesc = `현재 대운(${curDW.gan}${curDW.ji}) 안에 결혼 기운이 있어요`;
+        } else if(goodDW){
+          bestAge = `${goodDW.age_from}~${goodDW.age_to}세`;
+          bestDesc = `${goodDW.gan}${goodDW.ji} 대운 · ${goodDW.sipsin}`;
+        } else {
+          const nextDW = data.daewoon?.find(d=>d.age_from>age);
+          bestAge = nextDW ? `${nextDW.age_from}~${nextDW.age_to}세` : `${age+2}~${age+5}세`;
+          bestDesc = '지금 인연과 차근차근 준비해가는 시기예요';
+        }
       } else {
-        // 가장 가까운 대운 나이라도 표시
-        const nextDW = data.daewoon?.find(d=>d.age_from>age);
-        bestAge = nextDW ? `${nextDW.age_from}~${nextDW.age_to}세` : `${age+2}~${age+5}세`;
-        bestDesc = '지금도 충분히 좋은 시기예요';
+        // 싱글: 기존 로직 유지 (대운 우선)
+        if(curIsGood){
+          bestAge = `${curDW.age_from}~${curDW.age_to}세`;
+          bestDesc = `지금 이 대운(${curDW.gan}${curDW.ji})이 결혼운이 가장 강해요!`;
+        } else if(goodDW){
+          bestAge = `${goodDW.age_from}~${goodDW.age_to}세`;
+          bestDesc = `${goodDW.gan}${goodDW.ji} 대운 · ${goodDW.sipsin}`;
+        } else if(goodYearObj){
+          const targetAge = age + (goodYearObj.year - NOW_YEAR);
+          bestAge = `${goodYearObj.year}년 (${targetAge}세)`;
+          bestDesc = `${goodYearObj.gan}${goodYearObj.ji}년 연운 · ${goodYearObj.sipsin}`;
+        } else {
+          const nextDW = data.daewoon?.find(d=>d.age_from>age);
+          bestAge = nextDW ? `${nextDW.age_from}~${nextDW.age_to}세` : `${age+2}~${age+5}세`;
+          bestDesc = '지금도 충분히 좋은 시기예요';
+        }
       }
 
-      // 연애중이면 제목 변경
-      const isDating = love==='some'||love==='dating';
-      const sectionTitle = isDating ? '💍 지금 인연과 결혼 시기는?' : '💍 최적 결혼 시기';
+      const sectionTitle = love==='dating' ? '💍 지금 인연과 결혼 시기는?' : love==='some' ? '💍 이 인연이 결혼으로 이어지는 시기' : '💍 최적 결혼 시기';
       const myOh=OH[data.ilgan]||'목';
       const PARTNER_OH={목:'금·토',화:'수·금',토:'목·수',금:'화·목',수:'토·화'};
       const PARTNER_DESC={
@@ -1728,6 +1752,17 @@ const MENU_CONFIG = {
             <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;">${bestDesc}</p>
           </div>
         </div>
+        ${love==='dating'||love==='some' ? `
+        <div class="result-card">
+          <div class="result-card-title">💑 지금 인연과의 결혼 준비 타이밍</div>
+          <div style="background:rgba(232,145,126,.08);border-radius:12px;padding:14px;margin-bottom:10px;">
+            <p style="font-size:14px;line-height:1.8;margin:0;">${PARTNER_DESC[data.ilgan]||'나를 이해해주고 함께 성장할 수 있는 사람이 최고예요.'}</p>
+          </div>
+          <div style="font-size:13px;line-height:2;padding:10px;background:var(--ivory-2);border-radius:10px;">
+            <div>💬 결혼 이야기를 꺼내기 좋은 시기: <strong>${bestAge}</strong></div>
+            <div>⏳ 지금부터 준비하면 ${data.singang==='신강'?'1~2년':'2~3년'} 안에 자연스럽게 이어져요</div>
+          </div>
+        </div>` : `
         <div class="result-card">
           <div class="result-card-title">🤝 어떤 사람을 만나야 할까?</div>
           <div style="background:rgba(232,145,126,.08);border-radius:12px;padding:14px;margin-bottom:10px;">
@@ -1741,7 +1776,7 @@ const MENU_CONFIG = {
           <div style="margin-top:10px;padding:10px;background:var(--ivory-2);border-radius:10px;font-size:13px;">
             💡 만남 → 연애 <strong>${datingYears}</strong> → 결혼이 자연스러운 흐름이에요
           </div>
-        </div>
+        </div>`}
         <div class="result-card">
           <div class="result-card-title">🌊 대운별 결혼운 흐름</div>
           ${(data.daewoon?.slice(0,7)||[]).map(d=>{
@@ -1760,7 +1795,7 @@ const MENU_CONFIG = {
         </div>
                 <div class="result-card" style="background:var(--ivory-2);">
           <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
-          <p style="font-size:14px;line-height:1.8;font-style:italic;">"결혼은 타이밍이 절반이에요. ${bestAge}에 좋은 기운이 있으니 그 시기에 ${meetPlace.slice(0,15)}... 적극적으로 나가보세요. 준비된 마음에 좋은 인연이 와요 💍"</p>
+          <p style="font-size:14px;line-height:1.8;font-style:italic;">${love==='dating' ? `"좋은 인연은 이미 곁에 있느니라. ${bestAge}에 결혼 기운이 강하게 들어오니, 그 시기에 진지한 이야기를 나눠보거라. 준비된 마음이 좋은 결실을 맺느니라 💍"` : love==='some' ? `"지금 마음이 통하는 인연이 있다면 놓치지 말거라. ${bestAge}이 이 인연이 결실 맺기 좋은 시기니라. 용기 있는 자에게 좋은 결과가 오느니라 💕"` : `"결혼은 타이밍이 절반이에요. ${bestAge}에 좋은 기운이 있으니 그 시기에 ${meetPlace.slice(0,15)}... 적극적으로 나가보세요. 준비된 마음에 좋은 인연이 와요 💍"`}</p>
         <p style="font-size:11px;color:var(--petal);text-align:right;margin:8px 0 0;opacity:.8;">${['이 풀이가 마음에 들면 공유가 개운법이니라 🌸','혼자 간직하면 반만 이루어지느니라 🤫','친구에게 보내면 그 친구도 복 받느니라 💌','캡처해서 저장해두거라 ✨'][(NOW_DAY+NOW_MONTH)%4]}}</p>
         </div>`;
     }
