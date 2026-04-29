@@ -3628,8 +3628,9 @@ function startWorryTarot(ilgan, yongsin, sinsal) {
   const worry = document.getElementById('worry-input')?.value?.trim();
   if(!worry) { alert('고민을 입력해주세요!'); return; }
 
-  // 랜덤 카드 뽑기 (고민마다 다름)
-  const [card] = drawCardsRandom(1, 800);
+  // 랜덤 카드 뽑기
+  const shuffled=[...TAROT_MAJOR].sort(()=>Math.random()-.5);
+  const card = {...shuffled[0], isReversed: Math.random()<0.25};
   const m = card.isReversed ? card.reversed : card.upright;
 
   // 카드 표시
@@ -3644,17 +3645,13 @@ function startWorryTarot(ilgan, yongsin, sinsal) {
       <div style="font-size:12px;color:var(--ink-soft);text-align:center;margin-top:8px;">카드를 탭하면 뒤집혀요 ✨</div>
     </div>`;
 
-  // AI 호출
-  askWorryTarot(ilgan, yongsin, sinsal, card.id, card.isReversed, m.key, worry);
+  // AI 호출 - 카드 정보 직접 전달
+  askWorryTarot(ilgan, yongsin, sinsal, card.name, card.isReversed, m.key, m.desc, worry);
 }
 
-async function askWorryTarot(ilgan, yongsin, sinsal, cardId, isReversed, cardKey, worry) {
-
+async function askWorryTarot(ilgan, yongsin, sinsal, cardName, isReversed, cardKey, cardDesc, worry) {
   const resultEl = document.getElementById('worry-result');
   showAILoading('worry-result');
-
-  const card = TAROT_MAJOR[cardId];
-  const m = isReversed ? card.reversed : card.upright;
 
   const prompt = `
 사용자 고민: "${worry}"
@@ -3663,8 +3660,8 @@ async function askWorryTarot(ilgan, yongsin, sinsal, cardId, isReversed, cardKey
 - 일간: ${ilgan} / 용신: ${yongsin}
 - 주요 신살: ${sinsal}
 
-오늘 뽑힌 타로 카드: ${card.name} (${isReversed?'역방향':'정방향'}) — ${m.key}
-카드 의미: ${m.desc}
+오늘 뽑힌 타로 카드: ${cardName} (${isReversed?'역방향':'정방향'}) — ${cardKey}
+카드 의미: ${cardDesc}
 
 위 사주와 타로 카드를 바탕으로 이 고민에 대해 카피바라 도령 말투로 답해주세요.
 반드시 "~이니라", "~거라", "~느니라" 말투를 사용하고 150자 이내로 핵심만 말해주세요.`;
@@ -3687,7 +3684,7 @@ async function askWorryTarot(ilgan, yongsin, sinsal, cardId, isReversed, cardKey
     resultEl.innerHTML = `
       <div class="result-card" style="background:var(--ivory-2);text-align:center;">
         <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">${errMsg}</p>
-        <button onclick="askWorryTarot('${ilgan}','${yongsin}','${sinsal}',${card.id},${card.isReversed},'${m.key}')"
+        <button onclick="startWorryTarot('${ilgan}','${yongsin}','${sinsal}')"
           style="background:var(--petal);color:#fff;border:none;border-radius:12px;padding:10px 24px;font-size:14px;font-family:inherit;cursor:pointer;">
           🔄 다시 물어보기
         </button>
