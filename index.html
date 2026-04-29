@@ -131,7 +131,27 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(
 .msc-score{font-size:18px;font-weight:700;}
 .msc-label{font-size:14px;}
 
-/* ── 기타 ── */
+/* ── 타로 카드 ── */
+.tarot-scene{perspective:1000px;width:120px;height:200px;cursor:pointer;flex-shrink:0;}
+.tarot-card{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,0,.2,1);}
+.tarot-card.flipped{transform:rotateY(180deg);}
+.tarot-face,.tarot-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;}
+.tarot-back{background:linear-gradient(135deg,#9b7ec8,#6b4fa8);border:2px solid #c4a8f0;box-shadow:0 8px 24px rgba(107,79,168,.3);}
+.tarot-back-pattern{font-size:28px;opacity:.6;}
+.tarot-back-label{font-size:10px;color:rgba(255,255,255,.7);margin-top:6px;letter-spacing:1px;}
+.tarot-face{background:linear-gradient(160deg,#fff9f0,#fff5f8);border:2px solid var(--petal);transform:rotateY(180deg);box-shadow:0 8px 24px rgba(200,112,94,.2);}
+.tarot-face.reversed{transform:rotateY(180deg) rotate(180deg);}
+.tarot-emoji{font-size:36px;margin-bottom:6px;}
+.tarot-name{font-family:'Gowun Batang',serif;font-size:11px;font-weight:700;color:var(--moss-deep);text-align:center;line-height:1.3;}
+.tarot-num{font-size:10px;color:var(--ink-soft);margin-top:4px;}
+.tarot-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;padding:16px 0;}
+.tarot-slot{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.tarot-slot-label{font-size:11px;color:var(--ink-soft);font-weight:700;}
+.tarot-result{margin-top:16px;}
+.tarot-card-info{background:linear-gradient(135deg,#f8f0ff,#fff5f8);border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid #e0d0f0;}
+.tarot-card-info-name{font-family:'Gowun Batang',serif;font-size:16px;font-weight:700;color:var(--moss-deep);margin-bottom:6px;}
+.tarot-card-info-desc{font-size:13px;color:var(--ink);line-height:1.75;}
+.tarot-hint{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:12px;padding:8px;background:var(--ivory-2);border-radius:8px;}
 .home-wrap{padding-bottom:70px;}
 .error{color:#c4393a;font-size:12px;margin-top:6px;}
 details summary{list-style:none;}
@@ -285,6 +305,35 @@ details summary::-webkit-details-marker{display:none;}
         <div class="menu-card mint" onclick="openMenu('daewoon')"><span class="menu-card-emoji">🌊</span><div class="menu-card-title">대운 타임라인</div><div class="menu-card-desc">10년 단위 인생 흐름</div></div>
         <div class="menu-card mint" onclick="openMenu('ilgan_char')"><span class="menu-card-emoji">🔮</span><div class="menu-card-title">일간 특성</div><div class="menu-card-desc">甲乙丙丁 일간 풀이</div></div>
         <div class="menu-card mint" onclick="openMenu('yearly_rank')"><span class="menu-card-emoji">📊</span><div class="menu-card-title">월별 운세 순위</div><div class="menu-card-desc">올해 좋은 달 나쁜 달</div></div>
+      </div>
+    </div>
+
+    <!-- 카피바라 타로 -->
+    <div class="home-section">
+      <div class="section-title">🃏 카피바라 타로</div>
+      <div class="menu-grid">
+        <div class="menu-card" style="border-color:#d4b8f0;background:linear-gradient(135deg,#f8f0ff,#fff);" onclick="openMenu('tarot_today')">
+          <span class="menu-card-emoji">🃏</span>
+          <div class="menu-card-title">오늘의 타로</div>
+          <div class="menu-card-desc">도령이 오늘 카드를 뽑느니라</div>
+        </div>
+        <div class="menu-card" style="border-color:#ffd8d0;background:linear-gradient(135deg,#fff5f3,#fff);" onclick="openMenu('tarot_love')">
+          <span class="badge menu-badge badge-hot">HOT</span>
+          <span class="menu-card-emoji">💕</span>
+          <div class="menu-card-title">연애 타로</div>
+          <div class="menu-card-desc">과거·현재·미래 3장</div>
+        </div>
+        <div class="menu-card" style="border-color:#c8eedd;background:linear-gradient(135deg,#f0fff8,#fff);" onclick="openMenu('tarot_money')">
+          <span class="menu-card-emoji">💰</span>
+          <div class="menu-card-title">재물 타로</div>
+          <div class="menu-card-desc">상황·조언·결과 3장</div>
+        </div>
+        <div class="menu-card" style="border-color:#e0d4f5;background:linear-gradient(135deg,#f5f0ff,#fff);" onclick="openMenu('tarot_saju')">
+          <span class="badge menu-badge badge-new">NEW</span>
+          <span class="menu-card-emoji">✨</span>
+          <div class="menu-card-title">사주 타로</div>
+          <div class="menu-card-desc">용신 기반 맞춤 해석</div>
+        </div>
       </div>
     </div>
 
@@ -3225,6 +3274,219 @@ function saveAndAnalyzeGroup(){
   openMenu('multi_compare');
 }
 
+// ══ 타로 데이터 ══
+const TAROT_MAJOR = [
+  {id:0,name:'광대',emoji:'🃏',num:'0',upright:{key:'새로운 시작',desc:'두려움 없이 새로운 길로 나아갈 때예요. 직관을 믿고 도전해봐요.'},reversed:{key:'무모한 도전',desc:'준비 없이 뛰어들 수 있어요. 잠시 멈추고 신중하게 생각해봐요.'}},
+  {id:1,name:'마법사',emoji:'🎩',num:'I',upright:{key:'의지와 능력',desc:'지금 모든 능력이 갖춰져 있어요. 실행하는 것만 남았어요.'},reversed:{key:'재능 낭비',desc:'능력이 있는데 쓰지 못하고 있어요. 자신을 믿어봐요.'}},
+  {id:2,name:'여사제',emoji:'🌙',num:'II',upright:{key:'직관과 신비',desc:'내면의 소리에 귀 기울여봐요. 말로 표현 못할 것들을 느끼고 있어요.'},reversed:{key:'숨겨진 비밀',desc:'숨겨진 정보나 감정이 있어요. 좀 더 드러내도 괜찮아요.'}},
+  {id:3,name:'여황제',emoji:'👑',num:'III',upright:{key:'풍요와 창조',desc:'풍요롭고 창의적인 에너지가 넘쳐요. 사랑과 아름다움이 가득한 시기예요.'},reversed:{key:'의존과 정체',desc:'과도하게 의존하거나 정체된 느낌이 있어요. 독립심을 키워봐요.'}},
+  {id:4,name:'황제',emoji:'⚔️',num:'IV',upright:{key:'권위와 안정',desc:'강한 의지와 리더십으로 목표를 이룰 수 있어요. 체계와 규칙이 힘이 돼요.'},reversed:{key:'지배와 고집',desc:'너무 통제하려는 경향이 있어요. 유연성을 가져봐요.'}},
+  {id:5,name:'교황',emoji:'✝️',num:'V',upright:{key:'전통과 조언',desc:'믿을 수 있는 멘토나 가이드가 있어요. 전통적인 방식이 답이에요.'},reversed:{key:'규범 반항',desc:'기존 방식에 의문을 가지는 시기예요. 새로운 방법을 찾아봐요.'}},
+  {id:6,name:'연인',emoji:'💑',num:'VI',upright:{key:'사랑과 선택',desc:'중요한 선택의 순간이 왔어요. 마음이 이끄는 대로 따라가봐요.'},reversed:{key:'갈등과 불화',desc:'관계에서 갈등이 생길 수 있어요. 솔직한 대화가 필요해요.'}},
+  {id:7,name:'전차',emoji:'🏆',num:'VII',upright:{key:'승리와 의지',desc:'강한 의지로 장애물을 극복할 수 있어요. 지금 앞으로 나아가세요!'},reversed:{key:'방향 상실',desc:'어느 쪽으로 가야 할지 모르는 상태예요. 방향을 먼저 정해봐요.'}},
+  {id:8,name:'힘',emoji:'🦁',num:'VIII',upright:{key:'용기와 인내',desc:'부드러운 힘으로 어려움을 이겨낼 수 있어요. 내면의 강함을 믿어봐요.'},reversed:{key:'자기 의심',desc:'스스로를 믿지 못하고 있어요. 당신은 생각보다 훨씬 강해요.'}},
+  {id:9,name:'은둔자',emoji:'🔦',num:'IX',upright:{key:'성찰과 지혜',desc:'혼자만의 시간이 필요한 시기예요. 내면을 들여다보면 답이 있어요.'},reversed:{key:'고립과 외로움',desc:'너무 혼자 있어서 외로운 상태예요. 주변에 손을 내밀어봐요.'}},
+  {id:10,name:'운명의 수레바퀴',emoji:'☸️',num:'X',upright:{key:'전환점',desc:'삶의 사이클이 바뀌는 시점이에요. 변화를 받아들이면 행운이 따라와요.'},reversed:{key:'불운의 연속',desc:'잠시 운이 따르지 않는 시기예요. 곧 전환점이 올 거예요.'}},
+  {id:11,name:'정의',emoji:'⚖️',num:'XI',upright:{key:'공정과 균형',desc:'진실이 밝혀지고 올바른 결과가 나올 거예요. 정직이 최선이에요.'},reversed:{key:'불공정',desc:'불공평한 상황에 처할 수 있어요. 사실에 집중해봐요.'}},
+  {id:12,name:'매달린 사람',emoji:'🙃',num:'XII',upright:{key:'희생과 기다림',desc:'지금은 멈추고 기다릴 때예요. 다른 관점에서 보면 답이 보여요.'},reversed:{key:'헛된 희생',desc:'무의미한 희생을 하고 있지 않은지 돌아봐요.'}},
+  {id:13,name:'죽음',emoji:'🌑',num:'XIII',upright:{key:'변화와 전환',desc:'끝이 아니라 새로운 시작이에요. 낡은 것을 버리고 새 출발을 해봐요.'},reversed:{key:'변화 거부',desc:'변화를 두려워하며 붙잡고 있어요. 흘려보내는 용기가 필요해요.'}},
+  {id:14,name:'절제',emoji:'🌊',num:'XIV',upright:{key:'균형과 조화',desc:'서두르지 말고 균형을 맞춰가세요. 인내심을 가지고 조화롭게 나아가요.'},reversed:{key:'불균형',desc:'과도하거나 극단적인 상태예요. 중용을 찾아봐요.'}},
+  {id:15,name:'악마',emoji:'🔗',num:'XV',upright:{key:'집착과 욕망',desc:'무언가에 지나치게 집착하고 있어요. 스스로 만든 족쇄에서 벗어나봐요.'},reversed:{key:'해방',desc:'오랫동안 얽매였던 것에서 벗어날 기회예요. 자유를 찾아봐요.'}},
+  {id:16,name:'탑',emoji:'⚡',num:'XVI',upright:{key:'급격한 변화',desc:'갑작스러운 변화나 충격이 있을 수 있어요. 하지만 이게 새 시작의 계기예요.'},reversed:{key:'내면의 혼란',desc:'내면에 혼란이 있어요. 차분히 정리해봐요.'}},
+  {id:17,name:'별',emoji:'⭐',num:'XVII',upright:{key:'희망과 영감',desc:'희망의 빛이 보이는 시기예요. 꿈을 향해 나아가면 반드시 이루어져요.'},reversed:{key:'절망과 불신',desc:'지쳐서 희망을 잃은 상태예요. 작은 것부터 다시 시작해봐요.'}},
+  {id:18,name:'달',emoji:'🌕',num:'XVIII',upright:{key:'불안과 환상',desc:'불확실한 상황에서 혼란스러울 수 있어요. 직관을 믿되 현실을 직시해요.'},reversed:{key:'혼란 해소',desc:'안개가 걷히고 진실이 드러나는 시기예요.'}},
+  {id:19,name:'태양',emoji:'☀️',num:'XIX',upright:{key:'기쁨과 성공',desc:'밝고 긍정적인 에너지가 가득해요! 지금 하는 모든 것이 빛나는 시기예요.'},reversed:{key:'과시와 교만',desc:'좋은 에너지가 있지만 겸손함을 잊지 마세요.'}},
+  {id:20,name:'심판',emoji:'🎺',num:'XX',upright:{key:'재탄생과 각성',desc:'새로운 나로 거듭나는 시기예요. 과거를 정리하고 다시 일어서봐요.'},reversed:{key:'자책과 후회',desc:'과거에 너무 얽매여 있어요. 용서하고 앞으로 나아가봐요.'}},
+  {id:21,name:'세계',emoji:'🌍',num:'XXI',upright:{key:'완성과 성취',desc:'긴 여정의 마무리예요! 노력이 결실을 맺는 완성의 시기예요.'},reversed:{key:'미완성',desc:'아직 끝나지 않은 일이 있어요. 조금만 더 힘내봐요.'}}
+];
+
+function drawCards(seed, count) {
+  const cards=[]; const used=new Set(); let s=seed;
+  for(let i=0;i<count;i++){
+    s=(s*1664525+1013904223)&0xffffffff;
+    let idx=Math.abs(s)%TAROT_MAJOR.length,tries=0;
+    while(used.has(idx)&&tries<50){s=(s*1664525+1013904223)&0xffffffff;idx=Math.abs(s)%TAROT_MAJOR.length;tries++;}
+    used.add(idx);
+    s=(s*1664525+1013904223)&0xffffffff;
+    cards.push({...TAROT_MAJOR[idx],isReversed:Math.abs(s)%3===0});
+  }
+  return cards;
+}
+
+function flipTarotCard(idx) {
+  const card=document.getElementById('tc-'+idx);
+  if(!card) return;
+  card.classList.toggle('flipped');
+  setTimeout(()=>{
+    const res=document.getElementById('tr-'+idx);
+    if(res) res.style.display=card.classList.contains('flipped')?'block':'none';
+  },400);
+}
+
+function _tarotCard(card, label) {
+  return `<div class="tarot-slot">
+    <div class="tarot-slot-label">${label}</div>
+    <div class="tarot-scene" onclick="flipTarotCard(${card.id})">
+      <div class="tarot-card" id="tc-${card.id}">
+        <div class="tarot-back">
+          <div style="font-size:32px;opacity:.7;">🦫</div>
+          <div style="font-size:18px;margin-top:4px;opacity:.4;">✦✦✦</div>
+          <div class="tarot-back-label">TAP ✨</div>
+        </div>
+        <div class="tarot-face${card.isReversed?' reversed':''}">
+          <div class="tarot-emoji">${card.emoji}</div>
+          <div class="tarot-name">${card.name}</div>
+          <div class="tarot-num">${card.num}${card.isReversed?' ↑역':''}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function _tarotResult(card, ctx) {
+  const m=card.isReversed?card.reversed:card.upright;
+  return `<div class="tarot-card-info" id="tr-${card.id}" style="display:none;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:26px;">${card.emoji}</span>
+      <div>
+        <div class="tarot-card-info-name">${card.name} ${card.isReversed?'(역방향)':'(정방향)'}</div>
+        <div style="font-size:12px;font-weight:700;color:var(--petal);">${m.key}</div>
+      </div>
+    </div>
+    <div class="tarot-card-info-desc">${m.desc}</div>
+    ${ctx?`<div style="margin-top:8px;padding:8px 10px;background:rgba(155,126,200,.1);border-radius:8px;font-size:12px;color:var(--ink-soft);line-height:1.7;">
+      <strong>🦫 도령의 해석:</strong> ${ctx}
+    </div>`:''}
+  </div>`;
+}
+
+function _tarotWarn() {
+  return ['이 풀이가 마음에 들면 공유가 개운법이니라 🌸','혼자 간직하면 반만 이루어지느니라 🤫','친구에게 보내면 그 친구도 복 받느니라 💌','캡처해서 저장해두거라 ✨'][(NOW_DAY+NOW_MONTH)%4];
+}
+
+MENU_CONFIG.tarot_today = {
+  title: '🃏 오늘의 타로',
+  render(data,p) {
+    const seed=NOW_YEAR*10000+NOW_MONTH*100+NOW_DAY+(p?.year||0);
+    const [card]=drawCards(seed,1);
+    const m=card.isReversed?card.reversed:card.upright;
+    const OH={甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'};
+    const CTX={목:`나무처럼 유연하게. 오늘 ${m.key}의 기운이 당신 곁에 있느니라.`,화:`불처럼 뜨겁게. ${m.key} — 이 에너지를 오늘 적극적으로 써봐거라.`,토:`흙처럼 단단하게. ${m.key}의 메시지를 현실에 적용해봐거라.`,금:`금속처럼 날카롭게. ${m.key} — 오늘의 핵심 키워드니라.`,수:`물처럼 흘러가봐요. ${m.key}의 기운이 오늘을 안내하느니라.`};
+    const ctx=CTX[OH[data?.ilgan||'甲']||'목'];
+    return `
+      <div class="result-card" style="background:linear-gradient(135deg,#f5f0ff,#fff5f8);">
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-family:'Gowun Batang',serif;font-size:17px;color:var(--moss-deep);">${NOW_YEAR}년 ${NOW_MONTH}월 ${NOW_DAY}일</div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">카드를 탭하면 뒤집혀요 ✨</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;padding:12px 0;">
+        ${_tarotCard(card,'오늘의 카드')}
+      </div>
+      ${_tarotResult(card,ctx)}
+      <div class="result-card" style="background:var(--ivory-2);">
+        <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+        <p style="font-size:14px;line-height:1.8;font-style:italic;">"오늘 ${card.name} 카드가 그대에게 말하느니라 — ${m.key}. 이 카드를 마음에 새기고 하루를 보내거라 🃏"</p>
+        <p style="font-size:11px;color:var(--petal);text-align:right;margin:6px 0 0;opacity:.8;">${_tarotWarn()}</p>
+      </div>`;
+  }
+};
+
+MENU_CONFIG.tarot_love = {
+  title: '💕 연애 타로',
+  render(data,p) {
+    const seed=NOW_YEAR*10000+NOW_MONTH*100+(p?.year||0)+7;
+    const cards=drawCards(seed,3);
+    const slots=['과거','현재','미래'];
+    const ctxs=[
+      c=>`과거 연애에서 ${c.isReversed?c.reversed.key:c.upright.key}의 흔적이 남아있느니라. 이것이 현재의 당신을 만들었어요.`,
+      c=>`지금 이 순간 연애 에너지는 ${c.isReversed?c.reversed.key:c.upright.key}이니라. 현재 관계의 핵심 메시지예요.`,
+      c=>`앞으로의 인연에서 ${c.isReversed?c.reversed.key:c.upright.key}의 흐름이 보이느니라. 이 방향으로 준비해봐거라.`,
+    ];
+    return `
+      <div class="result-card" style="background:linear-gradient(135deg,#fff0f8,#fff5f0);">
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-family:'Gowun Batang',serif;font-size:17px;color:var(--moss-deep);">연애의 과거 · 현재 · 미래</div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">카드를 순서대로 탭해봐요 💕</div>
+        </div>
+      </div>
+      <div class="tarot-row">${cards.map((c,i)=>_tarotCard(c,slots[i])).join('')}</div>
+      <div class="tarot-result">${cards.map((c,i)=>_tarotResult(c,ctxs[i](c))).join('')}</div>
+      <div class="result-card" style="background:var(--ivory-2);">
+        <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+        <p style="font-size:14px;line-height:1.8;font-style:italic;">"과거에서 배우고, 현재를 살고, 미래를 향해 나아가거라. 카드 세 장이 그대의 연애 흐름을 말해주느니라 💕"</p>
+        <p style="font-size:11px;color:var(--petal);text-align:right;margin:6px 0 0;opacity:.8;">${_tarotWarn()}</p>
+      </div>`;
+  }
+};
+
+MENU_CONFIG.tarot_money = {
+  title: '💰 재물 타로',
+  render(data,p) {
+    const seed=NOW_YEAR*10000+NOW_MONTH*100+(p?.year||0)+13;
+    const cards=drawCards(seed,3);
+    const slots=['현재 상황','조언','결과'];
+    const ctxs=[
+      c=>`지금 재물 상황은 ${c.isReversed?c.reversed.key:c.upright.key}이니라. 현재 재정 상태를 파악해봐요.`,
+      c=>`도령의 조언은 ${c.isReversed?c.reversed.key:c.upright.key}이니라. 이 방향으로 재물을 다뤄봐거라.`,
+      c=>`이대로 간다면 ${c.isReversed?c.reversed.key:c.upright.key}의 결과가 예상되느니라.`,
+    ];
+    return `
+      <div class="result-card" style="background:linear-gradient(135deg,#f0fff8,#fffbf0);">
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-family:'Gowun Batang',serif;font-size:17px;color:var(--moss-deep);">이달 재물의 흐름</div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">상황 · 조언 · 결과 3장 💰</div>
+        </div>
+      </div>
+      <div class="tarot-row">${cards.map((c,i)=>_tarotCard(c,slots[i])).join('')}</div>
+      <div class="tarot-result">${cards.map((c,i)=>_tarotResult(c,ctxs[i](c))).join('')}</div>
+      <div class="result-card" style="background:var(--ivory-2);">
+        <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+        <p style="font-size:14px;line-height:1.8;font-style:italic;">"재물은 흐르는 물과 같느니라. 막으면 썩고 흘리면 마르느니라. 카드가 가리키는 방향으로 지혜롭게 다뤄봐거라 💰"</p>
+        <p style="font-size:11px;color:var(--petal);text-align:right;margin:6px 0 0;opacity:.8;">${_tarotWarn()}</p>
+      </div>`;
+  }
+};
+
+MENU_CONFIG.tarot_saju = {
+  title: '✨ 사주 타로',
+  render(data,p) {
+    const yongsin=data?.yongsin||'목';
+    const ilgan=data?.ilgan||'甲';
+    const OH_CARD={목:[1,3,7,17,21],화:[0,6,13,19,8],토:[4,5,11,14,20],금:[2,10,12,15,18],수:[9,16,3,17,2]};
+    const pool=OH_CARD[yongsin]||OH_CARD['목'];
+    const seed=NOW_YEAR*10000+NOW_MONTH*100+(p?.year||0)+21;
+    let s=seed; const drawn=[];
+    for(let i=0;i<3;i++){
+      s=(s*1664525+1013904223)&0xffffffff;
+      const card={...TAROT_MAJOR[pool[Math.abs(s)%pool.length]]};
+      s=(s*1664525+1013904223)&0xffffffff;
+      card.isReversed=Math.abs(s)%4===0;
+      drawn.push(card);
+    }
+    const slots=['현재 나의 기운','이번 달 흐름','도령의 조언'];
+    const YL={목:'나무(木)',화:'불(火)',토:'흙(土)',금:'금(金)',수:'물(水)'};
+    const ctxs=[
+      c=>`${ilgan}일간, ${YL[yongsin]} 용신을 가진 당신에게 ${c.isReversed?c.reversed.key:c.upright.key}의 기운이 보이느니라.`,
+      c=>`이번 달 흐름 속에서 ${c.isReversed?c.reversed.key:c.upright.key}를 명심해봐거라.`,
+      c=>`${YL[yongsin]} 기운의 카드에서 전하는 말 — ${c.isReversed?c.reversed.desc:c.upright.desc}`,
+    ];
+    return `
+      <div class="result-card" style="background:linear-gradient(135deg,#f5f0ff,#fff0f8);">
+        <div style="text-align:center;padding:8px 0;">
+          <div style="font-family:'Gowun Batang',serif;font-size:17px;color:var(--moss-deep);">사주 맞춤 타로</div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">${ilgan}일간 · 용신 ${YL[yongsin]} 기반 카드예요 ✨</div>
+        </div>
+      </div>
+      <div class="tarot-row">${drawn.map((c,i)=>_tarotCard(c,slots[i])).join('')}</div>
+      <div class="tarot-result">${drawn.map((c,i)=>_tarotResult(c,ctxs[i](c))).join('')}</div>
+      <div class="result-card" style="background:var(--ivory-2);">
+        <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+        <p style="font-size:14px;line-height:1.8;font-style:italic;">"${ilgan}일간에게 ${YL[yongsin]} 기운의 카드들이 모였느니라. 사주와 타로가 같은 방향을 가리킬 때 그것이 진짜 길이니라 ✨"</p>
+        <p style="font-size:11px;color:var(--petal);text-align:right;margin:6px 0 0;opacity:.8;">${_tarotWarn()}</p>
+      </div>`;
+  }
+};
 
 MENU_CONFIG.charm_point = {
   title: '✨ 나의 매력 포인트',
