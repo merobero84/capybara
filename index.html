@@ -1240,7 +1240,10 @@ function updateCapiBubble(){
   const data=p?profileToData(p):null;
   const cmon=data?.wolun?.[NOW_MONTH];
   const SIPSIN_MSG={비견:'이번 달 나를 믿고 독립적으로 나아가요 💪',겁재:'이번 달 과감한 도전이 기회가 돼요 ⚡',식신:'이번 달 즐기면 즐길수록 운이 열려요 🌸',상관:'이번 달 하고 싶은 말을 표현해봐요 🎭',편재:'이번 달 사람 많이 만날수록 복이 와요 💰',정재:'이번 달 차근차근 모으면 결실이 있어요 🏦',편관:'이번 달 압박이 있어도 이겨내면 성장해요 💎',정관:'이번 달 원칙대로 하면 인정받아요 👑',편인:'이번 달 배우고 공부하면 개운이 돼요 📚',정인:'이번 달 귀인이 도와줄 거예요 🌟'};
-  bubble.innerHTML=cmon?.sipsin?SIPSIN_MSG[cmon.sipsin]||'느긋하게,<br>그러나 깊이 🌿':'느긋하게,<br>그러나 깊이 🌿';
+  const LOVE_MSG={single:'이번 달 인연운이 강해요! 적극적으로 나가봐요 💕',some:'그 사람 마음이 기울고 있어요. 지금이 타이밍이에요 💘',dating:'이 인연, 결혼으로 이어질 수 있어요 💑',married:'부부 이달 궁합은? 함께하는 시간을 늘려봐요 💍'};
+  const loveStatus = p?.love||'single';
+  const baseSipsinMsg = cmon?.sipsin?SIPSIN_MSG[cmon.sipsin]||'느긋하게,<br>그러나 깊이 🌿':'느긋하게,<br>그러나 깊이 🌿';
+  bubble.innerHTML = LOVE_MSG[loveStatus]||baseSipsinMsg;
 }
 
 // ── init ──
@@ -1419,116 +1422,44 @@ const MENU_CONFIG = {
   solo_escape: {
     title: '❤️ 솔로 탈출 시기',
     render(data, p) {
-      const isF = p.gender==='female';
-      const targetSS = isF ? ['정관','편관'] : ['정재','편재'];
-      const monthData = Array.from({length:12},(_,i)=>{
-        const m=i+1, cw=data.wolun?.[m]; if(!cw) return {m,score:50,sipsin:'',gan:'',ji:'',isTarget:false};
-        const sub=capiScoreMonth(data,cw);
-        return {m, score:sub.love, sipsin:cw.sipsin, gan:cw.gan, ji:cw.ji, unseong:cw.unseong, isTarget:targetSS.includes(cw.sipsin)};
-      }).sort((a,b)=>b.score-a.score);
-      const top = monthData.slice(0,3);
-      const bestM = top[0];
-      const MONTH_MSG = {
-        1:'새해 첫 인연이 찾아올 수 있어요! 새해 모임을 적극 참여해보세요 🎉',
-        2:'발렌타인 시즌! 먼저 마음을 표현해봐요 💌',
-        3:'벚꽃 시즌 데이트 찬스 🌸 야외 활동으로 자연스러운 만남을!',
-        4:'봄 기운에 설레임이 와요. 새로운 취미 모임에 나가보세요 🌷',
-        5:'황금연휴 여행에서 인연을 만날 수 있어요 ✈️',
-        6:'여름 시작! 밝은 에너지가 이성의 시선을 끌어요 ☀️',
-        7:'여름 축제와 여행에서 운명적 만남이 기다려요 🎆',
-        8:'바다·계곡 데이트로 자연스러운 인연 찬스 🌊',
-        9:'가을 감성 최고조! 독서모임·문화생활로 좋은 사람 만나요 🍂',
-        10:'10월은 결실의 달. 인연도 열매를 맺어요 🍁',
-        11:'연말 모임 시즌 시작! 소개팅 잡기 딱 좋은 달 🍷',
-        12:'연말 감성으로 고백 성공률 UP! 파티·모임에 적극 나가요 🎄'
-      };
-      const SIPSIN_TIP = {
-        정관:'안정적이고 신뢰할 수 있는 인연이 와요. 소개팅이나 지인 소개로 만날 가능성↑',
-        편관:'강렬하고 카리스마 있는 인연! 예상치 못한 곳에서 만나요',
-        정재:'현실적이고 알뜰한 파트너 만나기 좋아요. 직장·동네 인연이 발전해요',
-        편재:'화끈하고 매력적인 인연! 여행·파티에서 만남이 생겨요'
-      };
-      return `
-        <div class="result-card" style="background:linear-gradient(135deg,#fff0f5,#fff8f5);">
-          <div class="result-card-title">🗓️ ${NOW_YEAR}년 최고의 달</div>
-          <div style="text-align:center;padding:12px 0;">
-            <span style="font-family:'Nanum Pen Script',cursive;font-size:52px;color:var(--leaf-3);">${bestM.m}월</span>
-            <p style="font-size:14px;margin:4px 0;font-weight:700;">${bestM.gan}${bestM.ji} · ${bestM.sipsin} · ${bestM.unseong}</p>
-            <p style="font-size:13px;color:var(--ink-soft);">${MONTH_MSG[bestM.m]||'이 달이 인연운이 가장 좋아요!'}</p>
-            ${bestM.isTarget?`<div style="margin-top:8px;padding:8px 14px;background:rgba(232,145,126,.12);border-radius:10px;font-size:13px;color:var(--moss-deep);">
-              🌟 ${SIPSIN_TIP[bestM.sipsin]||'인연운이 강한 달이에요!'}
-            </div>`:''}
-          </div>
+      const love = p?.love||'single';
+
+      // 연애중/기혼 분기
+      if(love==='dating') return `
+        <div class="result-card" style="background:linear-gradient(135deg,#fff0f8,#fff5f0);text-align:center;padding:24px;">
+          <div style="font-size:48px;">💑</div>
+          <p style="font-size:18px;font-weight:700;margin:10px 0;">이미 연애 중이시잖아요!</p>
+          <p style="font-size:14px;color:var(--ink-soft);line-height:1.75;">솔로 탈출은 이미 성공하셨네요 🎉<br>지금 인연을 더 깊게 만들어봐요.</p>
         </div>
-        <div class="result-card">
-          <div class="result-card-title">💕 TOP 3 인연운 달</div>
-          ${top.map((x,i)=>`
-            <div style="display:flex;align-items:center;gap:10px;padding:12px 0;${i>0?'border-top:1px solid var(--ivory-2);':''}">
-              <div style="font-size:24px;">${i===0?'🥇':i===1?'🥈':'🥉'}</div>
-              <div style="flex:1;">
-                <div style="font-weight:700;font-size:15px;">${x.m}월 <span style="font-size:12px;color:var(--ink-soft);">${x.gan}${x.ji}</span>
-                  ${x.isTarget?'<span class="tag tag-good" style="font-size:10px;margin-left:4px;">인연성↑</span>':''}
-                </div>
-                <div style="font-size:12px;color:var(--ink-soft);margin:2px 0;">${x.sipsin} · ${x.unseong}</div>
-                <div class="result-bar-wrap"><div class="result-bar" style="width:${x.score}%;background:${scoreColor(x.score)};"></div></div>
-              </div>
-              <div style="font-size:20px;font-weight:700;color:${scoreColor(x.score)};">${x.score}</div>
-            </div>
-          `).join('')}
+        <div class="result-card" style="background:var(--ivory-2);">
+          <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+          <p style="font-size:14px;line-height:1.8;font-style:italic;">"솔로 탈출은 이미 성공이니라! 이제 이 인연을 결혼으로 이어갈 시기를 보는 게 어떠한가 💍"</p>
+        </div>`;
+
+      if(love==='married') return `
+        <div class="result-card" style="background:linear-gradient(135deg,#fff0f8,#fff5f0);text-align:center;padding:24px;">
+          <div style="font-size:48px;">💍</div>
+          <p style="font-size:18px;font-weight:700;margin:10px 0;">결혼하셨군요!</p>
+          <p style="font-size:14px;color:var(--ink-soft);line-height:1.75;">솔로 탈출은 오래 전에 성공하셨네요 🎊<br>이달 부부운을 확인해봐요.</p>
         </div>
-        <div class="result-card">
-          <div class="result-card-title">💡 인연을 만드는 꿀팁</div>
-          <div style="font-size:14px;line-height:1.9;">
-            <div>🌸 ${isF?'정관·편관':'정재·편재'}이 들어오는 달에 적극적으로!</div>
-            <div>📱 소개팅 앱은 인연운 좋은 달에 집중 사용</div>
-            <div>🎉 모임·파티·동호회 나가기 — 자연스러운 만남이 최고</div>
-            <div>✨ 외모 관리는 그 달 시작 1~2주 전부터</div>
-          </div>
+        <div class="result-card" style="background:var(--ivory-2);">
+          <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+          <p style="font-size:14px;line-height:1.8;font-style:italic;">"솔로는 이미 옛날 이야기이니라! 부부 사이를 더 돈독하게 만드는 데 집중해봐거라 💍"</p>
+        </div>`;
+
+      if(love==='some') return `
+        <div class="result-card" style="background:linear-gradient(135deg,#fff0f8,#fff5f0);text-align:center;padding:16px;">
+          <div style="font-size:40px;">💘</div>
+          <p style="font-size:17px;font-weight:700;margin:8px 0;">썸을 연애로 발전시킬 시기는?</p>
+          <p style="font-size:13px;color:var(--ink-soft);">솔로 탈출보다 썸 성공에 집중해봐요!</p>
         </div>
-        <div class="result-card">
-          <div class="result-card-title">🗺️ 인연 만나기 좋은 장소</div>
-          ${(() => {
-            const oh=data.oheng||{};
-            const topOh=Object.entries(oh).sort((a,b)=>b[1]-a[1])[0]?.[0]||'목';
-            const PLACES={
-              목:['🌳 공원·산책로 (자연 속 만남)','📚 독서모임·도서관','🎨 미술관·갤러리','☕ 감성 카페','🌿 식물 원예 클래스'],
-              화:['🎭 공연·뮤지컬·콘서트','🍷 와인바·루프탑','💃 댄스·요가 클래스','📸 사진 동호회','🏃 러닝 크루'],
-              토:['🍽️ 맛집 탐방·쿠킹 클래스','⛳ 골프·등산 동호회','🏠 집들이·소규모 모임','🎲 보드게임 카페','🌾 농촌 체험'],
-              금:['🎵 재즈바·클래식 공연','🏋️ 헬스장·스포츠센터','💼 업무·직장 관련 모임','✈️ 해외여행·여행 동호회','🍣 고급 레스토랑'],
-              수:['🌊 바다·강변','🎤 노래방·음악 모임','🎬 영화관·영화 토론','📷 여행 사진 동호회','🧘 명상·힐링 프로그램']
-            };
-            const places=PLACES[topOh]||PLACES['목'];
-            return `<div style="font-size:13px;line-height:2.1;">${places.map(p=>`<div>${p}</div>`).join('')}</div>`;
-          })()}
-        </div>
-        <div class="result-card">
-          <div class="result-card-title">✨ 인연 만드는 행운의 아이템</div>
-          ${(() => {
-            const yongsin=data.yongsin||'목';
-            const ITEMS={
-              목:{color:'초록·민트',item:'나뭇잎 모양 액세서리, 초록 소품',perfume:'우디·그린 계열',tip:'자연 소재 옷 입기'},
-              화:{color:'빨강·주황·핑크',item:'붉은 액세서리, 루비·가넷 주얼리',perfume:'플로럴·스파이시 계열',tip:'밝은 색상 립컬러'},
-              토:{color:'노랑·베이지·황토',item:'토파즈·시트린 주얼리, 흙 소품',perfume:'머스크·앰버 계열',tip:'따뜻한 톤 메이크업'},
-              금:{color:'흰색·실버·골드',item:'실버 주얼리, 금속 액세서리',perfume:'프레시·아쿠아 계열',tip:'깔끔하고 단정한 스타일'},
-              수:{color:'파랑·보라·네이비',item:'아쿠아마린·라피스라줄리',perfume:'오션·시트러스 계열',tip:'흘리는 라인의 옷'}
-            };
-            const it=ITEMS[yongsin]||ITEMS['목'];
-            return `
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                ${[['🎨 행운의 색',it.color],['💎 행운 주얼리',it.item],['🌸 향수 계열',it.perfume],['👗 스타일 팁',it.tip]].map(([l,v])=>`
-                  <div style="background:var(--ivory-2);border-radius:10px;padding:8px;">
-                    <div style="font-size:10px;color:var(--ink-soft);">${l}</div>
-                    <div style="font-size:12px;font-weight:700;margin-top:2px;">${v}</div>
-                  </div>`).join('')}
-              </div>`;
-          })()}
-        </div>
-      `;
+        ${renderSoloEscape(data, p)}`;
+
+      return renderSoloEscape(data, p);
     }
   },
 
   love_count: {
-    title: '😮 남은 연애 횟수',
     render(data, p) {
       const age = NOW_YEAR - parseInt(p.year);
       const isF = p.gender==='female';
@@ -1624,14 +1555,54 @@ const MENU_CONFIG = {
   marriage_timing: {
     title: '💍 결혼 적령기',
     render(data, p) {
+      const love = p?.love||'single';
+      if(love==='married') return `
+        <div class="result-card" style="background:linear-gradient(135deg,#fff0f8,#f5f0ff);text-align:center;padding:24px;">
+          <div style="font-size:48px;">💍</div>
+          <p style="font-size:18px;font-weight:700;margin:10px 0;">이미 결혼하셨군요!</p>
+          <p style="font-size:14px;color:var(--ink-soft);line-height:1.75;">결혼 적령기는 이미 지나셨어요 🎊<br>이달 부부운을 확인해봐요.</p>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">💑 부부 이달 궁합</div>
+          <p style="font-size:14px;line-height:1.8;">이달 ${NOW_MONTH}월 ${data.wolun?.[NOW_MONTH]?.sipsin||''} 기운 속에서 배우자와 함께하는 시간을 늘려봐요. 작은 이벤트 하나가 부부 관계를 따뜻하게 해줘요 💕</p>
+        </div>
+        <div class="result-card" style="background:var(--ivory-2);">
+          <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+          <p style="font-size:14px;line-height:1.8;font-style:italic;">"결혼은 끝이 아니라 시작이니라. 매일 새롭게 사랑하는 마음이 좋은 부부를 만드느니라 💍"</p>
+        </div>`;
+
       const age = NOW_YEAR - parseInt(p.year);
       const isF = p.gender==='female';
       const targetSS = isF?['정관','편관']:['정재','편재'];
       const OH={甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'};
       const curDW = data.daewoon?.find(d=>d.age_from<=age&&age<=d.age_to);
-      const goodDW = data.daewoon?.find(d=>targetSS.includes(d.sipsin)&&d.age_from>age);
       const curIsGood = curDW&&targetSS.includes(curDW.sipsin);
-      const bestAge = curIsGood?`${curDW.age_from}~${curDW.age_to}세 (지금!)`:goodDW?`${goodDW.age_from}~${goodDW.age_to}세`:'지금도 좋아요!';
+
+      // 현재 나이 +20년 이내에서만 찾기 (현실적 범위)
+      const goodDW = data.daewoon?.find(d=>
+        targetSS.includes(d.sipsin) && d.age_from>age && d.age_from<=age+20
+      );
+
+      // 연운에서 가까운 좋은 해 찾기
+      const goodYear = data.yeonwoon
+        ? Object.entries(data.yeonwoon)
+            .find(([yr,yw])=>parseInt(yr)>=NOW_YEAR && targetSS.includes(yw.sipsin))
+        : null;
+
+      let bestAge, bestDesc;
+      if(curIsGood){
+        bestAge = `${curDW.age_from}~${curDW.age_to}세 (지금!)`;
+        bestDesc = '지금 이 대운이 결혼운이 가장 강해요!';
+      } else if(goodDW){
+        bestAge = `${goodDW.age_from}~${goodDW.age_to}세`;
+        bestDesc = `${goodDW.gan}${goodDW.ji} 대운 · ${goodDW.sipsin}`;
+      } else if(goodYear){
+        bestAge = `${goodYear[0]}년 (${age+(parseInt(goodYear[0])-NOW_YEAR)}세)`;
+        bestDesc = `${goodYear[1].gan}${goodYear[1].ji}년 연운 · ${goodYear[1].sipsin}`;
+      } else {
+        bestAge = '지금 이 순간도 좋아요!';
+        bestDesc = '마음이 열릴 때가 바로 적령기예요';
+      }
       const myOh=OH[data.ilgan]||'목';
       const PARTNER_OH={목:'금·토',화:'수·금',토:'목·수',금:'화·목',수:'토·화'};
       const PARTNER_DESC={
@@ -1661,7 +1632,7 @@ const MENU_CONFIG = {
           <div class="result-card-title" style="justify-content:center;">💍 최적 결혼 시기</div>
           <div style="text-align:center;padding:12px 0;">
             <span style="font-family:'Nanum Pen Script',cursive;font-size:40px;color:var(--leaf-3);">${bestAge}</span>
-            <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;">${curIsGood?'지금 이 대운이 결혼운이 강해요!':goodDW?goodDW.gan+goodDW.ji+' 대운 · '+goodDW.sipsin:'지금도 충분히 좋아요'}</p>
+            <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;">${bestDesc}</p>
           </div>
         </div>
         <div class="result-card">
@@ -1879,6 +1850,40 @@ const MENU_CONFIG = {
   reunion: {
     title: '🥺 재회운 분석',
     render(data, p) {
+      const love = p?.love||'single';
+      if(love==='dating') return `
+        <div class="result-card" style="background:linear-gradient(135deg,#fff0f8,#fff5f0);text-align:center;padding:24px;">
+          <div style="font-size:48px;">💑</div>
+          <p style="font-size:18px;font-weight:700;margin:10px 0;">헤어질 위기는 없을까?</p>
+          <p style="font-size:14px;color:var(--ink-soft);line-height:1.75;">재회보다 현재 연애 유지가 더 중요해요!<br>이달 갈등 가능성을 체크해봐요.</p>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">⚠️ 이달 갈등 주의 지수</div>
+          ${(()=>{const cmon=data.wolun?.[NOW_MONTH];const s=cmon?capiScoreMonth(data,cmon).love:50;
+          return `<div style="text-align:center;padding:10px 0;">
+            <span style="font-family:'Nanum Pen Script',cursive;font-size:48px;color:${s>=65?'#2d9a6b':'#c4393a'};">${s>=65?'안정':'주의'}</span>
+            <p style="font-size:13px;color:var(--ink-soft);margin-top:4px;">이달 애정운 ${s}점 — ${s>=65?'사이가 좋은 달이에요 💕':'갈등이 생길 수 있어요. 대화로 풀어봐요 🗣️'}</p>
+          </div>`;})()}
+        </div>
+        <div class="result-card" style="background:var(--ivory-2);">
+          <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+          <p style="font-size:14px;line-height:1.8;font-style:italic;">"지금 인연을 소중히 해거라. 있을 때 잘 해야 나중에 후회가 없느니라 💑"</p>
+        </div>`;
+      if(love==='married') return `
+        <div class="result-card" style="background:linear-gradient(135deg,#fff0f8,#fff5f0);text-align:center;padding:24px;">
+          <div style="font-size:48px;">💍</div>
+          <p style="font-size:18px;font-weight:700;margin:10px 0;">황혼이혼 조심!</p>
+          <p style="font-size:14px;color:var(--ink-soft);line-height:1.75;">이달 부부 갈등 가능성을 체크해봐요.</p>
+        </div>
+        <div class="result-card">
+          <div class="result-card-title">💑 이달 부부운</div>
+          ${(()=>{const cmon=data.wolun?.[NOW_MONTH];const s=cmon?capiScoreMonth(data,cmon).love:50;
+          return `<p style="font-size:14px;line-height:1.8;">${s>=65?'이달은 부부 사이가 화목한 달이에요. 함께하는 시간을 만들어봐요 💕':'이달은 사소한 갈등이 생길 수 있어요. 먼저 양보하는 마음이 중요해요 🙏'}</p>`;})()}
+        </div>
+        <div class="result-card" style="background:var(--ivory-2);">
+          <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+          <p style="font-size:14px;line-height:1.8;font-style:italic;">"부부는 매일 새롭게 선택하는 관계이니라. 오늘도 서로를 선택해주거라 💍"</p>
+        </div>`;
       const isF = p.gender==='female';
       const targetSS = isF?['정관','편관']:['정재','편재'];
       const cmon=data.wolun?.[NOW_MONTH];
@@ -3757,15 +3762,17 @@ MENU_CONFIG.capi_bujuck = {
     const yongsin=data.yongsin||'목';
     const cyr=data.yeonwoon?.find(y=>y.year===NOW_YEAR);
     const isGoodYear=['정관','편관','정재','편재','식신'].includes(cyr?.sipsin);
-    const isSingle=p.love==='single';
+    const loveStatus=p.love||'single';
     const YCOLOR={목:'#2d6a2d',화:'#c0392b',토:'#8B6914',금:'#7a7a7a',수:'#1a4a8a'};
     const YBGCOLOR={목:'#f0fff0',화:'#fff0f0',토:'#fffbf0',금:'#f8f8f8',수:'#f0f0ff'};
     const yc=YCOLOR[yongsin]||'#c4705e';
     const yb=YBGCOLOR[yongsin]||'#fff5f0';
     const bujucks=[
-      {id:'solo',label:'솔로 탈출부',emoji:'❤️‍🔥',show:isSingle,hanja:'緣分成就',sub:'인연을 맺어주소서',msg:'이 부적을 품은 자에게 올해 반드시 인연이 찾아오리라. 용기를 내어 먼저 다가가거라!'},
-      {id:'some',label:'썸 성공부',emoji:'💘',show:true,hanja:'心心相印',sub:'마음이 통하게 하소서',msg:'두 마음이 하나로 이어지는 기운을 담았느니라. 오늘 먼저 연락해보거라!'},
-      {id:'dohwa',label:'도화 개화부',emoji:'🌸',show:hasDohwa,hanja:'桃花盛開',sub:'매력이 활짝 피어나소서',msg:'도화의 기운이 강한 그대에게 드리는 특별 부적이니라. 자연스러운 매력을 믿어라!'},
+      {id:'solo',label:'솔로 탈출부',emoji:'❤️‍🔥',show:loveStatus==='single',hanja:'緣分成就',sub:'인연을 맺어주소서',msg:'이 부적을 품은 자에게 올해 반드시 인연이 찾아오리라. 용기를 내어 먼저 다가가거라!'},
+      {id:'some',label:'썸 성공부',emoji:'💘',show:loveStatus==='some',hanja:'心心相印',sub:'마음이 통하게 하소서',msg:'두 마음이 하나로 이어지는 기운을 담았느니라. 오늘 먼저 연락해보거라!'},
+      {id:'keep',label:'연애 유지부',emoji:'💑',show:loveStatus==='dating',hanja:'白年佳緣',sub:'오래오래 함께하소서',msg:'이 인연이 더욱 깊어지고 오래가도록 기운을 담았느니라. 매일 표현하거라!'},
+      {id:'couple',label:'부부 화합부',emoji:'💍',show:loveStatus==='married',hanja:'夫婦和合',sub:'부부 사이가 화목하소서',msg:'부부의 인연은 하늘이 맺어준 것이니라. 매일 감사하고 아껴주거라!'},
+      {id:'dohwa',label:'도화 개화부',emoji:'🌸',show:hasDohwa&&loveStatus==='single',hanja:'桃花盛開',sub:'매력이 활짝 피어나소서',msg:'도화의 기운이 강한 그대에게 드리는 특별 부적이니라. 자연스러운 매력을 믿어라!'},
     ].filter(b=>b.show);
     const main=bujucks[0]||bujucks[1];
     return `
