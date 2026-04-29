@@ -2853,6 +2853,50 @@ const MENU_CONFIG = {
   },
 };
 
+function renderSoloEscape(data, p) {
+  const isF = p.gender==='female';
+  const targetSS = isF ? ['정관','편관'] : ['정재','편재'];
+  const monthData = Array.from({length:12},(_,i)=>{
+    const m=i+1, cw=data.wolun?.[m]; if(!cw) return {m,score:50,sipsin:'',gan:'',ji:'',isTarget:false};
+    const sub=capiScoreMonth(data,cw);
+    return {m,score:sub.love,sipsin:cw.sipsin,gan:cw.gan,ji:cw.ji,unseong:cw.unseong,isTarget:targetSS.includes(cw.sipsin)};
+  }).sort((a,b)=>b.score-a.score);
+  const top=monthData.slice(0,3);
+  const bestM=top[0];
+  const MONTH_MSG={1:'새해 첫 인연이 찾아올 수 있어요! 🎉',2:'발렌타인 시즌! 먼저 마음을 표현해봐요 💌',3:'벚꽃 시즌 데이트 찬스 🌸',4:'봄 기운에 설레임이 와요 🌷',5:'황금연휴 여행에서 인연을 만날 수 있어요 ✈️',6:'여름 시작! 밝은 에너지가 이성의 시선을 끌어요 ☀️',7:'여름 축제에서 운명적 만남이 기다려요 🎆',8:'바다·계곡에서 자연스러운 인연 찬스 🌊',9:'가을 감성 최고조! 독서모임·문화생활로 만나요 🍂',10:'10월은 결실의 달. 인연도 열매를 맺어요 🍁',11:'연말 모임 시즌 시작! 소개팅 잡기 딱 좋은 달 🍷',12:'연말 감성으로 고백 성공률 UP! 🎄'};
+  const SIPSIN_TIP={정관:'안정적이고 신뢰할 수 있는 인연이 와요.',편관:'강렬하고 카리스마 있는 인연! 예상치 못한 곳에서 만나요',정재:'현실적이고 알뜰한 파트너 만나기 좋아요.',편재:'화끈하고 매력적인 인연! 여행·파티에서 만남이 생겨요'};
+  return `
+    <div class="result-card" style="background:linear-gradient(135deg,#fff0f5,#fff8f5);">
+      <div class="result-card-title">🗓️ ${NOW_YEAR}년 최고의 달</div>
+      <div style="text-align:center;padding:12px 0;">
+        <span style="font-family:'Nanum Pen Script',cursive;font-size:52px;color:var(--leaf-3);">${bestM.m}월</span>
+        <p style="font-size:14px;margin:4px 0;font-weight:700;">${bestM.gan}${bestM.ji} · ${bestM.sipsin} · ${bestM.unseong}</p>
+        <p style="font-size:13px;color:var(--ink-soft);">${MONTH_MSG[bestM.m]||'이 달이 인연운이 가장 좋아요!'}</p>
+        ${bestM.isTarget?`<div style="margin-top:8px;padding:8px 14px;background:rgba(232,145,126,.12);border-radius:10px;font-size:13px;color:var(--moss-deep);">🌟 ${SIPSIN_TIP[bestM.sipsin]||'인연운이 강한 달이에요!'}</div>`:''}
+      </div>
+    </div>
+    <div class="result-card">
+      <div class="result-card-title">💕 TOP 3 인연운 달</div>
+      ${top.map((x,i)=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 0;${i>0?'border-top:1px solid var(--ivory-2);':''}">
+          <div style="font-size:24px;">${i===0?'🥇':i===1?'🥈':'🥉'}</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:15px;">${x.m}월 <span style="font-size:12px;color:var(--ink-soft);">${x.gan}${x.ji}</span>
+              ${x.isTarget?'<span class="tag tag-good" style="font-size:10px;margin-left:4px;">인연성↑</span>':''}
+            </div>
+            <div style="font-size:12px;color:var(--ink-soft);margin:2px 0;">${x.sipsin} · ${x.unseong}</div>
+            <div class="result-bar-wrap"><div class="result-bar" style="width:${x.score}%;background:${scoreColor(x.score)};"></div></div>
+          </div>
+          <div style="font-size:20px;font-weight:700;color:${scoreColor(x.score)};">${x.score}</div>
+        </div>`).join('')}
+    </div>
+    <div class="result-card" style="background:var(--ivory-2);">
+      <div class="result-card-title">🦫 카피바라 도령의 한 줄 평</div>
+      <p style="font-size:14px;line-height:1.8;font-style:italic;">"${bestM.m}월에 인연운이 가장 강하니라. 그 달엔 적극적으로 나서거라! 준비된 마음에 좋은 인연이 오느니라 💕"</p>
+    </div>`;
+}
+
+
 
 const ILJURO_DATA = {
   // 甲 (갑목 - 큰 나무)
