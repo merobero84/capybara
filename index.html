@@ -1578,31 +1578,37 @@ const MENU_CONFIG = {
       const curDW = data.daewoon?.find(d=>d.age_from<=age&&age<=d.age_to);
       const curIsGood = curDW&&targetSS.includes(curDW.sipsin);
 
-      // 현재 나이 +20년 이내에서만 찾기 (현실적 범위)
+      // 현재 나이 +20년 이내에서만 찾기
       const goodDW = data.daewoon?.find(d=>
         targetSS.includes(d.sipsin) && d.age_from>age && d.age_from<=age+20
       );
 
-      // 연운에서 가까운 좋은 해 찾기
-      const goodYear = data.yeonwoon
-        ? Object.entries(data.yeonwoon)
-            .find(([yr,yw])=>parseInt(yr)>=NOW_YEAR && targetSS.includes(yw.sipsin))
+      // 연운에서 가까운 좋은 해 찾기 (배열 형태)
+      const goodYearObj = Array.isArray(data.yeonwoon)
+        ? data.yeonwoon.find(y=>y.year>=NOW_YEAR && targetSS.includes(y.sipsin))
         : null;
 
       let bestAge, bestDesc;
       if(curIsGood){
-        bestAge = `${curDW.age_from}~${curDW.age_to}세 (지금!)`;
-        bestDesc = '지금 이 대운이 결혼운이 가장 강해요!';
+        bestAge = `${curDW.age_from}~${curDW.age_to}세`;
+        bestDesc = `지금 이 대운(${curDW.gan}${curDW.ji})이 결혼운이 가장 강해요!`;
       } else if(goodDW){
         bestAge = `${goodDW.age_from}~${goodDW.age_to}세`;
         bestDesc = `${goodDW.gan}${goodDW.ji} 대운 · ${goodDW.sipsin}`;
-      } else if(goodYear){
-        bestAge = `${goodYear[0]}년 (${age+(parseInt(goodYear[0])-NOW_YEAR)}세)`;
-        bestDesc = `${goodYear[1].gan}${goodYear[1].ji}년 연운 · ${goodYear[1].sipsin}`;
+      } else if(goodYearObj){
+        const targetAge = age + (goodYearObj.year - NOW_YEAR);
+        bestAge = `${goodYearObj.year}년 (${targetAge}세)`;
+        bestDesc = `${goodYearObj.gan}${goodYearObj.ji}년 연운 · ${goodYearObj.sipsin}`;
       } else {
-        bestAge = '지금 이 순간도 좋아요!';
-        bestDesc = '마음이 열릴 때가 바로 적령기예요';
+        // 가장 가까운 대운 나이라도 표시
+        const nextDW = data.daewoon?.find(d=>d.age_from>age);
+        bestAge = nextDW ? `${nextDW.age_from}~${nextDW.age_to}세` : `${age+2}~${age+5}세`;
+        bestDesc = '지금도 충분히 좋은 시기예요';
       }
+
+      // 연애중이면 제목 변경
+      const isDating = love==='some'||love==='dating';
+      const sectionTitle = isDating ? '💍 지금 인연과 결혼 시기는?' : '💍 최적 결혼 시기';
       const myOh=OH[data.ilgan]||'목';
       const PARTNER_OH={목:'금·토',화:'수·금',토:'목·수',금:'화·목',수:'토·화'};
       const PARTNER_DESC={
@@ -1629,7 +1635,7 @@ const MENU_CONFIG = {
       const DW_DESC={비견:'자립과 독립의 시기. 결혼보다 자기 성장에 집중해요.',겁재:'변화가 많은 시기. 만남은 있지만 안정보다 변화를 원해요.',식신:'즐거움과 여유의 시기. 자연스러운 인연이 생기기 좋아요.',상관:'자유롭고 싶은 시기. 구속보다 연애를 즐기는 경향이 있어요.',편재:'활발한 만남의 시기. 다양한 인연이 있지만 결정이 어려워요.',정재:'안정을 원하는 시기. 진지한 관계와 결혼을 고려하게 돼요.',편관:'강한 인연의 시기. 운명적 만남이 있지만 긴장감도 있어요.',정관:'결혼에 가장 이상적인 시기! 안정적이고 신뢰할 인연이 와요.',편인:'내면 성장의 시기. 관계보다 자신에게 집중하게 돼요.',정인:'귀인의 도움이 있는 시기. 좋은 인연 소개를 받을 수 있어요.'};
       return `
         <div class="result-card" style="background:linear-gradient(135deg,#fff5ee,#fff0f8);">
-          <div class="result-card-title" style="justify-content:center;">💍 최적 결혼 시기</div>
+          <div class="result-card-title" style="justify-content:center;">${sectionTitle}</div>
           <div style="text-align:center;padding:12px 0;">
             <span style="font-family:'Nanum Pen Script',cursive;font-size:40px;color:var(--leaf-3);">${bestAge}</span>
             <p style="font-size:13px;color:var(--ink-soft);margin-top:6px;">${bestDesc}</p>
