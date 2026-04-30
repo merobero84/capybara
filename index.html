@@ -4370,27 +4370,54 @@ function checkShareParam() {
   if(!share) return;
   try {
     const data = JSON.parse(decodeURIComponent(atob(share)));
-    // 프로필 임시 생성 후 해당 메뉴 오픈
-    const tempProfile = {
+    // ── 읽기 전용: 프로필 저장 없이 결과만 표시 ──
+    const readonlyProfile = {
       name: data.n || '친구', year: data.y, month: data.m, day: data.d,
       hour: data.h, min: data.mi, ampm: data.ap,
-      gender: data.g, love: data.l, id: 'shared_' + Date.now()
+      gender: data.g, love: data.l
     };
-    // 기존 프로필에 임시 추가
-    let profiles = [];
-    try { profiles = JSON.parse(localStorage.getItem('capi_profiles')||'[]'); } catch{}
-    const exists = profiles.find(p => p.year===data.y && p.month===data.m && p.day===data.d && p.name===data.n);
-    if(!exists) {
-      profiles.unshift(tempProfile);
-      localStorage.setItem('capi_profiles', JSON.stringify(profiles));
-    }
-    // URL 정리 후 해당 메뉴 오픈
     history.replaceState({}, '', location.pathname);
-    setTimeout(() => {
-      renderHome();
-      if(data.menu) openMenu(data.menu);
-    }, 300);
+    setTimeout(() => showSharedResult(readonlyProfile, data.menu, data.title||'사주 결과'), 400);
   } catch(e) { console.warn('공유 파라미터 파싱 오류', e); }
+}
+
+function showSharedResult(p, menuId, title) {
+  const data = profileToData(p);
+  if(!data || !menuId) return;
+  const menu = MENU_CONFIG[menuId];
+  if(!menu) return;
+
+  let resultHtml = '';
+  try { resultHtml = menu.render(data, p) || ''; } catch(e) { resultHtml = '<p>결과를 불러오지 못했어요.</p>'; }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'share-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:#faf6f2;z-index:99999;overflow-y:auto;';
+  overlay.innerHTML = `
+    <div style="max-width:480px;margin:0 auto;">
+      <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:16px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:1;">
+        <img src="./assets/dolyeong_face.png" style="width:28px;height:28px;object-fit:contain;" alt="🦫"/>
+        <div style="flex:1;">
+          <div style="font-size:10px;letter-spacing:1px;color:rgba(255,255,255,.5);">공유된 사주 결과</div>
+          <div style="font-size:14px;font-weight:800;color:#fff;">${p.name}님의 ${menu.title||title}</div>
+        </div>
+        <button onclick="document.getElementById('share-overlay').remove()"
+          style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:99px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit;">✕ 닫기</button>
+      </div>
+      <div style="padding:16px 16px 20px;">${resultHtml}</div>
+      <div style="padding:0 16px 60px;">
+        <div style="background:linear-gradient(135deg,#fff5ee,#fff0f8);border-radius:16px;padding:20px;text-align:center;border:1.5px solid #f5d0c5;">
+          <img src="./assets/capi.png" style="width:64px;object-fit:contain;margin-bottom:10px;" alt="카피바라"/>
+          <div style="font-size:15px;font-weight:900;margin-bottom:4px;">나도 내 사주 봐야겠는데?</div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;">카피바라 도령이 무료로 봐드리니라 🦫</div>
+          <button onclick="document.getElementById('share-overlay').remove();"
+            style="width:100%;background:var(--petal);color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">
+            🔮 내 사주 보러가기
+          </button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
 }
 
 function updateGroupBtn(){
