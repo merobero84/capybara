@@ -4311,7 +4311,7 @@ function shareResult(menuId, title) {
   const TAROT_OFFSETS = {tarot_love:100, tarot_money:200, tarot_saju:900};
   const offset = TAROT_OFFSETS[menuId];
   if(offset !== undefined && window._tarotState && window._tarotState[offset]) {
-    shareData.tc = window._tarotState[offset].map(c=>({id:c.origId, r:c.r?1:0}));
+    shareData.tc = window._tarotState[String(offset)].map(c=>({id:c.id, r:c.r}));
   }
   const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
   const url = `${location.origin}${location.pathname}?share=${encoded}`;
@@ -4397,7 +4397,7 @@ function showSharedResult(p, menuId, title, tarotCards) {
   const offset = TAROT_OFFSETS[menuId];
   if(tarotCards && offset !== undefined) {
     window._sharedTarotCards = {};
-    window._sharedTarotCards[offset] = tarotCards;
+    window._sharedTarotCards[String(offset)] = tarotCards;
   }
 
   let resultHtml = '';
@@ -4530,20 +4530,20 @@ function drawCards(seed, count) {
 
 // 진짜 랜덤 (타로 셔플용)
 function drawCardsRandom(count, offset=0) {
-  // 공유 수신 모드: 고정 카드 그대로 복원
-  if(window._sharedTarotCards && window._sharedTarotCards[offset]) {
-    const fixed = window._sharedTarotCards[offset];
-    return fixed.map((f, i) => {
+  // 공유 수신 모드: 저장된 카드 ID로 고정 복원
+  const shared = window._sharedTarotCards;
+  if(shared && shared[String(offset)]) {
+    return shared[String(offset)].map((f, i) => {
       const orig = TAROT_MAJOR.find(c => c.id === f.id) || TAROT_MAJOR[i];
-      return {...orig, id: offset + i, isReversed: !!f.r};
+      return {...orig, id: offset + i, isReversed: f.r === 1};
     });
   }
   // 일반 랜덤 뽑기
   const shuffled = [...TAROT_MAJOR].sort(() => Math.random() - .5);
   const result = shuffled.slice(0, count).map((c, i) => ({...c, id: offset + i, isReversed: Math.random() < 0.25}));
-  // 공유를 위해 원본 카드 id + 역방향 저장
+  // 공유용: 원본 TAROT_MAJOR id 기준으로 저장
   if(!window._tarotState) window._tarotState = {};
-  window._tarotState[offset] = result.map(c => {
+  window._tarotState[String(offset)] = result.map(c => {
     const orig = TAROT_MAJOR.find(m => m.name === c.name);
     return {id: orig?.id ?? 0, r: c.isReversed ? 1 : 0};
   });
