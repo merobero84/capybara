@@ -4300,7 +4300,6 @@ function renderTodayWidget(p) {
 function shareResult(menuId, title) {
   const p = getCurrentProfile();
   if(!p) return;
-  // 프로필 데이터를 base64로 인코딩해서 URL에 담기
   const shareData = {
     n: p.name,
     y: p.year, m: p.month, d: p.day,
@@ -4308,6 +4307,12 @@ function shareResult(menuId, title) {
     g: p.gender, l: p.love,
     menu: menuId
   };
+  // 타로 메뉴면 현재 카드 상태 포함
+  const TAROT_OFFSETS = {tarot_love:100, tarot_money:200, tarot_saju:900};
+  const offset = TAROT_OFFSETS[menuId];
+  if(offset !== undefined && window._tarotState && window._tarotState[offset]) {
+    shareData.tc = window._tarotState[offset].map(c=>({id:c.origId, r:c.r?1:0}));
+  }
   const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
   const url = `${location.origin}${location.pathname}?share=${encoded}`;
   const shareText = `🦫 카피바라 도령의 ${title}\n${p.name}님의 사주 결과를 확인해봐요!\n${url}`;
@@ -4377,18 +4382,29 @@ function checkShareParam() {
       gender: data.g, love: data.l
     };
     history.replaceState({}, '', location.pathname);
-    setTimeout(() => showSharedResult(readonlyProfile, data.menu, data.title||'사주 결과'), 400);
+    setTimeout(() => showSharedResult(readonlyProfile, data.menu, data.title||'사주 결과', data.tc||null), 400);
   } catch(e) { console.warn('공유 파라미터 파싱 오류', e); }
 }
 
-function showSharedResult(p, menuId, title) {
+function showSharedResult(p, menuId, title, tarotCards) {
   const data = profileToData(p);
   if(!data || !menuId) return;
   const menu = MENU_CONFIG[menuId];
   if(!menu) return;
 
+  // 타로 카드 고정 (공유된 카드 그대로 보여주기)
+  const TAROT_OFFSETS = {tarot_love:100, tarot_money:200, tarot_saju:900};
+  const offset = TAROT_OFFSETS[menuId];
+  if(tarotCards && offset !== undefined) {
+    window._sharedTarotCards = {};
+    window._sharedTarotCards[offset] = tarotCards;
+  }
+
   let resultHtml = '';
   try { resultHtml = menu.render(data, p) || ''; } catch(e) { resultHtml = '<p>결과를 불러오지 못했어요.</p>'; }
+
+  // 고정 카드 초기화
+  if(window._sharedTarotCards) window._sharedTarotCards = null;
 
   const overlay = document.createElement('div');
   overlay.id = 'share-overlay';
@@ -4514,8 +4530,24 @@ function drawCards(seed, count) {
 
 // 진짜 랜덤 (타로 셔플용)
 function drawCardsRandom(count, offset=0) {
-  const shuffled=[...TAROT_MAJOR].sort(()=>Math.random()-.5);
-  return shuffled.slice(0,count).map((c,i)=>({...c,id:offset+i,isReversed:Math.random()<0.25}));
+  // 공유 수신 모드: 고정 카드 그대로 복원
+  if(window._sharedTarotCards && window._sharedTarotCards[offset]) {
+    const fixed = window._sharedTarotCards[offset];
+    return fixed.map((f, i) => {
+      const orig = TAROT_MAJOR.find(c => c.id === f.id) || TAROT_MAJOR[i];
+      return {...orig, id: offset + i, isReversed: !!f.r};
+    });
+  }
+  // 일반 랜덤 뽑기
+  const shuffled = [...TAROT_MAJOR].sort(() => Math.random() - .5);
+  const result = shuffled.slice(0, count).map((c, i) => ({...c, id: offset + i, isReversed: Math.random() < 0.25}));
+  // 공유를 위해 원본 카드 id + 역방향 저장
+  if(!window._tarotState) window._tarotState = {};
+  window._tarotState[offset] = result.map(c => {
+    const orig = TAROT_MAJOR.find(m => m.name === c.name);
+    return {id: orig?.id ?? 0, r: c.isReversed ? 1 : 0};
+  });
+  return result;
 }
 
 function flipTarotCard(idx) {
