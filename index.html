@@ -282,6 +282,38 @@ details summary::-webkit-details-marker{display:none;}
     <div class="profile-tabs" id="profile-tabs"></div>
   </div>
 
+  <!-- 오늘의 운세 위젯 -->
+  <div id="today-widget" style="margin:0 16px 12px;border-radius:16px;overflow:hidden;display:none;">
+    <div style="background:linear-gradient(135deg,#2c3e50,#3d5a80);padding:14px 16px;display:flex;align-items:center;gap:10px;">
+      <div style="flex:1;">
+        <div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.6);margin-bottom:3px;" id="today-date-label"></div>
+        <div style="font-size:15px;font-weight:800;color:#fff;line-height:1.5;" id="today-fortune-text">운세 불러오는 중...</div>
+      </div>
+      <div style="text-align:center;min-width:52px;">
+        <div style="font-size:28px;font-weight:900;color:#f9c74f;line-height:1;" id="today-score-num">-</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.6);">오늘의 운</div>
+      </div>
+    </div>
+    <div style="background:rgba(44,62,80,.92);padding:10px 16px;display:flex;gap:0;">
+      <div style="flex:1;text-align:center;border-right:1px solid rgba(255,255,255,.1);">
+        <div style="font-size:10px;color:rgba(255,255,255,.5);">💕 연애</div>
+        <div style="font-size:14px;font-weight:700;color:#ff8fab;" id="tw-love">-</div>
+      </div>
+      <div style="flex:1;text-align:center;border-right:1px solid rgba(255,255,255,.1);">
+        <div style="font-size:10px;color:rgba(255,255,255,.5);">💰 재물</div>
+        <div style="font-size:14px;font-weight:700;color:#f9c74f;" id="tw-money">-</div>
+      </div>
+      <div style="flex:1;text-align:center;border-right:1px solid rgba(255,255,255,.1);">
+        <div style="font-size:10px;color:rgba(255,255,255,.5);">💼 업무</div>
+        <div style="font-size:14px;font-weight:700;color:#90e0ef;" id="tw-work">-</div>
+      </div>
+      <div style="flex:1;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,.5);">❤️ 건강</div>
+        <div style="font-size:14px;font-weight:700;color:#95d5b2;" id="tw-health">-</div>
+      </div>
+    </div>
+  </div>
+
   <!-- 사주 카드 -->
   <div class="saju-card" id="saju-card"></div>
 
@@ -316,6 +348,19 @@ details summary::-webkit-details-marker{display:none;}
           <div class="month-item" onclick="openMenu('month_relation')"><span class="month-emoji">🤝</span><span class="month-label">대인관계</span></div>
           <div class="month-item" onclick="openMenu('love_success')"><span class="month-emoji">🎯</span><span class="month-label">썸성공률</span></div>
         </div>
+      </div>
+    </div>
+
+    <!-- 사주 총합 풀이 배너 -->
+    <div class="home-section">
+      <div onclick="openMenu('saju_total')" style="background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);border-radius:16px;padding:18px 20px;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 4px 16px rgba(0,0,0,.15);">
+        <div style="font-size:44px;line-height:1;">📜</div>
+        <div style="flex:1;">
+          <div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.5);margin-bottom:4px;">FULL READING</div>
+          <div style="font-size:17px;font-weight:900;color:#fff;margin-bottom:3px;">나의 사주 총합 풀이</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);">팔자 구조부터 인생 흐름까지 한눈에</div>
+        </div>
+        <div style="color:rgba(255,255,255,.4);font-size:20px;">›</div>
       </div>
     </div>
 
@@ -435,6 +480,8 @@ details summary::-webkit-details-marker{display:none;}
   <div class="detail-header">
     <button class="back-btn" onclick="goBack()">←</button>
     <div class="detail-title" id="detail-title">운세</div>
+    <button onclick="shareResult(window._currentMenuId, document.getElementById('detail-title').textContent)"
+      style="margin-left:auto;background:none;border:none;font-size:20px;cursor:pointer;padding:4px 8px;" title="공유하기">🔗</button>
   </div>
   <div class="detail-body" id="detail-body"></div>
   <div class="bottom-tab">
@@ -452,6 +499,62 @@ details summary::-webkit-details-marker{display:none;}
     <button onclick="showAddProfile()" style="margin-left:auto;background:var(--petal);color:#fff;border:none;border-radius:10px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:inherit;">+ 추가</button>
   </div>
   <div class="profile-section" id="profile-list"></div>
+
+  <!-- ══ 앱 정보 & 후원 섹션 ══ -->
+  <div style="padding:0 16px 16px;">
+
+    <!-- 후원 카드 -->
+    <div style="background:linear-gradient(135deg,#fff5ee,#fff0f8);border-radius:16px;padding:18px;margin-bottom:12px;border:1.5px solid #f5d0c5;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <img src="./assets/dolyeong_face.png" style="width:36px;height:36px;object-fit:contain;" alt="🦫"/>
+        <div>
+          <div style="font-weight:800;font-size:15px;">도령에게 커피 한 잔 🍵</div>
+          <div style="font-size:12px;color:var(--ink-soft);">후원이 카피바라 도령의 힘이 되니라!</div>
+        </div>
+      </div>
+      <p style="font-size:13px;line-height:1.8;color:var(--ink-soft);margin:0 0 14px;">
+        카피바라 사주는 광고 없이 무료로 운영되고 있어요.<br>
+        마음에 드셨다면 도령에게 작은 응원을 보내주세요 🙏
+      </p>
+      <!-- 후원 금액 버튼 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+        <button onclick="openDonate(1000)" style="padding:10px 0;border:1.5px solid var(--petal);background:#fff;color:var(--petal);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">☕ 1,000원</button>
+        <button onclick="openDonate(3000)" style="padding:10px 0;border:1.5px solid var(--petal);background:var(--petal);color:#fff;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🧋 3,000원</button>
+        <button onclick="openDonate(5000)" style="padding:10px 0;border:1.5px solid var(--petal);background:#fff;color:var(--petal);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🍱 5,000원</button>
+      </div>
+      <button onclick="openDonate(null)" style="width:100%;padding:12px;background:linear-gradient(90deg,#f9c74f,#f8961e);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:0.5px;">
+        💛 카카오페이로 후원하기
+      </button>
+      <p style="font-size:11px;color:var(--ink-soft);text-align:center;margin:8px 0 0;">후원해주신 분께 도령이 특별한 기운을 전해드리니라 🌟</p>
+    </div>
+
+    <!-- 앱 정보 -->
+    <div style="background:var(--ivory-2);border-radius:14px;padding:14px;">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--ink-soft);">📱 앱 정보</div>
+      <div style="font-size:12px;color:var(--ink-soft);line-height:2.2;">
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid #e8e0d8;padding-bottom:6px;margin-bottom:6px;">
+          <span>버전</span><span style="font-weight:700;">v1.0.0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid #e8e0d8;padding-bottom:6px;margin-bottom:6px;">
+          <span>사주 엔진</span><span style="font-weight:700;">만세력 v2</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;border-bottom:1px solid #e8e0d8;padding-bottom:6px;margin-bottom:6px;">
+          <span>AI 해석</span><span style="font-weight:700;">Claude Haiku</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span>문의/피드백</span>
+          <a href="mailto:heohj220@gmail.com" style="color:var(--petal);font-weight:700;text-decoration:none;">메일 보내기 →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 면책 조항 -->
+    <p style="font-size:10px;color:var(--ink-soft);text-align:center;margin:12px 0 0;line-height:1.6;opacity:.7;">
+      본 앱의 사주·운세 정보는 오락 및 참고 목적이며,<br>
+      실제 결정의 근거로 사용하지 마세요.
+    </p>
+  </div>
+
   <div class="bottom-tab">
     <button class="btab-btn" onclick="switchTab('home')"><span class="btab-emoji">🏠</span>홈</button>
     <button class="btab-btn active" onclick="switchTab('profile')"><span class="btab-emoji">👤</span>프로필</button>
@@ -900,6 +1003,9 @@ function initHome(){
     tabsEl.appendChild(add);
   }
 
+  // 오늘의 운세 위젯
+  renderTodayWidget(cur);
+
   // 사주 카드
   renderSajuCard(cur);
 
@@ -1060,6 +1166,7 @@ function goBack(){
 function openMenu(id){
   if(!window.capiHistory) window.capiHistory=[];
   window.capiHistory.push(id);
+  window._currentMenuId = id;
   openMenuDirect(id);
 }
 
@@ -3472,6 +3579,218 @@ const ILJURO_DATA = {
 //  신규 MENU_CONFIG 항목들
 // ══════════════════════════════════════
 
+
+// ══ 사주 총합 풀이 ══
+MENU_CONFIG.saju_total = {
+  title: '📜 나의 사주 총합 풀이',
+  render(data, p) {
+    if(!data||!p) return '<div class="result-card"><p>프로필을 먼저 등록해주세요.</p></div>';
+
+    const OH = {甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'};
+    const JI_OH = {子:'수',丑:'토',寅:'목',卯:'목',辰:'토',巳:'화',午:'화',未:'토',申:'금',酉:'금',戌:'토',亥:'수'};
+    const OH_EMOJI = {목:'🌳',화:'🔥',토:'🌏',금:'⚙️',수:'💧'};
+    const OH_COLOR = {목:'#4CAF50',화:'#FF5722',토:'#8D6E63',금:'#9E9E9E',수:'#2196F3'};
+    const SAENG = {목:'화',화:'토',토:'금',금:'수',수:'목'};
+    const GEK = {목:'토',화:'금',토:'수',금:'목',수:'화'};
+
+    const pl = data.pillars||{};
+    const dGan = pl.day?.gan||'甲', dJi = pl.day?.ji||'子';
+    const yGan = pl.year?.gan||'甲', yJi = pl.year?.ji||'子';
+    const mGan = pl.month?.gan||'甲', mJi = pl.month?.ji||'子';
+    const hGan = pl.hour?.gan||'', hJi = pl.hour?.ji||'';
+    const ilgan = data.ilgan||dGan;
+    const ilOh = OH[ilgan]||'목';
+    const yongsin = data.yongsin||'목';
+    const singang = data.singang||'신강';
+    const age = NOW_YEAR - parseInt(p.year||1990);
+
+    // ── 일주 데이터 ──
+    const ilKey = dGan + dJi;
+    const ilData = typeof ILJURO_DATA !== 'undefined' ? ILJURO_DATA[ilKey] : null;
+
+    // ── 격국 ──
+    const mOh = JI_OH[mJi]||'목';
+    let geokType = '';
+    if(mOh===ilOh) geokType='비겁격';
+    else if(mOh===SAENG[ilOh]||OH[mGan]===SAENG[ilOh]) geokType='인성격';
+    else if(GEK[mOh]===ilOh) geokType='관격';
+    else if(GEK[ilOh]===mOh) geokType='재격';
+    else geokType='식상격';
+
+    // ── 팔자 원국 테이블 ──
+    const pillarsHtml = (() => {
+      const cols = [
+        {label:'시(時)', gan:hGan, ji:hJi},
+        {label:'일(日)', gan:dGan, ji:dJi, isDay:true},
+        {label:'월(月)', gan:mGan, ji:mJi},
+        {label:'년(年)', gan:yGan, ji:yJi},
+      ];
+      return '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:4px;">'
+        + cols.map(c => {
+            const ganOh = OH[c.gan]||'목';
+            const jiOh = JI_OH[c.ji]||'목';
+            return '<div style="text-align:center;">'
+              + '<div style="font-size:10px;color:var(--ink-soft);margin-bottom:4px;">' + c.label + '</div>'
+              + '<div style="background:' + (c.isDay?'#1a1a2e':'var(--ivory-2)') + ';border-radius:10px;padding:10px 6px;">'
+              + '<div style="font-size:22px;font-weight:900;color:' + OH_COLOR[ganOh] + ';line-height:1.2;">' + (c.gan||'?') + '</div>'
+              + '<div style="font-size:10px;color:' + OH_COLOR[ganOh] + ';margin-bottom:6px;">' + OH_EMOJI[ganOh] + ' ' + ganOh + '</div>'
+              + '<div style="width:1px;height:8px;background:rgba(0,0,0,.1);margin:0 auto 6px;"></div>'
+              + '<div style="font-size:22px;font-weight:900;color:' + OH_COLOR[jiOh] + ';line-height:1.2;">' + (c.ji||'?') + '</div>'
+              + '<div style="font-size:10px;color:' + OH_COLOR[jiOh] + ';">' + OH_EMOJI[jiOh] + ' ' + jiOh + '</div>'
+              + '</div></div>';
+          }).join('')
+        + '</div>';
+    })();
+
+    // ── 사주 기질 요약 ──
+    const oheng = data.oheng||{};
+    const maxOh = ['목','화','토','금','수'].reduce((a,b)=>(oheng[a]||0)>=(oheng[b]||0)?a:b);
+    const minOh = ['목','화','토','금','수'].reduce((a,b)=>(oheng[a]||0)<=(oheng[b]||0)?a:b);
+    const NATURE_DESC = {
+      목: {str:'창의적이고 성장 지향적이에요. 새로운 것을 시작하는 힘이 강해요.', weak:'마무리와 현실적 실행이 부족할 수 있어요.'},
+      화: {str:'열정적이고 표현력이 강해요. 사람을 끌어당기는 매력이 있어요.', weak:'감정 기복과 성급함을 조심해야 해요.'},
+      토: {str:'안정적이고 포용력이 넘쳐요. 사람들의 중심이 되는 힘이 있어요.', weak:'변화에 느리고 고집이 생길 수 있어요.'},
+      금: {str:'결단력이 강하고 원칙을 중시해요. 한번 결심하면 끝까지 가요.', weak:'유연성이 부족하고 냉철해 보일 수 있어요.'},
+      수: {str:'지혜롭고 직관이 뛰어나요. 깊은 사고와 통찰력을 가졌어요.', weak:'현실 실행력이 약하고 방향을 못 잡을 때가 있어요.'},
+    };
+
+    // ── 대운 내러티브 ──
+    const daewoon = data.daewoon||[];
+    const SINSAL_KEYS = {정관:'사회적 인정',정재:'재물 결실',편관:'강한 도전',식신:'창의 표현',상관:'변화와 이탈',편인:'지식 탐구',정인:'학문 성취',겁재:'경쟁과 승부',비견:'독립 자립',편재:'투자 기회'};
+    const narrativeHtml = daewoon.slice(0,6).map((dw, i) => {
+      const dwAge = dw.age_from;
+      const isCur = dw.age_from <= age && age <= dw.age_to;
+      const dwOh = OH[dw.gan]||'목';
+      const isGood = [yongsin, SAENG[yongsin]].includes(dwOh);
+      const tone = isGood ? '🌟 상승기' : '🌱 준비기';
+      const desc = SINSAL_KEYS[dw.sipsin] || '변화의 기운';
+      return '<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--ivory-2);">'
+        + '<div style="min-width:52px;text-align:center;">'
+        + '<div style="font-size:11px;color:var(--ink-soft);">' + dw.age_from + '~' + dw.age_to + '세</div>'
+        + '<div style="font-size:13px;font-weight:700;color:' + OH_COLOR[dwOh] + ';">' + dw.gan + dw.ji + '</div>'
+        + '</div>'
+        + '<div style="flex:1;">'
+        + '<div style="font-size:12px;font-weight:700;margin-bottom:2px;">'
+        + (isCur ? '<span style="background:var(--petal);color:#fff;border-radius:99px;padding:1px 7px;font-size:10px;margin-right:5px;">지금</span>' : '')
+        + tone + ' — ' + desc
+        + '</div>'
+        + '<div style="font-size:12px;color:var(--ink-soft);">'
+        + (isGood
+          ? (dwAge < 30 ? '일찍이 좋은 기운이 드는 시기예요. 기초를 잘 쌓아두세요.' : '이 시기에 큰 도약의 기회가 와요. 적극적으로 나서세요.')
+          : (dwAge < 30 ? '내면을 다지고 실력을 쌓는 시기예요. 조급해하지 마세요.' : '인내와 준비의 시기예요. 욕심을 줄이고 본질에 집중하세요.'))
+        + '</div></div></div>';
+    }).join('');
+
+    // ── 직업/재물 적성 ──
+    const CAREER_MAP = {
+      목: {field:'교육·언론·환경·콘텐츠·디자인', money:'꾸준히 쌓이는 스타일이에요. 한방보다 성실함으로 버는 타입이에요.', tip:'봄(목운) 해와 동쪽 방향이 재물운을 높여줘요.'},
+      화: {field:'미디어·마케팅·연예·방송·교육', money:'사람을 통해 재물이 오는 스타일이에요. 영업력과 인맥이 핵심이에요.', tip:'여름(화운) 해와 남쪽이 활동 에너지를 높여줘요.'},
+      토: {field:'부동산·의료·농식품·서비스·복지', money:'안정적으로 꾸준히 쌓는 스타일이에요. 부동산 투자에 강해요.', tip:'중앙(토색) 방향과 황토 계열이 재물 기운을 안정시켜요.'},
+      금: {field:'금융·법조·IT·기술·제조', money:'원칙과 분석력으로 버는 타입이에요. 저축과 투자에 강해요.', tip:'가을(금운) 해와 서쪽 방향이 결실을 도와줘요.'},
+      수: {field:'무역·IT·연구·상담·철학', money:'지식과 정보를 통해 재물이 오는 타입이에요. 지식재산이 핵심이에요.', tip:'겨울(수운) 해와 북쪽 방향이 지혜 기운을 높여줘요.'},
+    };
+    const careerData = CAREER_MAP[yongsin]||CAREER_MAP['목'];
+
+    // ── 건강 주의사항 ──
+    const HEALTH_MAP = {
+      목: {organ:'간·담낭·눈·근육', caution:'스트레스성 간 질환, 눈의 피로, 근육 경직에 주의하세요.', good:'규칙적인 스트레칭과 녹색 채소 섭취가 도움이 돼요.'},
+      화: {organ:'심장·소장·혈관·혀', caution:'심혈관 질환, 고혈압, 수면 부족에 주의하세요.', good:'충분한 수면과 과도한 감정 소모를 피하세요.'},
+      토: {organ:'비장·위장·근육·입', caution:'소화기 질환, 위염, 과식에 주의하세요.', good:'규칙적인 식사와 과식을 피하는 것이 핵심이에요.'},
+      금: {organ:'폐·대장·피부·코', caution:'호흡기 질환, 피부 트러블, 변비에 주의하세요.', good:'맑은 공기와 규칙적인 유산소 운동이 도움이 돼요.'},
+      수: {organ:'신장·방광·뼈·귀', caution:'신장·방광 질환, 관절·뼈 약화, 냉증에 주의하세요.', good:'충분한 수분 섭취와 몸을 따뜻하게 유지하세요.'},
+    };
+    // 가장 허약한 오행 기준으로 건강 경고
+    const healthOh = minOh;
+    const healthData = HEALTH_MAP[healthOh]||HEALTH_MAP['목'];
+
+    // ── 종합 한마디 ──
+    const summary = (() => {
+      const strongPart = singang==='신강' ? '기운이 강하고 추진력이 넘치는 사주예요' : '내면이 깊고 차분한 힘을 가진 사주예요';
+      const geokPart = geokType==='관격'?'사회적 인정으로 빛나는':geokType==='재격'?'실질적 결실을 맺는':geokType==='인성격'?'배움과 지혜로 이루는':geokType==='식상격'?'창의와 표현으로 빛나는':'독립과 자립으로 이루는';
+      const ysPart = OH_EMOJI[yongsin]+' '+yongsin+' 기운';
+      return `${ilData?.title||ilKey} 일주, ${strongPart}. ${geokPart} 그릇(${geokType})을 타고났어요. 용신인 ${ysPart}이 강해지는 환경에서 가장 빛나는 사람이에요. ${NATURE_DESC[ilOh]?.str||''} 인생의 전반부는 ${daewoon[0]?.sipsin||''}의 기운으로 시작해, 가장 빛나는 시기는 ${yongsin} 기운이 드는 대운이에요.`;
+    })();
+
+    return `
+      <!-- 1. 팔자 원국 -->
+      <div class="result-card" style="background:linear-gradient(135deg,#1a1a2e,#16213e);">
+        <div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.5);margin-bottom:12px;">📜 나의 팔자 원국</div>
+        ${pillarsHtml}
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <span style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 12px;font-size:11px;color:rgba(255,255,255,.8);">일간 ${OH_EMOJI[ilOh]} ${ilgan}(${ilOh})</span>
+          <span style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 12px;font-size:11px;color:rgba(255,255,255,.8);">${singang}</span>
+          <span style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 12px;font-size:11px;color:rgba(255,255,255,.8);">용신 ${OH_EMOJI[yongsin]} ${yongsin}</span>
+          <span style="background:rgba(255,255,255,.08);border-radius:99px;padding:4px 12px;font-size:11px;color:rgba(255,255,255,.8);">${geokType}</span>
+        </div>
+      </div>
+
+      <!-- 2. 타고난 기질 -->
+      <div class="result-card">
+        <div class="result-card-title">🧬 타고난 기질</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <span style="font-size:36px;">${OH_EMOJI[ilOh]}</span>
+          <div>
+            <div style="font-size:16px;font-weight:800;color:${OH_COLOR[ilOh]};">${ilgan}일간 — ${ilOh} 기운</div>
+            <div style="font-size:13px;color:var(--ink-soft);">${ilData?.title||''}</div>
+          </div>
+        </div>
+        <p style="font-size:14px;line-height:1.85;margin-bottom:10px;">${ilData?.nature||NATURE_DESC[ilOh]?.str||''}</p>
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;background:#e8f5e9;border-radius:10px;padding:10px;font-size:12px;line-height:1.7;">
+            <div style="font-weight:700;margin-bottom:3px;">💪 강점</div>${ilData?.strength||NATURE_DESC[ilOh]?.str||''}
+          </div>
+          <div style="flex:1;background:#ffebee;border-radius:10px;padding:10px;font-size:12px;line-height:1.7;">
+            <div style="font-weight:700;margin-bottom:3px;">⚠️ 약점</div>${ilData?.weakness||NATURE_DESC[ilOh]?.weak||''}
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 인생 대운 흐름 -->
+      <div class="result-card">
+        <div class="result-card-title">🌊 인생 대운 흐름 (10년 단위)</div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">🌟 상승기 = 용신(${OH_EMOJI[yongsin]}${yongsin}) 기운&nbsp;&nbsp; 🌱 준비기 = 내실을 다지는 시기</div>
+        ${narrativeHtml}
+      </div>
+
+      <!-- 4. 직업 & 재물 -->
+      <div class="result-card">
+        <div class="result-card-title">💼 직업 & 재물 적성</div>
+        <div style="background:rgba(var(--petal-rgb),.06);border-radius:12px;padding:12px;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:5px;">✨ 잘 맞는 분야</div>
+          <div style="font-size:14px;color:var(--moss-deep);font-weight:700;">${careerData.field}</div>
+        </div>
+        <div style="font-size:13px;line-height:1.85;">
+          <div style="margin-bottom:8px;">💰 <b>재물 운용 스타일</b>: ${careerData.money}</div>
+          <div>🔑 <b>재물 개운 팁</b>: ${careerData.tip}</div>
+        </div>
+      </div>
+
+      <!-- 5. 건강 주의사항 -->
+      <div class="result-card">
+        <div class="result-card-title">❤️ 건강 주의사항</div>
+        <div style="background:#fff0f5;border-radius:12px;padding:12px;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:700;color:#c0392b;margin-bottom:4px;">⚠️ 주의 기관 (${healthOh} 기운 허약)</div>
+          <div style="font-size:13px;font-weight:700;">${healthData.organ}</div>
+        </div>
+        <div style="font-size:13px;line-height:1.85;">
+          <div style="margin-bottom:6px;">🔴 ${healthData.caution}</div>
+          <div>✅ ${healthData.good}</div>
+        </div>
+      </div>
+
+      <!-- 6. 종합 한마디 -->
+      <div class="result-card" style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;">
+        <div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.5);margin-bottom:10px;">🦫 카피바라 도령의 종합 평</div>
+        <p style="font-size:14px;line-height:1.9;color:rgba(255,255,255,.9);font-style:italic;">"${summary}"</p>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:rgba(255,255,255,.4);">${p.name}님의 ${dGan}${dJi} 일주 분석</span>
+          <button onclick="shareResult('saju_total','나의 사주 총합 풀이')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:99px;padding:5px 14px;font-size:11px;cursor:pointer;font-family:inherit;">🔗 공유하기</button>
+        </div>
+      </div>
+    `;
+  }
+};
+
 // 일주 완전 분석
 MENU_CONFIG.iljuro = {
   title: '🌟 나의 일주 완전 분석',
@@ -3929,9 +4248,150 @@ function initScrollDrag(){
     el.addEventListener('wheel',e=>{e.preventDefault();el.scrollLeft+=e.deltaY;},{passive:false});
   });
 }
-document.addEventListener('DOMContentLoaded',()=>{init();setTimeout(initScrollDrag,500);});
+document.addEventListener('DOMContentLoaded',()=>{init();setTimeout(initScrollDrag,500);checkShareParam();});
 
 
+
+function openDonate(amount) {
+  // 카카오페이 송금 링크 — 링크 받은 후 아래 URL 교체하세요
+  // 베타 기간 중 후원 임시 비활성화
+  showShareToast('베타 기간 중 준비 중이에요 🦫 곧 오픈할게요!');
+  return;
+  // const KAKAO_PAY_LINK = 'https://qr.kakaopay.com/Ej7mLDQP3';
+  // window.open(KAKAO_PAY_LINK, '_blank');
+}
+
+
+// ══ 오늘의 운세 위젯 ══
+function renderTodayWidget(p) {
+  if(!p) { document.getElementById('today-widget').style.display='none'; return; }
+  const data = profileToData(p);
+  if(!data) return;
+  const now = new Date();
+  const todaySeed = now.getFullYear()*10000 + (now.getMonth()+1)*100 + now.getDate();
+  // 오늘 월운 기반 점수
+  const cw = data.wolun?.[now.getMonth()+1];
+  const scores = cw ? capiScoreMonth(data, cw) : {love:50,money:50,work:50,health:50,overall:50};
+  // 날짜 seed로 점수에 약간의 일별 변화 (-5~+5)
+  const daily = ((todaySeed + parseInt(data.ilgan?.charCodeAt(0)||0)) % 11) - 5;
+  const overall = Math.min(99, Math.max(20, scores.overall + daily));
+
+  // 한 줄 운세 문구
+  const FORTUNE_MSGS = [
+    ['오늘은 기다리던 소식이 올 수 있는 날이에요. 마음을 열어두세요 📬','오늘 작은 용기가 큰 변화를 만들어요. 먼저 말 걸어보세요 💬','오늘 만나는 사람이 중요한 인연이 될 수 있어요 ✨','잠시 쉬어가도 괜찮은 날이에요. 충전이 곧 도약이에요 🔋','오늘은 평소보다 직감이 날카로운 날이에요. 느낌을 믿어봐요 🎯','작은 감사의 표현이 오늘 하루를 빛나게 해요 🌟','오늘 시작한 일은 좋은 결실을 맺을 가능성이 높아요 🌱','예상치 못한 곳에서 좋은 기운이 와요. 열린 마음으로 🚪'],
+  ];
+  const msgArr = FORTUNE_MSGS[0];
+  const msgIdx = (todaySeed + parseInt(data.ilgan?.charCodeAt(0)||0)) % msgArr.length;
+
+  // 날짜 레이블
+  const weekDay = ['일','월','화','수','목','금','토'][now.getDay()];
+  document.getElementById('today-date-label').textContent =
+    `${now.getMonth()+1}월 ${now.getDate()}일 (${weekDay}) 오늘의 운세`;
+  document.getElementById('today-fortune-text').textContent = msgArr[msgIdx];
+  document.getElementById('today-score-num').textContent = overall;
+  document.getElementById('tw-love').textContent = scores.love;
+  document.getElementById('tw-money').textContent = scores.money;
+  document.getElementById('tw-work').textContent = scores.work;
+  document.getElementById('tw-health').textContent = scores.health;
+  document.getElementById('today-widget').style.display = 'block';
+}
+
+// ══ URL 공유 기능 ══
+function shareResult(menuId, title) {
+  const p = getCurrentProfile();
+  if(!p) return;
+  // 프로필 데이터를 base64로 인코딩해서 URL에 담기
+  const shareData = {
+    n: p.name,
+    y: p.year, m: p.month, d: p.day,
+    h: p.hour, mi: p.min, ap: p.ampm,
+    g: p.gender, l: p.love,
+    menu: menuId
+  };
+  const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
+  const url = `${location.origin}${location.pathname}?share=${encoded}`;
+  const shareText = `🦫 카피바라 도령의 ${title}\n${p.name}님의 사주 결과를 확인해봐요!\n${url}`;
+
+  if(navigator.share) {
+    navigator.share({ title: `카피바라 사주 — ${title}`, text: shareText, url }).catch(()=>showShareModal(url));
+  } else if(navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      showShareToast('링크가 복사됐어요! 📋');
+    }).catch(() => showShareModal(url));
+  } else {
+    showShareModal(url);
+  }
+}
+
+function showShareToast(msg) {
+  let toast = document.getElementById('share-toast');
+  if(!toast) {
+    toast = document.createElement('div');
+    toast.id = 'share-toast';
+    toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:700;z-index:9999;transition:opacity .3s;white-space:nowrap;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+}
+
+function showShareModal(url) {
+  let modal = document.getElementById('share-modal');
+  if(modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = 'share-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:480px;">
+      <div style="font-weight:800;font-size:15px;margin-bottom:6px;">🔗 링크 공유</div>
+      <p style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;">아래 링크를 복사해서 친구에게 보내봐요!</p>
+      <div style="display:flex;gap:8px;">
+        <input id="share-url-input" value="${url}" readonly
+          style="flex:1;border:1.5px solid #e8d8d0;border-radius:10px;padding:10px;font-size:12px;font-family:inherit;outline:none;color:var(--ink-soft);">
+        <button onclick="
+          document.getElementById('share-url-input').select();
+          document.execCommand('copy');
+          showShareToast('링크 복사 완료! 📋');
+          document.getElementById('share-modal').remove();
+        " style="background:var(--petal);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">복사</button>
+      </div>
+      <button onclick="document.getElementById('share-modal').remove()"
+        style="width:100%;margin-top:10px;background:var(--ivory-2);border:none;border-radius:10px;padding:10px;font-size:13px;cursor:pointer;font-family:inherit;">닫기</button>
+    </div>`;
+  modal.onclick = e => { if(e.target===modal) modal.remove(); };
+  document.body.appendChild(modal);
+}
+
+// 공유 파라미터로 진입 시 자동 처리
+function checkShareParam() {
+  const params = new URLSearchParams(location.search);
+  const share = params.get('share');
+  if(!share) return;
+  try {
+    const data = JSON.parse(decodeURIComponent(atob(share)));
+    // 프로필 임시 생성 후 해당 메뉴 오픈
+    const tempProfile = {
+      name: data.n || '친구', year: data.y, month: data.m, day: data.d,
+      hour: data.h, min: data.mi, ampm: data.ap,
+      gender: data.g, love: data.l, id: 'shared_' + Date.now()
+    };
+    // 기존 프로필에 임시 추가
+    let profiles = [];
+    try { profiles = JSON.parse(localStorage.getItem('capi_profiles')||'[]'); } catch{}
+    const exists = profiles.find(p => p.year===data.y && p.month===data.m && p.day===data.d && p.name===data.n);
+    if(!exists) {
+      profiles.unshift(tempProfile);
+      localStorage.setItem('capi_profiles', JSON.stringify(profiles));
+    }
+    // URL 정리 후 해당 메뉴 오픈
+    history.replaceState({}, '', location.pathname);
+    setTimeout(() => {
+      renderHome();
+      if(data.menu) openMenu(data.menu);
+    }, 300);
+  } catch(e) { console.warn('공유 파라미터 파싱 오류', e); }
+}
 
 function updateGroupBtn(){
   const profiles=getProfiles();
