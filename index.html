@@ -4300,6 +4300,8 @@ function renderTodayWidget(p) {
 function shareResult(menuId, title) {
   const p = getCurrentProfile();
   if(!p) return;
+
+  // 핵심 데이터만 최소화 (URL 길이 줄이기)
   const shareData = {
     n: p.name,
     y: p.year, m: p.month, d: p.day,
@@ -4307,22 +4309,27 @@ function shareResult(menuId, title) {
     g: p.gender, l: p.love,
     menu: menuId
   };
-  // 타로 메뉴면 현재 카드 상태 포함
+
+  // 타로: 카드 id + reversed만 최소로 담기
   const TAROT_OFFSETS = {tarot_love:100, tarot_money:200, tarot_saju:900};
   const offset = TAROT_OFFSETS[menuId];
-  if(offset !== undefined && window._tarotState && window._tarotState[offset]) {
-    shareData.tc = window._tarotState[String(offset)].map(c=>({id:c.id, r:c.r}));
+  const state = offset !== undefined && window._tarotState && window._tarotState[String(offset)];
+  if(state) {
+    // {id,r} 최소화 → 배열로 압축 [[id,r],[id,r],[id,r]]
+    shareData.tc = state.map(c=>[c.id, c.r]);
   }
-  const encoded = btoa(encodeURIComponent(JSON.stringify(shareData)));
-  const url = `${location.origin}${location.pathname}?share=${encoded}`;
-  const shareText = `🦫 카피바라 도령의 ${title}\n${p.name}님의 사주 결과를 확인해봐요!\n${url}`;
 
+  // JSON → 압축 인코딩
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))));
+  const url = `${location.origin}${location.pathname}?s=${encoded}`;
+
+  // URL만 공유 (텍스트 없이) → 카카오톡 미리보기 정상 작동
   if(navigator.share) {
-    navigator.share({ title: `카피바라 사주 — ${title}`, text: shareText, url }).catch(()=>showShareModal(url));
+    navigator.share({ title:`카피바라 사주 — ${title}`, url }).catch(()=>showShareModal(url));
   } else if(navigator.clipboard) {
-    navigator.clipboard.writeText(url).then(() => {
-      showShareToast('링크가 복사됐어요! 📋');
-    }).catch(() => showShareModal(url));
+    navigator.clipboard.writeText(url)
+      .then(()=>showShareToast('링크가 복사됐어요! 📋'))
+      .catch(()=>showShareModal(url));
   } else {
     showShareModal(url);
   }
@@ -4371,10 +4378,14 @@ function showShareModal(url) {
 // 공유 파라미터로 진입 시 자동 처리
 function checkShareParam() {
   const params = new URLSearchParams(location.search);
-  const share = params.get('share');
+  const share = params.get('s') || params.get('share'); // 구버전 호환
   if(!share) return;
   try {
-    const data = JSON.parse(decodeURIComponent(atob(share)));
+    const data = JSON.parse(decodeURIComponent(escape(atob(share))));
+    // tc 압축 포맷 [[id,r],...] → [{id,r},...] 변환
+    if(data.tc && Array.isArray(data.tc[0])) {
+      data.tc = data.tc.map(c=>({id:c[0], r:c[1]}));
+    }
     // ── 읽기 전용: 프로필 저장 없이 결과만 표시 ──
     const readonlyProfile = {
       name: data.n || '친구', year: data.y, month: data.m, day: data.d,
