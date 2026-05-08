@@ -714,7 +714,7 @@ function calcSaju(year,month,day,hourJiInput,gender,name){
   const _GEK      ={목:'토',화:'금',토:'수',금:'목',수:'화'};
   const ohArr = ['목','화','토','금','수'];
   // 오행 총 개수 (천간+지지)
-  const ohCount = oheng; // 이미 계산된 oheng 사용
+  const ohCount = oh; // 엔진 내 변수명은 oh
   const maxOh = ohArr.reduce((a,b)=>(ohCount[a]||0)>=(ohCount[b]||0)?a:b);
   let yongsin='',heesin='',kisin='';
 
